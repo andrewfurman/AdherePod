@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,6 @@ import {
   BarChart3,
   DollarSign,
   Users,
-  ArrowRight,
   Heart,
   Wifi,
   Clock,
@@ -30,8 +30,8 @@ export default function Home() {
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
             <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
+            <a href="#team" className="hover:text-foreground transition-colors">Team</a>
           </div>
-          <Button>Get Early Access</Button>
         </div>
       </nav>
 
@@ -52,9 +52,6 @@ export default function Home() {
             who need health management to just work.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8">
-              Join the Waitlist <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
             <Button size="lg" variant="outline" className="text-lg px-8">
               Learn More
             </Button>
@@ -217,17 +214,52 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Team */}
+      <section id="team" className="py-24 px-6 bg-muted">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-16">Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+            <Card className="text-center">
+              <CardHeader>
+                <Image
+                  src="/gage-clifton.jpg"
+                  alt="Gage Clifton"
+                  width={80}
+                  height={80}
+                  className="rounded-full mx-auto mb-2 object-cover"
+                />
+                <CardTitle>Gage Clifton</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                CEO
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <Image
+                  src="/andrew-furman.jpg"
+                  alt="Andrew Furman"
+                  width={80}
+                  height={80}
+                  className="rounded-full mx-auto mb-2 object-cover"
+                />
+                <CardTitle>Andrew Furman</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                CTO
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 px-6 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Health management that just works.</h2>
-          <p className="text-lg opacity-90 mb-8">
+          <p className="text-lg opacity-90">
             No screens. No confusion. Just plug in and start talking.
-            Join the waitlist to be first in line.
           </p>
-          <Button size="lg" variant="secondary" className="text-lg px-8">
-            Get Early Access <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
         </div>
       </section>
 
