@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,9 @@ export default function Home() {
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
             <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
             <a href="#team" className="hover:text-foreground transition-colors">Team</a>
+            <Link href="/sign-in">
+              <Button size="sm">Sign In</Button>
+            </Link>
           </div>
         </div>
       </nav>
