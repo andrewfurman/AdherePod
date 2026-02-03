@@ -40,7 +40,7 @@ export default function SignInPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/dashboard");
     router.refresh();
   }
 
