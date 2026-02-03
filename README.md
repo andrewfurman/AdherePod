@@ -1,20 +1,20 @@
-# MedicalPod
+# AdherePod
 
 A voice-native, plug-and-play medical adherence device and data platform. Designed for elderly and low-literacy users who need frictionless health management — no apps, no menus, no confusion.
 
 ## Vision
 
-MedicalPod is a dedicated hardware device (not a phone app) that sits in a patient's home and becomes their personal health hub. It connects to pill dispensers, blood pressure monitors, glucose meters, wearables, and other medical devices — then turns that data into a unified platform for providers and payers.
+AdherePod is a dedicated hardware device (not a phone app) that sits in a patient's home and becomes their personal health hub. It connects to pill dispensers, blood pressure monitors, glucose meters, wearables, and other medical devices — then turns that data into a unified platform for providers and payers.
 
-The phone form factor is too confusing for elders and low-literacy populations. MedicalPod is **frictionless, plug-and-play, and voice-native**.
+The phone form factor is too confusing for elders and low-literacy populations. AdherePod is **frictionless, plug-and-play, and voice-native**.
 
 ## Core Features
 
 ### 1. Voice-Native Interface
 - All interactions happen through natural voice conversation
 - No screens to navigate, no apps to download, no buttons to press
-- "MedicalPod, what pills do I take this morning?"
-- "MedicalPod, my blood pressure reading is ready"
+- "AdherePod, what pills do I take this morning?"
+- "AdherePod, my blood pressure reading is ready"
 - Supports multiple languages and dialects
 
 ### 2. Medical Device Integration
@@ -43,7 +43,7 @@ The phone form factor is too confusing for elders and low-literacy populations. 
 
 ## How It Works
 
-1. **Plug In** - Place MedicalPod in the home, connect to WiFi
+1. **Plug In** - Place AdherePod in the home, connect to WiFi
 2. **Pair** - Automatically discovers nearby medical devices and wearables
 3. **Talk** - Voice-guided setup of medications and schedule
 4. **Live** - Daily voice reminders, automatic vitals capture, hands-free logging
@@ -59,8 +59,8 @@ The phone form factor is too confusing for elders and low-literacy populations. 
 
 ## Domain
 
-- **MedicalPod.com** — available ($150k, viable with funding)
-- See [DOMAINS.md](DOMAINS.md) for additional options explored
+- **adherepod.com** — available
+- See [docs-and-planning/DOMAINS.md](docs-and-planning/DOMAINS.md) for additional options explored
 
 ## Tech Stack
 
