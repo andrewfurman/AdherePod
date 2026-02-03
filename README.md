@@ -1,47 +1,67 @@
-# MedAdherenceApp
+# MedicalPod
 
-A medication adherence platform that helps users manage their prescriptions, avoid dangerous drug interactions, and optimize costs through insurance integration.
+A voice-native, plug-and-play medical adherence device and data platform. Designed for elderly and low-literacy users who need frictionless health management — no apps, no menus, no confusion.
+
+## Vision
+
+MedicalPod is a dedicated hardware device (not a phone app) that sits in a patient's home and becomes their personal health hub. It connects to pill dispensers, blood pressure monitors, glucose meters, wearables, and other medical devices — then turns that data into a unified platform for providers and payers.
+
+The phone form factor is too confusing for elders and low-literacy populations. MedicalPod is **frictionless, plug-and-play, and voice-native**.
 
 ## Core Features
 
-### 1. Pill Scanning & Identification
-- Take a photo of all your prescribed pills
-- AI-powered identification of each medication
-- Automatically builds your complete medication profile
+### 1. Voice-Native Interface
+- All interactions happen through natural voice conversation
+- No screens to navigate, no apps to download, no buttons to press
+- "MedicalPod, what pills do I take this morning?"
+- "MedicalPod, my blood pressure reading is ready"
+- Supports multiple languages and dialects
 
-### 2. Interaction & Advisory Alerts
-- Cross-references all medications for potential conflicts
-- Highlights dangerous drug interactions
+### 2. Medical Device Integration
+- Connects to blood pressure monitors, glucose meters, pulse oximeters, scales
+- Syncs with wearables (Apple Watch, Fitbit, etc.)
+- Integrates with smart pill dispensers
+- Automatic data capture — no manual entry
+
+### 3. Medication Management
+- Voice-guided pill identification and scheduling
+- Automated reminders through the device speaker
+- Cross-references all medications for dangerous interactions
 - Flags advisories to discuss with your doctor
 
-### 3. Smart Scheduling & Reminders
-- Generates a personalized calendar based on your prescriptions
-- Automated reminders for each dose (push notifications, SMS, email)
-- Tracks whether medications should be taken with food, morning vs. evening, etc.
+### 4. Adherence Tracking
+- Logs medication doses, vitals, and device readings automatically
+- Builds a comprehensive health adherence score
+- Tracks trends over time (blood pressure patterns, medication consistency, etc.)
 
-### 4. Med Adherence Tracking
-- Logs when you take each medication
-- Builds an adherence score over time
-- Visual dashboard showing your compliance history
-
-### 5. Insurance Integration
-- Shares anonymized adherence data with your insurance provider
-- Surfaces cheaper alternatives or generic options covered by your plan
-- Identifies discounts and savings programs available through your insurance
+### 5. Data Platform for Providers & Payers
+- Real-time dashboard for physicians to monitor patient adherence and vitals
+- Shares anonymized adherence data with insurance providers
+- Surfaces cheaper medication alternatives covered by the patient's plan
+- Identifies discounts and savings programs through insurance
+- Enables value-based care models with verified adherence data
 
 ## How It Works
 
-1. **Snap** - Take a photo of your pills
-2. **Review** - Confirm identified medications and check for interactions
-3. **Schedule** - Get a personalized dosing calendar with reminders
-4. **Track** - Log doses and build your adherence history
-5. **Save** - Connect with your insurance to find cost savings
+1. **Plug In** - Place MedicalPod in the home, connect to WiFi
+2. **Pair** - Automatically discovers nearby medical devices and wearables
+3. **Talk** - Voice-guided setup of medications and schedule
+4. **Live** - Daily voice reminders, automatic vitals capture, hands-free logging
+5. **Share** - Providers and payers get a real-time view of patient health data
+
+## Target Users
+
+- **Elderly patients** managing multiple chronic conditions
+- **Low-literacy populations** who struggle with app-based solutions
+- **Caregivers** managing medications for family members
+- **Healthcare providers** who need reliable adherence and vitals data
+- **Insurance companies / payers** looking to reduce costs through better adherence
+
+## Domain
+
+- **MedicalPod.com** — available ($150k, viable with funding)
+- See [DOMAINS.md](DOMAINS.md) for additional options explored
 
 ## Tech Stack
 
 *To be determined*
-
-## Domain Ideas
-
-- MedPod.com
-- *(exploring additional options)*
