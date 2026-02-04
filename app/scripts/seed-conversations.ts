@@ -7,8 +7,7 @@ config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq } from "drizzle-orm";
-import { put } from "@vercel/blob";
+import { eq, inArray } from "drizzle-orm";
 import {
   users,
   conversations,
@@ -19,23 +18,12 @@ import {
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
-async function uploadPlaceholderImage(
-  name: string,
-  color: string
-): Promise<string> {
-  // Create a simple SVG placeholder image
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-    <rect width="400" height="300" fill="${color}" rx="16"/>
-    <text x="200" y="140" text-anchor="middle" font-family="sans-serif" font-size="18" fill="white" font-weight="bold">${name}</text>
-    <text x="200" y="170" text-anchor="middle" font-family="sans-serif" font-size="14" fill="white" opacity="0.8">Sample Image Capture</text>
-  </svg>`;
-
-  const blob = await put(`seed/${name.replace(/\s+/g, "-").toLowerCase()}.svg`, svg, {
-    access: "public",
-    contentType: "image/svg+xml",
-  });
-  return blob.url;
-}
+// Pre-uploaded Gemini Imagen 4.0 generated images on Vercel Blob
+const IMAGE_URLS = {
+  lisinoprilBottle: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/lisinopril-bottle-webcam.png",
+  weeklyPillbox: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/weekly-pillbox.png",
+  prescriptionLabel: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/prescription-label-webcam.png",
+};
 
 async function main() {
   // Find user
@@ -51,12 +39,23 @@ async function main() {
 
   console.log(`Found user: ${user.id} (${user.email})`);
 
-  // Upload placeholder images to Vercel Blob
-  console.log("Uploading images to Vercel Blob...");
-  const image1Url = await uploadPlaceholderImage("Lisinopril Bottle", "#2563eb");
-  const image2Url = await uploadPlaceholderImage("Weekly Pillbox", "#059669");
-  const image3Url = await uploadPlaceholderImage("Metformin Label", "#7c3aed");
-  console.log("Images uploaded.");
+  // Clean up old seed data
+  console.log("Cleaning up old seed conversations...");
+  const oldConvs = await db
+    .select({ id: conversations.id })
+    .from(conversations)
+    .where(eq(conversations.userId, user.id));
+  if (oldConvs.length > 0) {
+    const oldIds = oldConvs.map((c) => c.id);
+    await db.delete(imageCaptures).where(inArray(imageCaptures.conversationId, oldIds));
+    await db.delete(conversationMessages).where(inArray(conversationMessages.conversationId, oldIds));
+    await db.delete(conversations).where(inArray(conversations.id, oldIds));
+    console.log(`  Deleted ${oldConvs.length} old conversations and related data`);
+  }
+
+  const image1Url = IMAGE_URLS.lisinoprilBottle;
+  const image2Url = IMAGE_URLS.weeklyPillbox;
+  const image3Url = IMAGE_URLS.prescriptionLabel;
 
   // --- Conversation 1: Morning medication check-in ---
   const conv1StartedAt = new Date("2026-02-03T14:30:00Z");

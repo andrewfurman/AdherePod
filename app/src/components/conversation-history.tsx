@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, ChevronLeft, Image as ImageIcon, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Image as ImageIcon, Clock, MessageCircle } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -43,6 +42,21 @@ function formatLocalTime(utcDate: string): string {
   }).format(new Date(utcDate));
 }
 
+function formatDate(utcDate: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(utcDate));
+}
+
+function formatTime(utcDate: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    timeStyle: "short",
+  }).format(new Date(utcDate));
+}
+
 function formatDuration(start: string, end: string | null): string {
   if (!end) return "In progress";
   const ms = new Date(end).getTime() - new Date(start).getTime();
@@ -51,11 +65,187 @@ function formatDuration(start: string, end: string | null): string {
   return `${minutes} min`;
 }
 
+// Group conversations by date
+function groupByDate(conversations: Conversation[]): Map<string, Conversation[]> {
+  const groups = new Map<string, Conversation[]>();
+  for (const conv of conversations) {
+    const dateKey = new Date(conv.startedAt).toLocaleDateString();
+    const existing = groups.get(dateKey) || [];
+    existing.push(conv);
+    groups.set(dateKey, existing);
+  }
+  return groups;
+}
+
+function TimelineEntry({ conversation }: { conversation: Conversation }) {
+  const [expanded, setExpanded] = useState(false);
+  const [detail, setDetail] = useState<ConversationDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadDetail = async () => {
+    if (detail) {
+      setExpanded(!expanded);
+      return;
+    }
+    setLoading(true);
+    setExpanded(true);
+    try {
+      const res = await fetch(`/api/voice/conversations?id=${conversation.id}`);
+      if (res.ok) {
+        setDetail(await res.json());
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const imageCount = detail?.images?.length || 0;
+
+  return (
+    <div className="relative pl-8">
+      {/* Timeline dot */}
+      <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-primary border-2 border-background" />
+
+      {/* Entry card */}
+      <button
+        onClick={loadDetail}
+        className="w-full text-left mb-1"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="font-medium text-sm">
+              {conversation.title || "Untitled conversation"}
+            </h3>
+            <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formatTime(conversation.startedAt)}
+              </span>
+              <span>{formatDuration(conversation.startedAt, conversation.endedAt)}</span>
+              {conversation.status === "active" && (
+                <span className="text-green-600 font-medium">Active</span>
+              )}
+            </div>
+          </div>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+          )}
+        </div>
+      </button>
+
+      {/* Summary (always visible) */}
+      {conversation.summary && !expanded && (
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+          {conversation.summary}
+        </p>
+      )}
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div className="mt-3 space-y-4">
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading transcript...</p>
+          ) : detail ? (
+            <>
+              {/* Summary */}
+              {detail.summary && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Summary
+                  </p>
+                  <p className="text-sm">{detail.summary}</p>
+                </div>
+              )}
+
+              {/* Transcript */}
+              {detail.messages.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+                    <MessageCircle className="h-3 w-3" />
+                    Transcript
+                  </p>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {detail.messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-[85%] rounded-lg px-3 py-2 text-xs ${
+                            msg.role === "user"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background border border-border"
+                          }`}
+                        >
+                          <p className="font-medium mb-0.5 opacity-70">
+                            {msg.role === "user" ? "You" : "AdherePod"}
+                          </p>
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Images */}
+              {detail.images.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+                    <ImageIcon className="h-3 w-3" />
+                    Captured Images ({detail.images.length})
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {detail.images.map((img) => (
+                      <div
+                        key={img.id}
+                        className="border border-border rounded-lg overflow-hidden"
+                      >
+                        <img
+                          src={img.imageUrl}
+                          alt={img.description || "Captured image"}
+                          className="w-full h-32 object-cover"
+                        />
+                        <div className="p-2 space-y-1">
+                          {img.description && (
+                            <p className="text-xs font-medium">{img.description}</p>
+                          )}
+                          {img.extractedText && (
+                            <p className="text-xs text-muted-foreground whitespace-pre-line">
+                              {img.extractedText}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground opacity-60">
+                            {formatLocalTime(img.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {detail.messages.length === 0 && detail.images.length === 0 && (
+                <p className="text-sm text-muted-foreground">No messages or images recorded.</p>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
+
+      {/* Bottom spacing for timeline connector */}
+      <div className="pb-6" />
+    </div>
+  );
+}
+
 export default function ConversationHistory() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selected, setSelected] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -75,189 +265,46 @@ export default function ConversationHistory() {
     fetchConversations();
   }, [fetchConversations]);
 
-  const viewConversation = async (id: string) => {
-    setDetailLoading(true);
-    try {
-      const res = await fetch(`/api/voice/conversations?id=${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSelected(data);
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <p className="text-sm text-muted-foreground">Loading conversation history...</p>
+      </div>
+    );
+  }
+
+  if (conversations.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <MessageCircle className="h-12 w-12 text-muted-foreground/40 mb-3" />
+        <p className="text-muted-foreground text-sm">
+          No conversations yet. Start a voice chat to see your history here.
+        </p>
+      </div>
+    );
+  }
+
+  const grouped = groupByDate(conversations);
 
   return (
-    <Card className="flex flex-col min-h-0">
-      <CardHeader className="shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MessageCircle className="h-6 w-6 text-primary" />
-            <CardTitle>
-              {selected ? "Conversation" : "History"}
-            </CardTitle>
-          </div>
-          {selected && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelected(null)}
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 min-h-0 overflow-y-auto">
-        {/* Conversation detail view */}
-        {selected ? (
-          <div className="space-y-4">
-            {/* Header info */}
-            <div className="space-y-1">
-              <h3 className="font-medium text-sm">
-                {selected.title || "Untitled conversation"}
-              </h3>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatLocalTime(selected.startedAt)}
-                </span>
-                <span>{formatDuration(selected.startedAt, selected.endedAt)}</span>
-              </div>
-              {selected.summary && (
-                <p className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
-                  {selected.summary}
-                </p>
-              )}
-            </div>
+    <div className="max-w-2xl mx-auto space-y-8">
+      {Array.from(grouped.entries()).map(([dateKey, convs]) => (
+        <div key={dateKey}>
+          {/* Date header */}
+          <h2 className="text-sm font-semibold text-muted-foreground mb-4">
+            {formatDate(convs[0].startedAt)}
+          </h2>
 
-            {/* Messages */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Transcript
-              </h4>
-              {selected.messages.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No messages recorded.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {selected.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[85%] rounded-lg px-3 py-2 text-xs ${
-                          msg.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted border border-border"
-                        }`}
-                      >
-                        <p className="font-medium mb-0.5 opacity-70">
-                          {msg.role === "user" ? "You" : "AdherePod"}
-                        </p>
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* Timeline line */}
+          <div className="relative">
+            <div className="absolute left-[7px] top-2 bottom-0 w-0.5 bg-border" />
 
-            {/* Images */}
-            {selected.images.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <ImageIcon className="h-3 w-3" />
-                  Captured Images
-                </h4>
-                <div className="space-y-3">
-                  {selected.images.map((img) => (
-                    <div
-                      key={img.id}
-                      className="border border-border rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={img.imageUrl}
-                        alt={img.description || "Captured image"}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="p-2 space-y-1">
-                        {img.description && (
-                          <p className="text-xs font-medium">{img.description}</p>
-                        )}
-                        {img.extractedText && (
-                          <p className="text-xs text-muted-foreground">
-                            {img.extractedText}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground opacity-60">
-                          {formatLocalTime(img.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : detailLoading ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            Loading...
-          </p>
-        ) : loading ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            Loading conversations...
-          </p>
-        ) : conversations.length === 0 ? (
-          <div className="text-center py-8">
-            <MessageCircle className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">
-              No conversations yet. Start a voice chat to see your history here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => viewConversation(conv.id)}
-                className="w-full text-left p-3 border border-border rounded-lg hover:bg-muted transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {conv.title || "Untitled conversation"}
-                    </p>
-                    {conv.summary && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {conv.summary}
-                      </p>
-                    )}
-                  </div>
-                  <span
-                    className={`shrink-0 text-xs px-1.5 py-0.5 rounded ${
-                      conv.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {conv.status === "active" ? "Active" : formatDuration(conv.startedAt, conv.endedAt)}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatLocalTime(conv.startedAt)}
-                </p>
-              </button>
+            {convs.map((conv) => (
+              <TimelineEntry key={conv.id} conversation={conv} />
             ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      ))}
+    </div>
   );
 }

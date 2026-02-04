@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock, MessageCircle } from "lucide-react";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
 
@@ -182,204 +183,223 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <main className="flex-1 min-h-0 max-w-[1600px] w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
-        <div className="shrink-0 mb-4">
-          <h1 className="text-2xl font-bold">
-            Welcome{session?.user?.name ? `, ${session.user.name}` : ""}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Your AdherePod dashboard
-          </p>
-        </div>
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
+        <Tabs defaultValue="dashboard" className="flex-1 min-h-0 flex flex-col">
+          <div className="shrink-0 flex items-end justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold">
+                Welcome{session?.user?.name ? `, ${session.user.name}` : ""}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Your AdherePod dashboard
+              </p>
+            </div>
+            <TabsList>
+              <TabsTrigger value="dashboard">
+                <Pill className="h-4 w-4 mr-1.5" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                <MessageCircle className="h-4 w-4 mr-1.5" />
+                History
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Left column — Medications */}
-          <Card className="flex flex-col min-h-0">
-            <CardHeader className="shrink-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Pill className="h-6 w-6 text-primary" />
-                  <CardTitle>My Medications</CardTitle>
-                </div>
-                {!showForm && (
-                  <Button size="sm" onClick={openAddForm} className="w-44 justify-start">
-                    <Plus className="h-4 w-4 mr-2 shrink-0" />
-                    Add Medication
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 min-h-0 overflow-y-auto">
-              {/* Add/Edit Form */}
-              {showForm && (
-                <form onSubmit={handleSubmit} className="mb-6 p-4 border border-border rounded-lg space-y-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">
-                      {editingId ? "Edit Medication" : "Add New Medication"}
-                    </h3>
-                    <Button type="button" variant="ghost" size="sm" onClick={closeForm}>
-                      <X className="h-4 w-4" />
-                    </Button>
+          {/* Tab 1: Dashboard — medications + voice chat */}
+          <TabsContent value="dashboard" className="flex-1 min-h-0">
+            <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left column — Medications */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Pill className="h-6 w-6 text-primary" />
+                      <CardTitle>My Medications</CardTitle>
+                    </div>
+                    {!showForm && (
+                      <Button size="sm" onClick={openAddForm} className="w-44 justify-start">
+                        <Plus className="h-4 w-4 mr-2 shrink-0" />
+                        Add Medication
+                      </Button>
+                    )}
                   </div>
+                </CardHeader>
+                <CardContent className="flex-1 min-h-0 overflow-y-auto">
+                  {/* Add/Edit Form */}
+                  {showForm && (
+                    <form onSubmit={handleSubmit} className="mb-6 p-4 border border-border rounded-lg space-y-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">
+                          {editingId ? "Edit Medication" : "Add New Medication"}
+                        </h3>
+                        <Button type="button" variant="ghost" size="sm" onClick={closeForm}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
 
-                  {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                      {error && (
+                        <p className="text-sm text-destructive">{error}</p>
+                      )}
+
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Medication Name *</Label>
+                          <Input
+                            id="name"
+                            placeholder="e.g. Lisinopril 10mg"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="timesPerDay">Times Per Day *</Label>
+                          <Input
+                            id="timesPerDay"
+                            type="number"
+                            min="1"
+                            max="24"
+                            value={form.timesPerDay}
+                            onChange={(e) => setForm({ ...form, timesPerDay: e.target.value })}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="timingDescription">Timing</Label>
+                          <Input
+                            id="timingDescription"
+                            placeholder="e.g. before meals, at bedtime"
+                            value={form.timingDescription}
+                            onChange={(e) => setForm({ ...form, timingDescription: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="startDate">Start Date *</Label>
+                          <Input
+                            id="startDate"
+                            type="date"
+                            value={form.startDate}
+                            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="endDate">End Date</Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={form.endDate}
+                            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="notes">Notes</Label>
+                          <Input
+                            id="notes"
+                            placeholder="Any extra information"
+                            value={form.notes}
+                            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button type="submit" disabled={saving}>
+                          {saving ? "Saving..." : editingId ? "Update" : "Add Medication"}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={closeForm}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
                   )}
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Medication Name *</Label>
-                      <Input
-                        id="name"
-                        placeholder="e.g. Lisinopril 10mg"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        required
-                      />
+                  {/* Medications List */}
+                  {loading ? (
+                    <p className="text-muted-foreground">Loading medications...</p>
+                  ) : medications.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Pill className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                      <p className="text-muted-foreground">
+                        No medications yet. Click &quot;Add Medication&quot; to get started.
+                      </p>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="timesPerDay">Times Per Day *</Label>
-                      <Input
-                        id="timesPerDay"
-                        type="number"
-                        min="1"
-                        max="24"
-                        value={form.timesPerDay}
-                        onChange={(e) => setForm({ ...form, timesPerDay: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="timingDescription">Timing</Label>
-                      <Input
-                        id="timingDescription"
-                        placeholder="e.g. before meals, at bedtime"
-                        value={form.timingDescription}
-                        onChange={(e) => setForm({ ...form, timingDescription: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="startDate">Start Date *</Label>
-                      <Input
-                        id="startDate"
-                        type="date"
-                        value={form.startDate}
-                        onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date</Label>
-                      <Input
-                        id="endDate"
-                        type="date"
-                        value={form.endDate}
-                        onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Notes</Label>
-                      <Input
-                        id="notes"
-                        placeholder="Any extra information"
-                        value={form.notes}
-                        onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <Button type="submit" disabled={saving}>
-                      {saving ? "Saving..." : editingId ? "Update" : "Add Medication"}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={closeForm}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              {/* Medications List */}
-              {loading ? (
-                <p className="text-muted-foreground">Loading medications...</p>
-              ) : medications.length === 0 ? (
-                <div className="text-center py-8">
-                  <Pill className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-muted-foreground">
-                    No medications yet. Click &quot;Add Medication&quot; to get started.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {medications.map((med) => (
-                    <div
-                      key={med.id}
-                      className="flex items-start justify-between p-4 border border-border rounded-lg"
-                    >
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-medium">{med.name}</h4>
-                          <Badge variant="secondary">
-                            {med.timesPerDay}x / day
-                          </Badge>
-                          {med.endDate ? (
-                            <Badge variant="outline">
-                              Ends {formatDate(med.endDate)}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">Ongoing</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                          {med.timingDescription && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {med.timingDescription}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Started {formatDate(med.startDate)}
-                          </span>
-                        </div>
-                        {med.notes && (
-                          <p className="text-sm text-muted-foreground">{med.notes}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 ml-4 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditForm(med)}
+                  ) : (
+                    <div className="space-y-3">
+                      {medications.map((med) => (
+                        <div
+                          key={med.id}
+                          className="flex items-start justify-between p-4 border border-border rounded-lg"
                         >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(med.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-medium">{med.name}</h4>
+                              <Badge variant="secondary">
+                                {med.timesPerDay}x / day
+                              </Badge>
+                              {med.endDate ? (
+                                <Badge variant="outline">
+                                  Ends {formatDate(med.endDate)}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">Ongoing</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                              {med.timingDescription && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {med.timingDescription}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                Started {formatDate(med.startDate)}
+                              </span>
+                            </div>
+                            {med.notes && (
+                              <p className="text-sm text-muted-foreground">{med.notes}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 ml-4 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditForm(med)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(med.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Middle column — Voice Chat */}
-          <VoiceChat onMedicationsChanged={fetchMedications} />
+              {/* Right column — Voice Chat */}
+              <VoiceChat onMedicationsChanged={fetchMedications} />
+            </div>
+          </TabsContent>
 
-          {/* Right column — Conversation History */}
-          <ConversationHistory />
-        </div>
+          {/* Tab 2: History — conversation timeline */}
+          <TabsContent value="history" className="flex-1 min-h-0 overflow-y-auto">
+            <ConversationHistory />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
