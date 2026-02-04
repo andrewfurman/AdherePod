@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock } from "lucide-react";
 import VoiceChat from "@/components/voice-chat";
+import ConversationHistory from "@/components/conversation-history";
 
 interface Medication {
   id: string;
@@ -160,7 +161,7 @@ export default function DashboardPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       <nav className="border-b border-border shrink-0">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart className="h-7 w-7 text-red-500" />
             <span className="text-xl font-bold">AdherePod</span>
@@ -181,7 +182,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
+      <main className="flex-1 min-h-0 max-w-[1600px] w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
         <div className="shrink-0 mb-4">
           <h1 className="text-2xl font-bold">
             Welcome{session?.user?.name ? `, ${session.user.name}` : ""}
@@ -191,7 +192,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left column — Medications */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="shrink-0">
@@ -373,8 +374,11 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Right column — Voice Chat */}
+          {/* Middle column — Voice Chat */}
           <VoiceChat onMedicationsChanged={fetchMedications} />
+
+          {/* Right column — Conversation History */}
+          <ConversationHistory />
         </div>
       </main>
     </div>

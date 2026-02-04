@@ -84,8 +84,11 @@ export const conversations = pgTable("conversations", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("active"),
-  startedAt: timestamp("started_at", { mode: "date" }).defaultNow().notNull(),
-  endedAt: timestamp("ended_at", { mode: "date" }),
+  title: text("title"),
+  transcript: text("transcript"),
+  summary: text("summary"),
+  startedAt: timestamp("started_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  endedAt: timestamp("ended_at", { mode: "date", withTimezone: true }),
 });
 
 export const conversationMessages = pgTable("conversation_messages", {
@@ -99,7 +102,23 @@ export const conversationMessages = pgTable("conversation_messages", {
   content: text("content").notNull(),
   toolName: text("tool_name"),
   toolArgs: text("tool_args"),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+});
+
+export const imageCaptures = pgTable("image_captures", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  conversationId: text("conversation_id")
+    .references(() => conversations.id, { onDelete: "set null" }),
+  imageUrl: text("image_url").notNull(),
+  extractedText: text("extracted_text"),
+  description: text("description"),
+  extractedMedications: text("extracted_medications"),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
 });
 
 export const passwordResetTokens = pgTable("password_reset_tokens", {

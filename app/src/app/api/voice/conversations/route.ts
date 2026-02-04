@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { conversations, conversationMessages } from "@/lib/db/schema";
+import { conversations, conversationMessages, imageCaptures } from "@/lib/db/schema";
 
 export async function GET(req: Request) {
   try {
@@ -33,7 +33,13 @@ export async function GET(req: Request) {
         .where(eq(conversationMessages.conversationId, id))
         .orderBy(conversationMessages.createdAt);
 
-      return NextResponse.json({ ...conversation, messages });
+      const images = await db
+        .select()
+        .from(imageCaptures)
+        .where(eq(imageCaptures.conversationId, id))
+        .orderBy(imageCaptures.createdAt);
+
+      return NextResponse.json({ ...conversation, messages, images });
     }
 
     const userConversations = await db
