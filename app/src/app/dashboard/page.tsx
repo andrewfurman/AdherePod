@@ -238,10 +238,10 @@ export default function DashboardPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
         <nav className="border-b border-border shrink-0">
           <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <button onClick={() => setActiveTab("dashboard")} className="flex items-center gap-2 cursor-pointer">
               <Heart className="h-7 w-7 text-red-500" />
               <span className="text-xl font-bold">AdherePod</span>
-            </div>
+            </button>
             <div className="flex items-center gap-4">
               <TabsList>
                 <TabsTrigger value="dashboard">
@@ -251,10 +251,6 @@ export default function DashboardPage() {
                 <TabsTrigger value="history">
                   <MessageCircle className="h-4 w-4 mr-1.5" />
                   History
-                </TabsTrigger>
-                <TabsTrigger value="users">
-                  <Users className="h-4 w-4 mr-1.5" />
-                  Users
                 </TabsTrigger>
               </TabsList>
               <DropdownMenu>
@@ -279,6 +275,10 @@ export default function DashboardPage() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setActiveTab("users")}>
+                    <Users className="h-4 w-4 mr-2" />
+                    Users
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
