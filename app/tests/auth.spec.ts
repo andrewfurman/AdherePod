@@ -33,6 +33,9 @@ test.describe("Auth flow", () => {
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByText("Welcome")).toBeVisible();
     await expect(page.getByText("My Medications")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Talk to AdherePod" })
+    ).toBeVisible();
   });
 
   test("sign-in with wrong password shows error", async ({

@@ -76,6 +76,32 @@ export const medications = pgTable("medications", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const conversations = pgTable("conversations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("active"),
+  startedAt: timestamp("started_at", { mode: "date" }).defaultNow().notNull(),
+  endedAt: timestamp("ended_at", { mode: "date" }),
+});
+
+export const conversationMessages = pgTable("conversation_messages", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  conversationId: text("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  toolName: text("tool_name"),
+  toolArgs: text("tool_args"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: text("id")
     .primaryKey()
