@@ -192,16 +192,122 @@ export default function VoiceChat() {
 }
 ```
 
-### 4. Update `src/app/dashboard/page.tsx`
+### 4. `src/lib/db/schema.ts` -- Add `conversations` Table
+
+Store full conversation transcripts in the database, updated in real-time as the conversation progresses.
+
+```typescript
+export const conversations = pgTable("conversations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("active"),       // "active" | "ended"
+  startedAt: timestamp("started_at", { mode: "date" }).defaultNow().notNull(),
+  endedAt: timestamp("ended_at", { mode: "date" }),
+});
+
+export const conversationMessages = pgTable("conversation_messages", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  conversationId: text("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),                              // "user" | "agent"
+  content: text("content").notNull(),                        // transcript text
+  toolName: text("tool_name"),                               // e.g. "add_medication" (if agent called a tool)
+  toolArgs: text("tool_args"),                               // JSON string of tool arguments
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+```
+
+### 5. `src/app/api/voice/conversations/route.ts` -- Conversations API
+
+CRUD for conversation transcripts. The voice chat component calls these in real-time.
+
+```typescript
+// POST /api/voice/conversations
+// Creates a new conversation, returns { id }
+
+// GET /api/voice/conversations
+// Lists all conversations for the user (for history view)
+
+// GET /api/voice/conversations?id=xxx
+// Returns a single conversation with all messages
+```
+
+### 6. `src/app/api/voice/conversations/messages/route.ts` -- Messages API
+
+```typescript
+// POST /api/voice/conversations/messages
+// Appends a message to a conversation
+// Body: { conversationId, role, content, toolName?, toolArgs? }
+// Called by the browser each time a transcript event fires
+
+// PATCH /api/voice/conversations/messages
+// Updates the conversation status to "ended" when the user disconnects
+// Body: { conversationId }
+```
+
+### 7. Update Voice Chat Component -- Save Transcripts
+
+The `voice-chat.tsx` component saves each transcript message to the database as it arrives:
+
+```typescript
+// On connect: create a new conversation
+const convRes = await fetch("/api/voice/conversations", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+});
+const { id: conversationId } = await convRes.json();
+
+// On each transcript event: save the message
+newSession.on("event", (event) => {
+  if (event.type === "conversation.item.input_audio_transcription.completed") {
+    // Save user message
+    fetch("/api/voice/conversations/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        conversationId,
+        role: "user",
+        content: event.transcript,
+      }),
+    });
+  }
+  if (event.type === "response.output_audio_transcript.done") {
+    // Save agent message
+    fetch("/api/voice/conversations/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        conversationId,
+        role: "agent",
+        content: event.transcript,
+      }),
+    });
+  }
+});
+
+// On disconnect: mark conversation as ended
+await fetch("/api/voice/conversations/messages", {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ conversationId }),
+});
+```
+
+### 8. Update `src/app/dashboard/page.tsx`
 
 Add a "Talk to AdherePod" button that shows the `VoiceChat` component.
+Optionally show a "Conversation History" section listing past conversations with timestamps.
 
 ## Files to Modify
 
 | File | Change |
 |---|---|
-| `src/app/dashboard/page.tsx` | Add voice chat button and embed `<VoiceChat />` component |
-| `src/middleware.ts` | No change needed -- `/api/voice/session` is already protected |
+| `src/app/dashboard/page.tsx` | Add voice chat button, embed `<VoiceChat />`, optionally show conversation history |
+| `src/lib/db/schema.ts` | Add `conversations` and `conversationMessages` tables |
+| `src/middleware.ts` | No change needed -- `/api/voice/*` routes are already protected |
 | `package.json` | Add `@openai/agents` and `zod` dependencies |
 
 ## Dependencies to Install
@@ -223,13 +329,17 @@ OPENAI_API_KEY=sk-proj-...
 
 1. Install `@openai/agents` and `zod`
 2. Add `OPENAI_API_KEY` to `.env.local` (if not already there)
-3. Create `/api/voice/session/route.ts` (ephemeral key endpoint)
-4. Create `/lib/voice/tools.ts` (tool definitions)
-5. Create `/components/voice-chat.tsx` (voice chat UI component)
-6. Update dashboard page to include voice chat
-7. Test locally -- verify mic access, transcription, and function calling
-8. Run Playwright tests to ensure nothing is broken
-9. Commit and push to deploy
+3. Add `conversations` and `conversationMessages` tables to schema
+4. Run `npx drizzle-kit push` to create tables in Neon
+5. Create `/api/voice/session/route.ts` (ephemeral key endpoint)
+6. Create `/api/voice/conversations/route.ts` (conversation CRUD)
+7. Create `/api/voice/conversations/messages/route.ts` (message append + end conversation)
+8. Create `/lib/voice/tools.ts` (tool definitions)
+9. Create `/components/voice-chat.tsx` (voice chat UI with real-time transcript saving)
+10. Update dashboard page to include voice chat and conversation history
+11. Test locally -- verify mic access, transcription, function calling, and transcript persistence
+12. Run Playwright tests to ensure nothing is broken
+13. Commit and push to deploy
 
 ## Voice Agent System Prompt
 
@@ -261,5 +371,9 @@ Available actions:
 4. Check dashboard medications list -- new med should appear
 5. Say "Delete Lisinopril" -- should call `delete_medication` and confirm
 6. Verify transcript shows both sides of the conversation in real-time
-7. Run Playwright tests to ensure existing auth/dashboard tests still pass
-8. Deploy and test on production
+7. End the conversation -- verify transcript is saved to database
+8. Check conversation history -- should show the conversation with all messages
+9. Start a new conversation -- should create a new conversation record, not append to old one
+10. Verify each message row has correct role ("user" or "agent") and content
+11. Run Playwright tests to ensure existing auth/dashboard tests still pass
+12. Deploy and test on production
