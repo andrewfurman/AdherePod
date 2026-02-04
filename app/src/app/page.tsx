@@ -13,8 +13,8 @@ import {
   DollarSign,
   Users,
   Heart,
-  Wifi,
-  Clock,
+  MessageCircle,
+  Bell,
 } from "lucide-react";
 
 export default function Home() {
@@ -55,12 +55,7 @@ export default function Home() {
             your medications through simple voice conversation. Designed for people
             who need health management to just work.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" variant="outline" className="text-lg px-8">
-              Learn More
-            </Button>
-          </div>
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto mt-12">
             <Image
               src="/hero-image.png"
               alt="Elderly woman talking to AdherePod at her kitchen table"
@@ -181,12 +176,11 @@ export default function Home() {
       <section id="how-it-works" className="py-24 px-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">How it works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: "1", icon: Wifi, title: "Plug In", desc: "Place AdherePod in your home and connect to WiFi." },
-              { step: "2", icon: Bluetooth, title: "Pair", desc: "Automatically discovers nearby medical devices and wearables." },
-              { step: "3", icon: Mic, title: "Talk", desc: "Voice-guided setup of your medications and schedule." },
-              { step: "4", icon: Clock, title: "Live", desc: "Daily reminders, automatic vitals capture, hands-free logging." },
+              { step: "1", icon: Mic, title: "Talk", desc: "Have a live voice conversation with AdherePod about your medications, schedule, and health questions." },
+              { step: "2", icon: MessageCircle, title: "Discuss", desc: "AdherePod helps you manage your medications, check for interactions, and track your adherence over time." },
+              { step: "3", icon: Bell, title: "Get Notified", desc: "Receive reminders and new health advice via phone call or SMS when it&apos;s time to take your medications or when the system has guidance for you." },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
@@ -243,9 +237,13 @@ export default function Home() {
                   className="rounded-full mx-auto mb-2 object-cover"
                 />
                 <CardTitle>Gage Clifton</CardTitle>
+                <p className="text-xs text-muted-foreground font-medium">CEO</p>
               </CardHeader>
               <CardContent className="text-muted-foreground text-sm">
-                CEO
+                Visionary founder most passionate about simplifying medical
+                adherence and helping people navigate their health journeys.
+                Deep experience working with all of the nation&apos;s largest
+                health insurance companies.
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -258,9 +256,12 @@ export default function Home() {
                   className="rounded-full mx-auto mb-2 object-cover"
                 />
                 <CardTitle>Andrew Furman</CardTitle>
+                <p className="text-xs text-muted-foreground font-medium">CTO</p>
               </CardHeader>
               <CardContent className="text-muted-foreground text-sm">
-                CTO
+                Experienced agentive AI developer with deep expertise in LLM
+                integrations and voice agents built to serve the healthcare
+                industry.
               </CardContent>
             </Card>
           </div>
