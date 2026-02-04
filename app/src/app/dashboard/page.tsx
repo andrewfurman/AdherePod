@@ -8,7 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock, MessageCircle } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock, MessageCircle, Users } from "lucide-react";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
 
@@ -33,6 +50,14 @@ interface MedicationForm {
   notes: string;
 }
 
+interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
 const emptyForm: MedicationForm = {
   name: "",
   timesPerDay: "1",
@@ -41,6 +66,20 @@ const emptyForm: MedicationForm = {
   endDate: "",
   notes: "",
 };
+
+function getInitials(name: string | null | undefined, email: string | null | undefined): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name[0].toUpperCase();
+  }
+  if (email) {
+    return email[0].toUpperCase();
+  }
+  return "?";
+}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -51,6 +90,9 @@ export default function DashboardPage() {
   const [form, setForm] = useState<MedicationForm>(emptyForm);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const fetchMedications = useCallback(async () => {
     try {
@@ -66,9 +108,30 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchUsers = useCallback(async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch("/api/users");
+      if (res.ok) {
+        const data = await res.json();
+        setAllUsers(data);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMedications();
   }, [fetchMedications]);
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetchUsers();
+    }
+  }, [activeTab, fetchUsers]);
 
   const openAddForm = () => {
     setForm(emptyForm);
@@ -159,52 +222,74 @@ export default function DashboardPage() {
     });
   };
 
+  const formatDateTime = (dateStr: string | null) => {
+    if (!dateStr) return "Never";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <nav className="border-b border-border shrink-0">
-        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="h-7 w-7 text-red-500" />
-            <span className="text-xl font-bold">AdherePod</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {session?.user?.name || session?.user?.email}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => signOut({ callbackUrl: "/" })}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
-        <Tabs defaultValue="dashboard" className="flex-1 min-h-0 flex flex-col">
-          <div className="shrink-0 flex items-end justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold">
-                Welcome{session?.user?.name ? `, ${session.user.name}` : ""}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Your AdherePod dashboard
-              </p>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
+        <nav className="border-b border-border shrink-0">
+          <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Heart className="h-7 w-7 text-red-500" />
+              <span className="text-xl font-bold">AdherePod</span>
             </div>
-            <TabsList>
-              <TabsTrigger value="dashboard">
-                <Pill className="h-4 w-4 mr-1.5" />
-                Dashboard
-              </TabsTrigger>
-              <TabsTrigger value="history">
-                <MessageCircle className="h-4 w-4 mr-1.5" />
-                History
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center gap-4">
+              <TabsList>
+                <TabsTrigger value="dashboard">
+                  <Pill className="h-4 w-4 mr-1.5" />
+                  Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="history">
+                  <MessageCircle className="h-4 w-4 mr-1.5" />
+                  History
+                </TabsTrigger>
+                <TabsTrigger value="users">
+                  <Users className="h-4 w-4 mr-1.5" />
+                  Users
+                </TabsTrigger>
+              </TabsList>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                        {getInitials(session?.user?.name, session?.user?.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      {session?.user?.name && (
+                        <p className="text-sm font-medium">{session.user.name}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+        </nav>
+
+        <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
 
           {/* Tab 1: Dashboard — medications + voice chat */}
           <TabsContent value="dashboard" className="flex-1 min-h-0">
@@ -399,8 +484,55 @@ export default function DashboardPage() {
           <TabsContent value="history" className="flex-1 min-h-0 overflow-y-auto">
             <ConversationHistory />
           </TabsContent>
-        </Tabs>
-      </main>
+
+          {/* Tab 3: Users — all users table */}
+          <TabsContent value="users" className="flex-1 min-h-0 overflow-y-auto">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Users className="h-6 w-6 text-primary" />
+                  <CardTitle>All Users</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {usersLoading ? (
+                  <p className="text-muted-foreground">Loading users...</p>
+                ) : allUsers.length === 0 ? (
+                  <p className="text-muted-foreground">No users found.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>First Name</TableHead>
+                        <TableHead>Last Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Last Login</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allUsers.map((user) => {
+                        const nameParts = user.name?.trim().split(/\s+/) || [];
+                        const firstName = nameParts[0] || "-";
+                        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "-";
+                        return (
+                          <TableRow key={user.id}>
+                            <TableCell>{firstName}</TableCell>
+                            <TableCell>{lastName}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>{formatDateTime(user.createdAt)}</TableCell>
+                            <TableCell>{formatDateTime(user.lastLoginAt)}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </main>
+      </Tabs>
     </div>
   );
 }

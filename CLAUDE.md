@@ -55,6 +55,16 @@ app/
   playwright.config.ts # Supports TEST_BASE_URL env var for production testing
 ```
 
+## Development Workflow
+
+After implementing a new feature, always start the dev server and open it in the browser so we can visually verify the changes:
+
+```bash
+cd app
+npm run dev &
+open http://localhost:3000
+```
+
 ## Common Commands
 
 ```bash

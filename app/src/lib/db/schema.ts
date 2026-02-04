@@ -17,6 +17,8 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   password: text("password"),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at", { mode: "date", withTimezone: true }),
 });
 
 export const accounts = pgTable(

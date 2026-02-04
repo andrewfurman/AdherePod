@@ -44,6 +44,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) return null;
 
+        await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
+
         return {
           id: user.id,
           name: user.name,

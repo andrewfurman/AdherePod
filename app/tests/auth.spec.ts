@@ -34,7 +34,6 @@ test.describe("Auth flow", () => {
 
     await page.waitForURL("**/dashboard", { timeout: 10000 });
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText("Welcome")).toBeVisible();
     await expect(page.getByText("My Medications")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Talk to AdherePod" })
@@ -64,8 +63,9 @@ test.describe("Auth flow", () => {
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.waitForURL("**/dashboard", { timeout: 10000 });
 
-    // Sign out
-    await page.getByRole("button", { name: "Sign Out" }).click();
+    // Open avatar dropdown then sign out
+    await page.locator("[data-slot='avatar']").click();
+    await page.getByRole("menuitem", { name: "Sign Out" }).click();
     await page.waitForURL("**/", { timeout: 10000 });
   });
 

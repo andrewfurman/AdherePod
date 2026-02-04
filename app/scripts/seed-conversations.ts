@@ -18,11 +18,11 @@ import {
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
-// Pre-uploaded Gemini Imagen 4.0 generated images on Vercel Blob
+// Gemini-generated images uploaded to Vercel Blob
 const IMAGE_URLS = {
-  lisinoprilBottle: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/lisinopril-bottle-webcam.png",
+  lisinoprilBottle: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/lisinopril-bottle.png",
   weeklyPillbox: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/weekly-pillbox.png",
-  prescriptionLabel: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/prescription-label-webcam.png",
+  prescriptionLabel: "https://vsnjp7qexrpgbt0u.public.blob.vercel-storage.com/seed/prescription-label.png",
 };
 
 async function main() {

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Image as ImageIcon, Clock, MessageCircle } from "lucide-react";
+import { Camera, Clock, MessageCircle } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -35,12 +34,9 @@ interface ConversationDetail extends Conversation {
   images: ImageCapture[];
 }
 
-function formatLocalTime(utcDate: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(utcDate));
-}
+type TimelineItem =
+  | { type: "message"; data: ConversationMessage }
+  | { type: "image"; data: ImageCapture };
 
 function formatDate(utcDate: string): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -65,7 +61,6 @@ function formatDuration(start: string, end: string | null): string {
   return `${minutes} min`;
 }
 
-// Group conversations by date
 function groupByDate(conversations: Conversation[]): Map<string, Conversation[]> {
   const groups = new Map<string, Conversation[]>();
   for (const conv of conversations) {
@@ -77,175 +72,27 @@ function groupByDate(conversations: Conversation[]): Map<string, Conversation[]>
   return groups;
 }
 
-function TimelineEntry({ conversation }: { conversation: Conversation }) {
-  const [expanded, setExpanded] = useState(false);
-  const [detail, setDetail] = useState<ConversationDetail | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const loadDetail = async () => {
-    if (detail) {
-      setExpanded(!expanded);
-      return;
-    }
-    setLoading(true);
-    setExpanded(true);
-    try {
-      const res = await fetch(`/api/voice/conversations?id=${conversation.id}`);
-      if (res.ok) {
-        setDetail(await res.json());
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const imageCount = detail?.images?.length || 0;
-
-  return (
-    <div className="relative pl-8">
-      {/* Timeline dot */}
-      <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-primary border-2 border-background" />
-
-      {/* Entry card */}
-      <button
-        onClick={loadDetail}
-        className="w-full text-left mb-1"
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="font-medium text-sm">
-              {conversation.title || "Untitled conversation"}
-            </h3>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {formatTime(conversation.startedAt)}
-              </span>
-              <span>{formatDuration(conversation.startedAt, conversation.endedAt)}</span>
-              {conversation.status === "active" && (
-                <span className="text-green-600 font-medium">Active</span>
-              )}
-            </div>
-          </div>
-          {expanded ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
-          )}
-        </div>
-      </button>
-
-      {/* Summary (always visible) */}
-      {conversation.summary && !expanded && (
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-          {conversation.summary}
-        </p>
-      )}
-
-      {/* Expanded detail */}
-      {expanded && (
-        <div className="mt-3 space-y-4">
-          {loading ? (
-            <p className="text-sm text-muted-foreground">Loading transcript...</p>
-          ) : detail ? (
-            <>
-              {/* Summary */}
-              {detail.summary && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Summary
-                  </p>
-                  <p className="text-sm">{detail.summary}</p>
-                </div>
-              )}
-
-              {/* Transcript */}
-              {detail.messages.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-                    <MessageCircle className="h-3 w-3" />
-                    Transcript
-                  </p>
-                  <div className="space-y-2 max-h-80 overflow-y-auto">
-                    {detail.messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-[85%] rounded-lg px-3 py-2 text-xs ${
-                            msg.role === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-background border border-border"
-                          }`}
-                        >
-                          <p className="font-medium mb-0.5 opacity-70">
-                            {msg.role === "user" ? "You" : "AdherePod"}
-                          </p>
-                          {msg.content}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Images */}
-              {detail.images.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-                    <ImageIcon className="h-3 w-3" />
-                    Captured Images ({detail.images.length})
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {detail.images.map((img) => (
-                      <div
-                        key={img.id}
-                        className="border border-border rounded-lg overflow-hidden"
-                      >
-                        <img
-                          src={img.imageUrl}
-                          alt={img.description || "Captured image"}
-                          className="w-full h-32 object-cover"
-                        />
-                        <div className="p-2 space-y-1">
-                          {img.description && (
-                            <p className="text-xs font-medium">{img.description}</p>
-                          )}
-                          {img.extractedText && (
-                            <p className="text-xs text-muted-foreground whitespace-pre-line">
-                              {img.extractedText}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground opacity-60">
-                            {formatLocalTime(img.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {detail.messages.length === 0 && detail.images.length === 0 && (
-                <p className="text-sm text-muted-foreground">No messages or images recorded.</p>
-              )}
-            </>
-          ) : null}
-        </div>
-      )}
-
-      {/* Bottom spacing for timeline connector */}
-      <div className="pb-6" />
-    </div>
+function mergeTimeline(detail: ConversationDetail): TimelineItem[] {
+  const items: TimelineItem[] = [];
+  for (const msg of detail.messages) {
+    items.push({ type: "message", data: msg });
+  }
+  for (const img of detail.images) {
+    items.push({ type: "image", data: img });
+  }
+  items.sort(
+    (a, b) =>
+      new Date(a.data.createdAt).getTime() - new Date(b.data.createdAt).getTime()
   );
+  return items;
 }
 
 export default function ConversationHistory() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<ConversationDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -264,6 +111,23 @@ export default function ConversationHistory() {
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
+
+  const selectConversation = async (id: string) => {
+    if (id === selectedId) return;
+    setSelectedId(id);
+    setDetail(null);
+    setDetailLoading(true);
+    try {
+      const res = await fetch(`/api/voice/conversations?id=${id}`);
+      if (res.ok) {
+        setDetail(await res.json());
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -285,26 +149,150 @@ export default function ConversationHistory() {
   }
 
   const grouped = groupByDate(conversations);
+  const timeline = detail ? mergeTimeline(detail) : [];
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      {Array.from(grouped.entries()).map(([dateKey, convs]) => (
-        <div key={dateKey}>
-          {/* Date header */}
-          <h2 className="text-sm font-semibold text-muted-foreground mb-4">
-            {formatDate(convs[0].startedAt)}
-          </h2>
-
-          {/* Timeline line */}
-          <div className="relative">
-            <div className="absolute left-[7px] top-2 bottom-0 w-0.5 bg-border" />
-
+    <div className="h-full flex border border-border rounded-lg overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-64 shrink-0 border-r border-border overflow-y-auto bg-muted/30">
+        {Array.from(grouped.entries()).map(([dateKey, convs]) => (
+          <div key={dateKey}>
+            <div className="px-3 pt-3 pb-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                {formatDate(convs[0].startedAt)}
+              </p>
+            </div>
             {convs.map((conv) => (
-              <TimelineEntry key={conv.id} conversation={conv} />
+              <button
+                key={conv.id}
+                onClick={() => selectConversation(conv.id)}
+                className={`w-full text-left px-3 py-2 border-b border-border transition-colors ${
+                  selectedId === conv.id
+                    ? "bg-background shadow-sm"
+                    : "hover:bg-background/60"
+                }`}
+              >
+                <p className={`text-sm font-medium truncate ${selectedId === conv.id ? "text-foreground" : "text-foreground/80"}`}>
+                  {conv.title || "Untitled conversation"}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {formatTime(conv.startedAt)}
+                  </span>
+                  <span>{formatDuration(conv.startedAt, conv.endedAt)}</span>
+                </div>
+              </button>
             ))}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* Detail pane */}
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        {!selectedId ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+            <MessageCircle className="h-10 w-10 mb-2 opacity-40" />
+            <p className="text-sm">Select a conversation to view</p>
+          </div>
+        ) : detailLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Loading conversation...</p>
+          </div>
+        ) : detail ? (
+          <>
+            {/* Header */}
+            <div className="shrink-0 px-5 py-4 border-b border-border">
+              <h2 className="text-lg font-semibold">
+                {detail.title || "Untitled conversation"}
+              </h2>
+              <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                <span>{formatDate(detail.startedAt)}</span>
+                <span>{formatTime(detail.startedAt)}</span>
+                <span>{formatDuration(detail.startedAt, detail.endedAt)}</span>
+              </div>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+              {/* Summary */}
+              {detail.summary && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Summary
+                  </p>
+                  <p className="text-sm">{detail.summary}</p>
+                </div>
+              )}
+
+              {/* Merged timeline: messages + inline images */}
+              {timeline.length > 0 && (
+                <div className="space-y-3">
+                  {timeline.map((item) => {
+                    if (item.type === "message") {
+                      const msg = item.data;
+                      const isUser = msg.role === "user";
+                      return (
+                        <div
+                          key={`msg-${msg.id}`}
+                          className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[75%] rounded-lg px-4 py-2.5 text-sm ${
+                              isUser
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
+                            }`}
+                          >
+                            <p className="font-medium text-xs mb-1 opacity-60">
+                              {isUser ? "You" : "AdherePod"}
+                            </p>
+                            {msg.content}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Inline image capture
+                    const img = item.data;
+                    return (
+                      <div key={`img-${img.id}`} className="flex justify-center">
+                        <div className="w-full max-w-sm border border-border rounded-lg overflow-hidden bg-muted/50">
+                          <img
+                            src={img.imageUrl}
+                            alt={img.description || "Captured image"}
+                            className="w-full h-48 object-cover"
+                          />
+                          <div className="px-3 py-2 space-y-1">
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                              <Camera className="h-3 w-3" />
+                              Image Capture
+                            </div>
+                            {img.description && (
+                              <p className="text-sm font-medium">{img.description}</p>
+                            )}
+                            {img.extractedText && (
+                              <p className="text-xs text-muted-foreground whitespace-pre-line">
+                                {img.extractedText}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {timeline.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No messages or images recorded.
+                </p>
+              )}
+            </div>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }
