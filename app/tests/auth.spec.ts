@@ -4,10 +4,13 @@ const TEST_EMAIL = "aifurman@gmail.com";
 const TEST_PASSWORD = "1700ManorRd!";
 
 test.describe("Auth flow", () => {
-  test("homepage has Sign In button", async ({ page }) => {
+  test("homepage has Sign In button and hero image", async ({ page }) => {
     await page.goto("/");
     const signInButton = page.getByRole("link", { name: "Sign In" }).first();
     await expect(signInButton).toBeVisible();
+    await expect(
+      page.getByAltText("Elderly woman talking to AdherePod at her kitchen table")
+    ).toBeVisible();
   });
 
   test("sign-in page loads", async ({ context, page }) => {

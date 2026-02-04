@@ -55,10 +55,20 @@ export default function Home() {
             your medications through simple voice conversation. Designed for people
             who need health management to just work.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button size="lg" variant="outline" className="text-lg px-8">
               Learn More
             </Button>
+          </div>
+          <div className="max-w-3xl mx-auto">
+            <Image
+              src="/hero-image.png"
+              alt="Elderly woman talking to AdherePod at her kitchen table"
+              width={960}
+              height={540}
+              className="rounded-2xl shadow-lg"
+              priority
+            />
           </div>
         </div>
       </section>
