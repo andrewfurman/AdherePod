@@ -40,7 +40,7 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="py-24 px-6">
+      <section className="pt-12 pb-24 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6">
             Voice-Native Health Platform
