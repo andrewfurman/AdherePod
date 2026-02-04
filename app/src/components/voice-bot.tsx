@@ -8,7 +8,7 @@ export default function VoiceBot({ state }: { state: BotState }) {
       <div className={`relative ${state === "speaking" ? "animate-bot-bounce" : ""}`}>
         {/* Pulse ring when listening */}
         {state === "listening" && (
-          <div className="absolute inset-0 -m-3 rounded-full border-2 border-primary/40 animate-ping" />
+          <div className="absolute inset-0 -m-1.5 rounded-full border-2 border-primary/40 animate-ping" />
         )}
 
         {/* Glow behind bot */}
@@ -24,8 +24,8 @@ export default function VoiceBot({ state }: { state: BotState }) {
 
         {/* Bot face */}
         <svg
-          width="72"
-          height="72"
+          width="52"
+          height="52"
           viewBox="0 0 72 72"
           className="relative"
         >
@@ -134,7 +134,7 @@ export default function VoiceBot({ state }: { state: BotState }) {
 
       {/* Status text */}
       <div className="ml-3">
-        <p className="text-sm font-medium">
+        <p className="text-xs font-medium">
           {state === "speaking"
             ? "AdherePod is talking..."
             : state === "listening"

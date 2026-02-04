@@ -22,6 +22,13 @@ const agent = new RealtimeAgent({
   name: "AdherePod",
   instructions: `You are AdherePod, a friendly and patient medication assistant.
 You help elderly users manage their medications through voice conversation.
+The user has a webcam active and the system is automatically scanning for medications every 10 seconds.
+
+When you first connect, greet the user warmly and let them know:
+- You can see them through their camera
+- They can hold up any pill bottles, prescription labels, or pillboxes to the camera
+- You'll automatically read and identify their medications from the image
+- They can also just tell you about their medications by voice
 
 Guidelines:
 - Speak slowly and clearly
@@ -32,7 +39,8 @@ Guidelines:
 - Use today's date as the start date unless the user specifies otherwise
 - Always offer to help with anything else after completing an action
 - When listing medications, read each one clearly with its dosage and frequency
-- The user has a camera active. When image analysis results appear in the conversation, discuss what was found with the user.
+- When image analysis results appear in the conversation (marked with a camera icon), discuss what was found. Read back the medication name, dosage, and instructions to the user and ask if they'd like to add it to their list.
+- Encourage the user to show you their pill bottles if they haven't already
 
 Available actions:
 - List all medications
@@ -75,6 +83,13 @@ export default function VoiceChat({
       if (captureIntervalRef.current) clearInterval(captureIntervalRef.current);
     };
   }, []);
+
+  // Attach stream to video element when it becomes available
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraActive]);
 
   const startCamera = useCallback(async () => {
     try {
@@ -362,8 +377,68 @@ export default function VoiceChat({
         </div>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col gap-3">
-        {/* Bot character */}
-        <VoiceBot state={botState} />
+        {/* Bot + Camera side by side */}
+        <div className="shrink-0 flex items-stretch gap-4">
+          {/* Bot on left */}
+          <div className="flex-1 flex items-center justify-center rounded-lg border border-border bg-muted/30 py-3">
+            <VoiceBot state={botState} />
+          </div>
+
+          {/* Camera preview on right */}
+          <div className="flex-1 flex flex-col rounded-lg overflow-hidden border border-border bg-muted/30">
+            {isConnected && cameraActive ? (
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="flex-1 w-full object-cover"
+                />
+                <div className="shrink-0 px-2 py-1 flex items-center justify-center gap-1.5 bg-muted/50">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                  </span>
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Camera Live
+                    {isCapturing && (
+                      <span className="text-amber-600 dark:text-amber-400 ml-1">analyzing...</span>
+                    )}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Placeholder: person silhouette + pill bottle */}
+                <div className="flex-1 flex items-center justify-center bg-muted">
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 64 64"
+                    className="text-muted-foreground/30"
+                    fill="currentColor"
+                  >
+                    {/* Person silhouette (head + shoulders) */}
+                    <circle cx="26" cy="18" r="8" />
+                    <path d="M10 52 C10 38 14 32 26 32 C38 32 42 38 42 52 Z" />
+                    {/* Pill bottle */}
+                    <rect x="46" y="24" width="10" height="18" rx="2" opacity="0.6" />
+                    <rect x="44" y="22" width="14" height="5" rx="1.5" opacity="0.4" />
+                    {/* Pill cap highlight */}
+                    <rect x="48" y="30" width="6" height="1.5" rx="0.75" className="fill-background" opacity="0.4" />
+                    <rect x="48" y="34" width="6" height="1.5" rx="0.75" className="fill-background" opacity="0.4" />
+                  </svg>
+                </div>
+                <div className="shrink-0 px-2 py-1 bg-muted/50">
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    {isConnected ? "Starting camera..." : "Camera starts on call"}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Transcript box */}
         <div className="flex-1 min-h-0 overflow-y-auto space-y-3 p-3 bg-muted/50 rounded-lg">
@@ -381,7 +456,7 @@ export default function VoiceChat({
             if (entry.role === "image") {
               return (
                 <div key={i} className="flex justify-center">
-                  <div className="max-w-[90%] rounded-lg px-3 py-2 text-sm bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                  <div className="max-w-[90%] rounded-lg px-2.5 py-1.5 text-xs bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                     <p className="font-medium text-xs mb-1 text-amber-700 dark:text-amber-400 flex items-center gap-1">
                       <Camera className="h-3 w-3" />
                       Image Detected
@@ -397,13 +472,13 @@ export default function VoiceChat({
                 className={`flex ${entry.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                  className={`max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs ${
                     entry.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-background border border-border"
                   }`}
                 >
-                  <p className="font-medium text-xs mb-1 opacity-70">
+                  <p className="font-medium text-[10px] mb-0.5 opacity-70">
                     {entry.role === "user" ? "You" : "AdherePod"}
                   </p>
                   {entry.text}
@@ -413,36 +488,6 @@ export default function VoiceChat({
           })}
           <div ref={transcriptEndRef} />
         </div>
-
-        {/* Camera preview */}
-        {isConnected && (
-          <div className="shrink-0 rounded-lg overflow-hidden bg-black/5 dark:bg-white/5 border border-border">
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                <Camera className="h-3 w-3" />
-                {cameraActive ? "Camera active" : "Camera off"}
-                {cameraActive && isCapturing && (
-                  <span className="text-amber-600 dark:text-amber-400 ml-1">analyzing...</span>
-                )}
-              </span>
-              {cameraActive && (
-                <span className="text-xs text-muted-foreground">Auto-capturing every 10s</span>
-              )}
-            </div>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`w-full h-32 object-cover ${!cameraActive ? "hidden" : ""}`}
-            />
-            {!cameraActive && (
-              <div className="h-20 flex items-center justify-center">
-                <p className="text-xs text-muted-foreground">Camera will start when connected</p>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Status bar */}
         {error && (
