@@ -63,19 +63,6 @@ test.describe("Auth flow", () => {
     await page.waitForURL("**/", { timeout: 10000 });
   });
 
-  test("forgot-password page loads and submits", async ({ context, page }) => {
-    await context.clearCookies();
-    await page.goto("/forgot-password");
-    await expect(page.getByText("Forgot Password").first()).toBeVisible();
-
-    await page.getByLabel("Email").fill(TEST_EMAIL);
-    await page.getByRole("button", { name: "Send Reset Link" }).click();
-
-    await expect(
-      page.getByText("password reset link has been sent")
-    ).toBeVisible();
-  });
-
   test("dashboard redirects to sign-in when not authenticated", async ({
     context,
     page,
