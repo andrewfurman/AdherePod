@@ -1,7 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Camera, Clock, MessageCircle } from "lucide-react";
+import { Camera, Clock, MessageCircle, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Conversation {
   id: string;
@@ -112,6 +123,21 @@ export default function ConversationHistory() {
     fetchConversations();
   }, [fetchConversations]);
 
+  const deleteConversation = async (id: string) => {
+    try {
+      const res = await fetch(`/api/voice/conversations?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setConversations((prev) => prev.filter((c) => c.id !== id));
+        if (selectedId === id) {
+          setSelectedId(null);
+          setDetail(null);
+        }
+      }
+    } catch {
+      // silently fail
+    }
+  };
+
   const selectConversation = async (id: string) => {
     if (id === selectedId) return;
     setSelectedId(id);
@@ -203,9 +229,40 @@ export default function ConversationHistory() {
           <>
             {/* Header */}
             <div className="shrink-0 px-5 py-4 border-b border-border">
-              <h2 className="text-lg font-semibold">
-                {detail.title || "Untitled conversation"}
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">
+                  {detail.title || "Untitled conversation"}
+                </h2>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      title="Delete conversation"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete conversation</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete this conversation and all its messages and images. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteConversation(detail.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        autoFocus
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
               <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                 <span>{formatDate(detail.startedAt)}</span>
                 <span>{formatTime(detail.startedAt)}</span>

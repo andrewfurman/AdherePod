@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { conversations, conversationMessages, imageCaptures } from "@/lib/db/schema";
@@ -70,6 +70,41 @@ export async function POST() {
       .returning();
 
     return NextResponse.json(conversation, { status: 201 });
+  } catch {
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, id), eq(conversations.userId, session.user.id)));
+
+    if (!conversation) {
+      return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    }
+
+    await db.delete(imageCaptures).where(eq(imageCaptures.conversationId, id));
+    await db.delete(conversationMessages).where(eq(conversationMessages.conversationId, id));
+    await db.delete(conversations).where(eq(conversations.id, id));
+
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },
