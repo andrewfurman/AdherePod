@@ -158,14 +158,16 @@ Set in `.env.local` for local dev, and in Vercel project settings for production
 
 ## Deployment
 
-Vercel project is at `andrew-furmans-projects/adherepod`. Root directory is `app/`. Deploy from the repo root:
+Vercel project is at `andrew-furmans-projects/adherepod`. Root directory is `app/`. GitHub auto-deploy is connected — pushing to `main` automatically triggers a production deployment to **AdherePod.com** via the Vercel GitHub integration. There is a single Vercel environment (production only, no preview/staging).
 
 ```bash
+# Typical deploy workflow: just push to main
+git push origin main    # Triggers automatic Vercel production deploy
+
+# Manual deploy (if needed)
 cd /path/to/AdherePod
 vercel --prod
 ```
-
-GitHub auto-deploy is not yet connected — requires installing the Vercel GitHub App at https://vercel.com/andrew-furmans-projects/adherepod/settings/git.
 
 ## Maintaining This File
 

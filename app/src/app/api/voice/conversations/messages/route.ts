@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
-import { eq, and } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
+import { generateText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { conversations, conversationMessages } from "@/lib/db/schema";
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+});
+const titleModel = google("gemini-3-flash-preview");
 
 export async function POST(req: Request) {
   try {
@@ -91,6 +98,48 @@ export async function PATCH(req: Request) {
         { error: "Conversation not found" },
         { status: 404 }
       );
+    }
+
+    // Generate a title from the conversation messages
+    try {
+      const messages = await db
+        .select()
+        .from(conversationMessages)
+        .where(eq(conversationMessages.conversationId, conversationId))
+        .orderBy(asc(conversationMessages.createdAt));
+
+      const chatMessages = messages.filter(
+        (m) => m.role === "user" || m.role === "agent"
+      );
+
+      if (chatMessages.length > 0) {
+        const transcript = chatMessages
+          .slice(0, 20)
+          .map((m) => `${m.role}: ${m.content}`)
+          .join("\n")
+          .slice(0, 2000);
+
+        const result = await generateText({
+          model: titleModel,
+          prompt: `Summarize this voice conversation in a short title (30-40 characters max).
+Focus on the main topic: medications added/changed/removed, questions asked, etc.
+Return ONLY the title text, nothing else. No quotes.
+
+${transcript}`,
+        });
+
+        const title = result.text.trim().slice(0, 60);
+        if (title) {
+          const [withTitle] = await db
+            .update(conversations)
+            .set({ title })
+            .where(eq(conversations.id, conversationId))
+            .returning();
+          return NextResponse.json(withTitle);
+        }
+      }
+    } catch (err) {
+      console.error("Title generation failed:", err);
     }
 
     return NextResponse.json(updated);

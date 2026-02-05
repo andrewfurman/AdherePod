@@ -1,12 +1,11 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -25,9 +24,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Heart, Pill, LogOut, Plus, Pencil, Trash2, X, Calendar, Clock, MessageCircle, Users } from "lucide-react";
+import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users } from "lucide-react";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
+import MedicationCard from "@/components/medication-card";
 
 interface Medication {
   id: string;
@@ -93,13 +93,51 @@ export default function DashboardPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [editHighlights, setEditHighlights] = useState<Map<string, { oldMed: Medication }>>(new Map());
+  const medicationsRef = useRef<Medication[]>([]);
 
   const fetchMedications = useCallback(async () => {
     try {
+      const snapshot = new Map(
+        medicationsRef.current.map((m) => [m.id, m])
+      );
+
       const res = await fetch("/api/medications");
       if (res.ok) {
-        const data = await res.json();
+        const data: Medication[] = await res.json();
+
+        if (snapshot.size > 0) {
+          const newHighlights = new Map<string, { oldMed: Medication }>();
+          for (const med of data) {
+            const old = snapshot.get(med.id);
+            if (
+              old &&
+              (old.name !== med.name ||
+                old.timesPerDay !== med.timesPerDay ||
+                (old.timingDescription || "") !== (med.timingDescription || "") ||
+                (old.notes || "") !== (med.notes || ""))
+            ) {
+              newHighlights.set(med.id, { oldMed: old });
+            }
+          }
+          if (newHighlights.size > 0) {
+            setEditHighlights((prev) => {
+              const merged = new Map(prev);
+              newHighlights.forEach((v, k) => merged.set(k, v));
+              return merged;
+            });
+            setTimeout(() => {
+              setEditHighlights((prev) => {
+                const next = new Map(prev);
+                newHighlights.forEach((_, k) => next.delete(k));
+                return next;
+              });
+            }, 15000);
+          }
+        }
+
         setMedications(data);
+        medicationsRef.current = data;
       }
     } catch {
       // silently fail
@@ -418,57 +456,14 @@ export default function DashboardPage() {
                   ) : (
                     <div className="space-y-3">
                       {medications.map((med) => (
-                        <div
+                        <MedicationCard
                           key={med.id}
-                          className="flex items-start justify-between p-4 border border-border rounded-lg"
-                        >
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-medium">{med.name}</h4>
-                              <Badge variant="secondary">
-                                {med.timesPerDay}x / day
-                              </Badge>
-                              {med.endDate ? (
-                                <Badge variant="outline">
-                                  Ends {formatDate(med.endDate)}
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline">Ongoing</Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                              {med.timingDescription && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {med.timingDescription}
-                                </span>
-                              )}
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                Started {formatDate(med.startDate)}
-                              </span>
-                            </div>
-                            {med.notes && (
-                              <p className="text-sm text-muted-foreground">{med.notes}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 ml-4 shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openEditForm(med)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(med.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
+                          medication={med}
+                          highlight={editHighlights.get(med.id)}
+                          onEdit={openEditForm}
+                          onDelete={handleDelete}
+                          formatDate={formatDate}
+                        />
                       ))}
                     </div>
                   )}
