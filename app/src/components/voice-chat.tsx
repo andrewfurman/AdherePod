@@ -14,43 +14,56 @@ import {
 import VoiceBot from "@/components/voice-bot";
 
 interface TranscriptEntry {
-  role: "user" | "agent" | "image";
+  role: "user" | "agent" | "image" | "camera";
   text: string;
 }
 
 const agent = new RealtimeAgent({
   name: "AdherePod",
-  instructions: `You are AdherePod, a friendly and patient medication assistant.
-You help elderly users manage their medications through voice conversation.
-The user has a webcam active and the system is automatically scanning for medications every 10 seconds.
+  instructions: `You are AdherePod, a friendly and patient medication assistant designed for elderly users.
 
-When you first connect, greet the user warmly and let them know:
-- You can see them through their camera
-- They can hold up any pill bottles, prescription labels, or pillboxes to the camera
-- You'll automatically read and identify their medications from the image
-- They can also just tell you about their medications by voice
+Greeting:
+When you first connect, give a brief, warm greeting. Say something like:
+"Hi there! I'm AdherePod, your medication assistant. I can help you review your medications, update your list if your doctor made any changes, or answer questions about how your medications work together. You can also hold up a prescription or pill bottle to the camera and I'll read it for you. What can I help you with today?"
+Keep the greeting to 2-3 sentences max. Be warm but concise.
+
+Core capabilities:
+- List and review the user's current medications
+- Add new medications to their list
+- Update existing medications (dosage changes, timing changes)
+- Delete medications they no longer take
+- Answer questions about their medications, including drug interactions, side effects, and what to watch out for
+- Read prescriptions or pill bottles held up to the camera
 
 Guidelines:
-- Speak slowly and clearly
-- Use simple, everyday words
+- Speak slowly and clearly, using simple everyday words
 - Confirm what the user said before taking action
-- After adding, editing, or deleting a medication, confirm what was done
+- After any change, briefly confirm what was done
 - If unsure about a medication name, spell it out and ask for confirmation
 - Use today's date as the start date unless the user specifies otherwise
+- When listing medications, read each one clearly with dosage, frequency, and timing
 - Always offer to help with anything else after completing an action
-- When listing medications, read each one clearly with its dosage and frequency
-- When image analysis results appear in the conversation (marked with a camera icon), discuss what was found. Read back the medication name, dosage, and instructions to the user and ask if they'd like to add it to their list.
-- Encourage the user to show you their pill bottles if they haven't already
 
-Available actions:
-- List all medications
-- Add a new medication (name, times per day, timing, start date)
-- Edit an existing medication
-- Delete a medication`,
+Camera and vision:
+- The user's camera is active. Every few seconds you receive an automatic update describing what the camera sees. These messages are prefixed with [Camera: ...].
+- For routine frames (e.g. "[Camera: Person facing camera, talking]"), silently absorb the context. Do NOT read these aloud or react to them.
+- ONLY react to camera updates when:
+  1. The user asks "what do you see?" or "can you see this?" — describe what you last saw from the camera.
+  2. A medication or prescription is detected (the description mentions drug names, dosages, pill bottles, prescription labels, etc.) — proactively mention it and offer to add it to their medication list. Read back the medication name, dosage, and instructions you see.
+  3. A health concern is visible (rash, swelling, injury, skin condition) — mention what you see and relate it to their medications if relevant.
+- If the camera shows something partially obscured or hard to read, let the user know and ask them to hold it closer or adjust the angle.
+- If a detected medication is already on their list, let them know and ask if they need to update it.
+- If it's a new medication, ask if they'd like to add it.
+- Don't repeatedly ask about the camera — just respond naturally when relevant content appears.
+
+Drug interaction and health questions:
+- When asked about drug interactions, give clear, practical advice in plain language
+- Mention common things to watch out for (e.g. take at a certain time, avoid certain foods, report symptoms)
+- Always remind them that you're an assistant, not a replacement for their doctor`,
   tools: [listMedications, addMedication, editMedication, deleteMedication],
 });
 
-const AUTO_CAPTURE_INTERVAL_MS = 10_000;
+const AUTO_CAPTURE_INTERVAL_MS = 5_000;
 
 export default function VoiceChat({
   onMedicationsChanged,
@@ -70,7 +83,8 @@ export default function VoiceChat({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const captureIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastExtractionRef = useRef<string>("");
+  const lastDescriptionRef = useRef<string>("");
+  const sessionRef = useRef<RealtimeSession | null>(null);
 
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -134,72 +148,6 @@ export default function VoiceChat({
     return canvas.toDataURL("image/jpeg", 0.7);
   }, []);
 
-  const processCapture = useCallback(async () => {
-    if (isCapturing || !conversationIdRef.current) return;
-
-    const imageBase64 = captureFrame();
-    if (!imageBase64) return;
-
-    setIsCapturing(true);
-
-    try {
-      // Step 1: Triage — is there anything medically relevant?
-      const triageRes = await fetch("/api/voice/image-capture", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64,
-          conversationId: conversationIdRef.current,
-          mode: "triage",
-        }),
-      });
-
-      if (!triageRes.ok) return;
-      const { hasMedication } = await triageRes.json();
-
-      if (!hasMedication) return;
-
-      // Step 2: Full extraction
-      const extractRes = await fetch("/api/voice/image-capture", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64,
-          conversationId: conversationIdRef.current,
-          mode: "extract",
-        }),
-      });
-
-      if (!extractRes.ok) return;
-      const result = await extractRes.json();
-
-      // Step 3: Deduplication — skip if same as last extraction
-      const extractionKey = result.medications || result.description;
-      if (extractionKey === lastExtractionRef.current) return;
-      lastExtractionRef.current = extractionKey;
-
-      // Step 4: Add to transcript
-      setTranscript((prev) => [
-        ...prev,
-        {
-          role: "image",
-          text: `📷 ${result.description}${result.medications ? `\nMedications: ${result.medications}` : ""}`,
-        },
-      ]);
-    } catch {
-      // Don't interrupt the conversation for a failed capture
-    } finally {
-      setIsCapturing(false);
-    }
-  }, [isCapturing, captureFrame]);
-
-  const startAutoCapture = useCallback(() => {
-    if (captureIntervalRef.current) clearInterval(captureIntervalRef.current);
-    captureIntervalRef.current = setInterval(() => {
-      processCapture();
-    }, AUTO_CAPTURE_INTERVAL_MS);
-  }, [processCapture]);
-
   const saveMessage = useCallback(
     async (role: string, content: string) => {
       if (!conversationIdRef.current) return;
@@ -219,6 +167,84 @@ export default function VoiceChat({
     },
     []
   );
+
+  const processCapture = useCallback(async () => {
+    if (isCapturing || !conversationIdRef.current) return;
+
+    const imageBase64 = captureFrame();
+    if (!imageBase64) return;
+
+    setIsCapturing(true);
+
+    try {
+      // Single call: describe + upload + save to DB
+      console.log("[Camera] Capturing frame...");
+      const res = await fetch("/api/voice/image-capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          conversationId: conversationIdRef.current,
+          mode: "describe",
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        console.error("[Camera] API error:", res.status, body.error, body.detail);
+        return;
+      }
+      const { description, hasMedicalContent } = await res.json();
+      console.log("[Camera] Description:", description, "| Medical:", hasMedicalContent);
+
+      // Deduplicate — skip if description is exactly the same as last one
+      if (description === lastDescriptionRef.current) {
+        console.log("[Camera] Skipped (duplicate)");
+        return;
+      }
+      lastDescriptionRef.current = description;
+
+      // Inject into agent context via sendMessage
+      const currentSession = sessionRef.current;
+      if (currentSession) {
+        currentSession.sendMessage(`[Camera: ${description}]`);
+      }
+
+      // Save camera description to conversation messages
+      saveMessage("camera", `[Camera: ${description}]`);
+
+      // Always show description in transcript for debugging
+      // Medical content gets the prominent yellow card; routine gets tiny text
+      if (hasMedicalContent) {
+        setTranscript((prev) => [
+          ...prev,
+          {
+            role: "image",
+            text: `📷 ${description}`,
+          },
+        ]);
+      } else {
+        setTranscript((prev) => [
+          ...prev,
+          {
+            role: "camera",
+            text: description,
+          },
+        ]);
+      }
+    } catch {
+      // Don't interrupt the conversation for a failed capture
+    } finally {
+      setIsCapturing(false);
+    }
+  }, [isCapturing, captureFrame, saveMessage]);
+
+  const startAutoCapture = useCallback(() => {
+    if (captureIntervalRef.current) clearInterval(captureIntervalRef.current);
+    captureIntervalRef.current = setInterval(() => {
+      processCapture();
+    }, AUTO_CAPTURE_INTERVAL_MS);
+  }, [processCapture]);
 
   const connect = useCallback(async () => {
     setIsConnecting(true);
@@ -289,6 +315,7 @@ export default function VoiceChat({
 
       await newSession.connect({ apiKey: keyData.value });
       setSession(newSession);
+      sessionRef.current = newSession;
       setIsConnected(true);
       setBotState("listening");
 
@@ -319,10 +346,11 @@ export default function VoiceChat({
   const disconnect = useCallback(async () => {
     session?.close();
     setSession(null);
+    sessionRef.current = null;
     setIsConnected(false);
     setBotState("idle");
     stopCamera();
-    lastExtractionRef.current = "";
+    lastDescriptionRef.current = "";
 
     // Mark conversation as ended
     if (conversationIdRef.current) {
@@ -377,10 +405,10 @@ export default function VoiceChat({
         </div>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col gap-3">
-        {/* Bot + Camera side by side */}
-        <div className="shrink-0 flex items-stretch gap-4">
+        {/* Bot + Camera side by side — fixed height to prevent layout shift */}
+        <div className="shrink-0 h-40 flex items-stretch gap-4">
           {/* Bot on left */}
-          <div className="flex-1 flex items-center justify-center rounded-lg border border-border bg-muted/30 py-3">
+          <div className="flex-1 flex items-center justify-center rounded-lg border border-border bg-muted/30">
             <VoiceBot state={botState} />
           </div>
 
@@ -393,7 +421,7 @@ export default function VoiceChat({
                   autoPlay
                   playsInline
                   muted
-                  className="flex-1 w-full object-cover"
+                  className="flex-1 min-h-0 w-full object-cover"
                 />
                 <div className="shrink-0 px-2 py-1 flex items-center justify-center gap-1.5 bg-muted/50">
                   <span className="relative flex h-2 w-2">
@@ -463,6 +491,15 @@ export default function VoiceChat({
                     </p>
                     <span className="whitespace-pre-line">{entry.text}</span>
                   </div>
+                </div>
+              );
+            }
+            if (entry.role === "camera") {
+              return (
+                <div key={i} className="flex justify-center">
+                  <p className="text-[9px] text-muted-foreground/50 leading-tight truncate max-w-[90%]">
+                    👁 {entry.text}
+                  </p>
                 </div>
               );
             }

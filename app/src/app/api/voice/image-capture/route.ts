@@ -1,34 +1,52 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { put } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { imageCaptures, conversations } from "@/lib/db/schema";
 
-const model = google("gemini-2.5-flash");
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+});
+const model = google("gemini-3-flash-preview");
 
-const TRIAGE_PROMPT = `Look at this image. Is there a medication bottle, pill bottle, prescription label, pillbox, pill organizer, or any medication-related item clearly visible?
+const DESCRIBE_PROMPT = `You are the eyes of a medication assistant during a live video call with a patient.
+Describe what you see in the image. Adjust your detail level:
 
-Answer with ONLY one word: YES or NO`;
+- If the person is just talking/sitting normally: describe in under 50 characters
+  (e.g. "Person facing camera, talking" or "Person looking to the side")
 
-const EXTRACT_PROMPT = `Analyze this image of a medication or prescription item. Extract all visible information:
+- If they are holding up a prescription, pill bottle, medication label, or any
+  document with text: transcribe EVERY piece of readable text you can see.
+  Include drug names, dosages, directions, quantities, refills, prescriber name,
+  pharmacy, dates, and any warnings. Be exhaustive.
 
-1. Drug name and brand
-2. Dosage/strength
-3. Frequency/directions
-4. Quantity and refills remaining
-5. Prescriber name
-6. Pharmacy name
-7. Any warnings or special instructions
+- If they are showing a part of their body (rash, swelling, bruise, wound, skin
+  condition, etc.): describe in clinical detail — location on body, color, size,
+  texture, pattern, and any characteristics relevant to a medical assessment.
 
-If you can't read something clearly, note what's unclear. Provide a brief natural-language description first, then the structured details.
+- If something is partially visible or hard to read, say so:
+  "The label is partially obscured but appears to read..."
+  "I can't make out the dosage clearly, but it looks like..."
 
-Format your response as:
-DESCRIPTION: [1-2 sentence description of what you see]
-MEDICATIONS: [comma-separated list of medication names and dosages found]
-DETAILS: [all extracted text and details]`;
+Be factual and concise. No pleasantries or preamble.`;
+
+const MEDICAL_KEYWORDS = [
+  "prescription", "medication", "pill", "tablet", "capsule", "bottle",
+  "mg", "mcg", "ml", "dosage", "dose", "refill", "pharmacy", "rx",
+  "drug", "medicine", "ointment", "cream", "inhaler", "syringe",
+  "rash", "swelling", "bruise", "wound", "injury", "lesion",
+  "redness", "irritation", "blister", "bump", "skin condition",
+  "atorvastatin", "lisinopril", "metformin", "amlodipine", "omeprazole",
+  "label", "directions", "warnings", "prescriber",
+];
+
+function hasMedicalKeywords(text: string): boolean {
+  const lower = text.toLowerCase();
+  return MEDICAL_KEYWORDS.some((kw) => lower.includes(kw));
+}
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { imageBase64, conversationId, mode = "triage" } = body;
+    const { imageBase64, conversationId, mode = "describe" } = body;
 
     if (!imageBase64) {
       return NextResponse.json({ error: "Missing imageBase64" }, { status: 400 });
@@ -47,6 +65,7 @@ export async function POST(req: Request) {
     // Strip the data URL prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
+    // Legacy triage mode — kept for backwards compatibility but not used by new flow
     if (mode === "triage") {
       const result = await generateText({
         model,
@@ -54,7 +73,7 @@ export async function POST(req: Request) {
           {
             role: "user",
             content: [
-              { type: "text", text: TRIAGE_PROMPT },
+              { type: "text", text: "Look at this image. Is there a medication bottle, pill bottle, prescription label, pillbox, pill organizer, or any medication-related item clearly visible?\n\nAnswer with ONLY one word: YES or NO" },
               { type: "image", image: base64Data },
             ],
           },
@@ -63,34 +82,25 @@ export async function POST(req: Request) {
 
       const answer = result.text.trim().toUpperCase();
       const hasMedication = answer.startsWith("YES");
-
       return NextResponse.json({ hasMedication });
     }
 
-    // Full extraction mode
+    // Describe mode: single call that always describes, always stores, flags medical content
     const result = await generateText({
       model,
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: EXTRACT_PROMPT },
+            { type: "text", text: DESCRIBE_PROMPT },
             { type: "image", image: base64Data },
           ],
         },
       ],
     });
 
-    const responseText = result.text;
-
-    // Parse the response
-    const descriptionMatch = responseText.match(/DESCRIPTION:\s*([\s\S]+?)(?=\nMEDICATIONS:|\n\n|$)/);
-    const medicationsMatch = responseText.match(/MEDICATIONS:\s*([\s\S]+?)(?=\nDETAILS:|\n\n|$)/);
-    const detailsMatch = responseText.match(/DETAILS:\s*([\s\S]+)$/);
-
-    const description = descriptionMatch?.[1]?.trim() || responseText.slice(0, 200);
-    const medications = medicationsMatch?.[1]?.trim() || "";
-    const extractedText = detailsMatch?.[1]?.trim() || responseText;
+    const description = result.text.trim();
+    const hasMedicalContent = hasMedicalKeywords(description);
 
     // Upload image to Vercel Blob
     const imageBuffer = Buffer.from(base64Data, "base64");
@@ -102,7 +112,6 @@ export async function POST(req: Request) {
 
     // Save to database
     if (conversationId) {
-      // Verify conversation belongs to user
       const [conv] = await db
         .select()
         .from(conversations)
@@ -114,22 +123,23 @@ export async function POST(req: Request) {
           conversationId,
           imageUrl: blob.url,
           description,
-          extractedText,
-          extractedMedications: medications,
+          extractedText: hasMedicalContent ? description : null,
+          extractedMedications: null,
         });
       }
     }
 
     return NextResponse.json({
       description,
-      medications,
-      extractedText,
+      hasMedicalContent,
       imageUrl: blob.url,
     });
   } catch (err) {
-    console.error("Image capture error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : "";
+    console.error("Image capture error:", message, "\n", stack);
     return NextResponse.json(
-      { error: "Failed to process image" },
+      { error: "Failed to process image", detail: message },
       { status: 500 }
     );
   }
