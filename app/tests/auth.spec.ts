@@ -4,13 +4,13 @@ const TEST_EMAIL = process.env.TEST_USER_EMAIL!;
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD!;
 
 test.describe("Auth flow", () => {
-  test("homepage has Sign In button and demo video when logged out", async ({ context, page }) => {
+  test("homepage has Sign In button and hero image when logged out", async ({ context, page }) => {
     await context.clearCookies();
     await page.goto("/");
     const signInButton = page.getByRole("link", { name: "Sign In" }).first();
     await expect(signInButton).toBeVisible();
     await expect(
-      page.locator("iframe[src*='loom.com']")
+      page.getByAltText("Elderly woman talking to AdherePod at her kitchen table")
     ).toBeVisible();
   });
 

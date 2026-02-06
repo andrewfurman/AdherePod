@@ -149,14 +149,14 @@ export default function Home() {
             </div>
           )}
           <div className="max-w-3xl mx-auto mt-12">
-            <div className="relative w-full rounded-2xl shadow-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                src="https://www.loom.com/embed/43be972396664485bb522268a46aadb1?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true"
-                frameBorder="0"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
-            </div>
+            <Image
+              src="/hero-image.png"
+              alt="Elderly woman talking to AdherePod at her kitchen table"
+              width={896}
+              height={504}
+              className="rounded-2xl shadow-lg w-full h-auto"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -284,6 +284,17 @@ export default function Home() {
                 <p className="text-muted-foreground text-sm">{item.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="max-w-3xl mx-auto mt-12">
+            <h3 className="text-xl font-semibold text-center mb-4">See it in action</h3>
+            <div className="relative w-full rounded-2xl shadow-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                src="https://www.loom.com/embed/43be972396664485bb522268a46aadb1?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true"
+                frameBorder="0"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
           </div>
         </div>
       </section>
