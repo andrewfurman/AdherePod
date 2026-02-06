@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-const TEST_EMAIL = "aifurman@gmail.com";
-const TEST_PASSWORD = "1700ManorRd!";
+const TEST_EMAIL = process.env.TEST_USER_EMAIL!;
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD!;
 
 /**
  * Helper: sign in and navigate to dashboard.
