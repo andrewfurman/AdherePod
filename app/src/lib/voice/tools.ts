@@ -74,3 +74,14 @@ export const deleteMedication = tool({
     return res.json();
   },
 });
+
+export const checkCamera = tool({
+  name: "check_camera",
+  description:
+    "Look at what the camera currently sees. Use this when the user asks what you see or asks you to look at something.",
+  parameters: z.object({}),
+  execute: async () => {
+    const res = await fetch("/api/voice/camera-latest");
+    return res.json();
+  },
+});

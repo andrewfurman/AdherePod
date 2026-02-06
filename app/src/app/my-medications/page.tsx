@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users } from "lucide-react";
+import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
 import MedicationCard from "@/components/medication-card";
@@ -92,7 +93,7 @@ export default function DashboardPage() {
   const [saving, setSaving] = useState(false);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("medications");
   const [editHighlights, setEditHighlights] = useState<Map<string, { oldMed: Medication }>>(new Map());
   const medicationsRef = useRef<Medication[]>([]);
 
@@ -276,15 +277,15 @@ export default function DashboardPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
         <nav className="border-b border-border shrink-0">
           <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
-            <button onClick={() => setActiveTab("dashboard")} className="flex items-center gap-2 cursor-pointer">
+            <Link href="/" className="flex items-center gap-2">
               <Heart className="h-7 w-7 text-red-500" />
               <span className="text-xl font-bold">AdherePod</span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
               <TabsList>
-                <TabsTrigger value="dashboard">
+                <TabsTrigger value="medications">
                   <Pill className="h-4 w-4 mr-1.5" />
-                  Dashboard
+                  My Medications
                 </TabsTrigger>
                 <TabsTrigger value="history">
                   <MessageCircle className="h-4 w-4 mr-1.5" />
@@ -330,7 +331,7 @@ export default function DashboardPage() {
         <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
 
           {/* Tab 1: Dashboard — medications + voice chat */}
-          <TabsContent value="dashboard" className="flex-1 min-h-0">
+          <TabsContent value="medications" className="flex-1 min-h-0">
             <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left column — Medications */}
               <Card className="flex flex-col min-h-0">

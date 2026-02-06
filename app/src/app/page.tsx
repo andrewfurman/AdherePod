@@ -15,9 +15,12 @@ import {
   Heart,
   MessageCircle,
   Bell,
+  ArrowRight,
 } from "lucide-react";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
@@ -32,9 +35,18 @@ export default function Home() {
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
             <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
             <a href="#team" className="hover:text-foreground transition-colors">Team</a>
-            <Link href="/sign-in">
-              <Button size="sm">Sign In</Button>
-            </Link>
+            {session?.user ? (
+              <Link href="/my-medications">
+                <Button size="sm">
+                  Go to My Medications
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/sign-in">
+                <Button size="sm">Sign In</Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>

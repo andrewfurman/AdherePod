@@ -17,7 +17,7 @@ export default auth((req) => {
 
   // Redirect logged-in users away from auth pages
   if (isLoggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/my-medications", req.url));
   }
 
   // Redirect unauthenticated users from protected routes

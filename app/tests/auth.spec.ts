@@ -4,7 +4,8 @@ const TEST_EMAIL = "aifurman@gmail.com";
 const TEST_PASSWORD = "1700ManorRd!";
 
 test.describe("Auth flow", () => {
-  test("homepage has Sign In button and hero image", async ({ page }) => {
+  test("homepage has Sign In button and hero image when logged out", async ({ context, page }) => {
+    await context.clearCookies();
     await page.goto("/");
     const signInButton = page.getByRole("link", { name: "Sign In" }).first();
     await expect(signInButton).toBeVisible();
@@ -32,9 +33,9 @@ test.describe("Auth flow", () => {
     await page.getByLabel("Password").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: "Sign In" }).click();
 
-    await page.waitForURL("**/dashboard", { timeout: 10000 });
-    await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText("My Medications")).toBeVisible();
+    await page.waitForURL("**/my-medications", { timeout: 10000 });
+    await expect(page).toHaveURL(/\/my-medications/);
+    await expect(page.getByRole("tab", { name: "My Medications" })).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Talk to AdherePod" })
     ).toBeVisible();
@@ -61,7 +62,7 @@ test.describe("Auth flow", () => {
     await page.getByLabel("Email").fill(TEST_EMAIL);
     await page.getByLabel("Password").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: "Sign In" }).click();
-    await page.waitForURL("**/dashboard", { timeout: 10000 });
+    await page.waitForURL("**/my-medications", { timeout: 10000 });
 
     // Open avatar dropdown then sign out
     await page.locator("[data-slot='avatar']").click();
@@ -69,12 +70,28 @@ test.describe("Auth flow", () => {
     await page.waitForURL("**/", { timeout: 10000 });
   });
 
-  test("dashboard redirects to sign-in when not authenticated", async ({
+  test("homepage shows Go to My Medications when logged in", async ({
     context,
     page,
   }) => {
     await context.clearCookies();
-    await page.goto("/dashboard");
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill(TEST_EMAIL);
+    await page.getByLabel("Password").fill(TEST_PASSWORD);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("**/my-medications", { timeout: 10000 });
+
+    await page.goto("/");
+    const goButton = page.getByRole("link", { name: "Go to My Medications" });
+    await expect(goButton).toBeVisible();
+  });
+
+  test("my-medications redirects to sign-in when not authenticated", async ({
+    context,
+    page,
+  }) => {
+    await context.clearCookies();
+    await page.goto("/my-medications");
     await page.waitForURL("**/sign-in", { timeout: 10000 });
   });
 });
