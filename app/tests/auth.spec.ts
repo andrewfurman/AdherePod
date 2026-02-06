@@ -82,7 +82,7 @@ test.describe("Auth flow", () => {
     await page.waitForURL("**/my-medications", { timeout: 10000 });
 
     await page.goto("/");
-    const goButton = page.getByRole("link", { name: "Go to My Medications" });
+    const goButton = page.getByRole("link", { name: "Go to My Medications" }).first();
     await expect(goButton).toBeVisible();
   });
 

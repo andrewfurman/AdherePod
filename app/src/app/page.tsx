@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,64 +20,141 @@ import {
   MessageCircle,
   Bell,
   ArrowRight,
+  Menu,
+  X,
 } from "lucide-react";
-import { auth } from "@/lib/auth";
 
-export default async function Home() {
-  const session = await auth();
+export default function Home() {
+  const { data: session } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <a href="#" className="flex items-center gap-2">
             <Heart className="h-8 w-8 text-red-500" />
             <span className="text-xl font-bold">AdherePod</span>
           </a>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
-            <a href="#team" className="hover:text-foreground transition-colors">Team</a>
+          <div className="flex items-center gap-3">
+            {/* Desktop nav links */}
+            <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+              <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+              <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
+              <a href="#team" className="hover:text-foreground transition-colors">Team</a>
+            </div>
+            {/* Auth buttons — always visible */}
             {session?.user ? (
               <Link href="/my-medications">
                 <Button size="sm">
-                  Go to My Medications
+                  <span className="hidden sm:inline">Go to My Medications</span>
+                  <span className="sm:hidden">My Meds</span>
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
               </Link>
             ) : (
-              <Link href="/sign-in">
-                <Button size="sm">Sign In</Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/sign-in">
+                  <Button variant="ghost" size="sm">Sign In</Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button size="sm">Sign Up</Button>
+                </Link>
+              </div>
             )}
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-border bg-background px-4 py-3 space-y-2">
+            <a
+              href="#features"
+              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              How It Works
+            </a>
+            <a
+              href="#who"
+              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Who It&apos;s For
+            </a>
+            <a
+              href="#team"
+              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Team
+            </a>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
-      <section className="pt-12 pb-24 px-6">
+      <section className="pt-12 pb-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6">
             Voice-Native Health Platform
           </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             Your medications, managed.
             <br />
             <span className="text-muted-foreground">No screens. No confusion.</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             AdherePod is a plug-and-play device that sits in your home and manages
             your medications through simple voice conversation. Designed for people
             who need health management to just work.
           </p>
+          {!session?.user && (
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <Link href="/sign-up">
+                <Button size="lg">
+                  Get Started Free
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Button>
+              </Link>
+              <Link href="/sign-in">
+                <Button variant="outline" size="lg">Sign In</Button>
+              </Link>
+            </div>
+          )}
+          {session?.user && (
+            <div className="flex items-center justify-center mb-10">
+              <Link href="/my-medications">
+                <Button size="lg">
+                  Go to My Medications
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Button>
+              </Link>
+            </div>
+          )}
           <div className="max-w-3xl mx-auto mt-12">
             <Image
               src="/hero-image.png"
               alt="Elderly woman talking to AdherePod at her kitchen table"
               width={960}
               height={540}
-              className="rounded-2xl shadow-lg"
+              className="w-full rounded-2xl shadow-lg"
               priority
             />
           </div>
@@ -81,7 +162,7 @@ export default async function Home() {
       </section>
 
       {/* Voice-First Callout */}
-      <section className="py-16 px-6 bg-muted">
+      <section className="py-16 px-4 sm:px-6 bg-muted">
         <div className="max-w-4xl mx-auto text-center">
           <Mic className="h-16 w-16 mx-auto mb-6 text-primary" />
           <h2 className="text-3xl font-bold mb-4">Just talk to it.</h2>
@@ -106,7 +187,7 @@ export default async function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Everything your health needs in one device</h2>
@@ -173,7 +254,7 @@ export default async function Home() {
             <Card>
               <CardHeader>
                 <BarChart3 className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Provider & Payer Platform</CardTitle>
+                <CardTitle>Provider &amp; Payer Platform</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">
                 Real-time dashboards for physicians. Shares adherence data with
@@ -185,14 +266,14 @@ export default async function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-6 bg-muted">
+      <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: "1", icon: Mic, title: "Talk", desc: "Have a live voice conversation with AdherePod about your medications, schedule, and health questions." },
               { step: "2", icon: MessageCircle, title: "Discuss", desc: "AdherePod helps you manage your medications, check for interactions, and track your adherence over time." },
-              { step: "3", icon: Bell, title: "Get Notified", desc: "Receive reminders and new health advice via phone call or SMS when it&apos;s time to take your medications or when the system has guidance for you." },
+              { step: "3", icon: Bell, title: "Get Notified", desc: "Receive reminders and new health advice via phone call or SMS when it's time to take your medications or when the system has guidance for you." },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
@@ -208,10 +289,10 @@ export default async function Home() {
       </section>
 
       {/* Who It's For */}
-      <section id="who" className="py-24 px-6">
+      <section id="who" className="py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">Built for everyone in the care chain</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: Heart, title: "Elderly Patients", desc: "Managing multiple chronic conditions without tech frustration." },
               { icon: Users, title: "Caregivers", desc: "Peace of mind knowing your loved one is taking their medications." },
@@ -235,7 +316,7 @@ export default async function Home() {
       </section>
 
       {/* Team */}
-      <section id="team" className="py-24 px-6 bg-muted">
+      <section id="team" className="py-24 px-4 sm:px-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
@@ -281,17 +362,25 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-6 bg-primary text-primary-foreground">
+      <section className="py-24 px-4 sm:px-6 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Health management that just works.</h2>
-          <p className="text-lg opacity-90">
+          <p className="text-lg opacity-90 mb-8">
             No screens. No confusion. Just plug in and start talking.
           </p>
+          {!session?.user && (
+            <Link href="/sign-up">
+              <Button size="lg" variant="secondary">
+                Sign Up Free
+                <ArrowRight className="h-4 w-4 ml-1.5" />
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-6">
+      <footer className="border-t border-border py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-red-500" />

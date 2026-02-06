@@ -273,10 +273,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen flex flex-col overflow-hidden bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
         <nav className="border-b border-border shrink-0">
-          <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Heart className="h-7 w-7 text-red-500" />
               <span className="text-xl font-bold">AdherePod</span>
@@ -284,12 +284,12 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <TabsList>
                 <TabsTrigger value="medications">
-                  <Pill className="h-4 w-4 mr-1.5" />
-                  My Medications
+                  <Pill className="h-4 w-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">My Medications</span>
                 </TabsTrigger>
                 <TabsTrigger value="history">
-                  <MessageCircle className="h-4 w-4 mr-1.5" />
-                  History
+                  <MessageCircle className="h-4 w-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">History</span>
                 </TabsTrigger>
               </TabsList>
               <DropdownMenu>
@@ -328,7 +328,7 @@ export default function DashboardPage() {
           </div>
         </nav>
 
-        <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-6 pt-4 pb-10 flex flex-col">
+        <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 md:px-6 pt-4 pb-6 md:pb-10 flex flex-col">
 
           {/* Tab 1: Dashboard — medications + voice chat */}
           <TabsContent value="medications" className="flex-1 min-h-0">

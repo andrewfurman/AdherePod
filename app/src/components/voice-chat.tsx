@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { RealtimeAgent, RealtimeSession } from "@openai/agents/realtime";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mic, Phone, PhoneOff, Camera } from "lucide-react";
+import { Mic, Phone, PhoneOff, Camera, SwitchCamera } from "lucide-react";
 import {
   listMedications,
   addMedication,
@@ -81,6 +81,7 @@ export default function VoiceChat({
   const [botState, setBotState] = useState<"idle" | "listening" | "speaking">("idle");
   const [cameraActive, setCameraActive] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const conversationIdRef = useRef<string | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -88,6 +89,7 @@ export default function VoiceChat({
   const captureIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastDescriptionRef = useRef<string>("");
   const sessionRef = useRef<RealtimeSession | null>(null);
+  const facingModeRef = useRef<"environment" | "user">("environment");
 
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,10 +110,11 @@ export default function VoiceChat({
     }
   }, [cameraActive]);
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (mode?: "environment" | "user") => {
+    const useFacing = mode ?? facingModeRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: 640, height: 480 },
+        video: { facingMode: useFacing, width: 640, height: 480 },
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -136,6 +139,16 @@ export default function VoiceChat({
       captureIntervalRef.current = null;
     }
   }, []);
+
+  const flipCamera = useCallback(async () => {
+    const newMode = facingModeRef.current === "environment" ? "user" : "environment";
+    facingModeRef.current = newMode;
+    setFacingMode(newMode);
+    // Stop current stream and restart with new facing mode
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    await startCamera(newMode);
+  }, [startCamera]);
 
   const captureFrame = useCallback((): string | null => {
     const video = videoRef.current;
@@ -396,22 +409,24 @@ export default function VoiceChat({
               size="sm"
               onClick={connect}
               disabled={isConnecting}
-              className="w-44 justify-start"
+              className="w-auto sm:w-44 justify-start"
             >
               <Phone className="h-4 w-4 mr-2 shrink-0" />
-              {isConnecting ? "Connecting..." : "Talk to AdherePod"}
+              <span className="hidden sm:inline">{isConnecting ? "Connecting..." : "Talk to AdherePod"}</span>
+              <span className="sm:hidden">{isConnecting ? "..." : "Talk"}</span>
             </Button>
           ) : (
-            <Button variant="destructive" size="sm" onClick={disconnect} className="w-44 justify-start">
+            <Button variant="destructive" size="sm" onClick={disconnect} className="w-auto sm:w-44 justify-start">
               <PhoneOff className="h-4 w-4 mr-2 shrink-0" />
-              End Call
+              <span className="hidden sm:inline">End Call</span>
+              <span className="sm:hidden">End</span>
             </Button>
           )}
         </div>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col gap-3">
-        {/* Bot + Camera side by side — fixed height to prevent layout shift */}
-        <div className="shrink-0 h-40 flex items-stretch gap-4">
+        {/* Bot + Camera side by side — responsive height */}
+        <div className="shrink-0 h-32 sm:h-40 flex items-stretch gap-4">
           {/* Bot on left */}
           <div className="flex-1 flex items-center justify-center rounded-lg border border-border bg-muted/30">
             <VoiceBot state={botState} />
@@ -421,13 +436,23 @@ export default function VoiceChat({
           <div className="flex-1 flex flex-col rounded-lg overflow-hidden border border-border bg-muted/30">
             {isConnected && cameraActive ? (
               <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="flex-1 min-h-0 w-full object-cover"
-                />
+                <div className="relative flex-1 min-h-0">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Flip camera button */}
+                  <button
+                    onClick={flipCamera}
+                    className="absolute top-1.5 right-1.5 z-10 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                    aria-label="Flip camera"
+                  >
+                    <SwitchCamera className="h-4 w-4" />
+                  </button>
+                </div>
                 <div className="shrink-0 px-2 py-1 flex items-center justify-center gap-1.5 bg-muted/50">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
