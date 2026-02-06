@@ -319,7 +319,7 @@ export default function Home() {
       <section id="team" className="py-24 px-4 sm:px-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <Card className="text-center">
               <CardHeader>
                 <Image
@@ -330,7 +330,7 @@ export default function Home() {
                   className="rounded-full mx-auto mb-2 object-cover"
                 />
                 <CardTitle>Gage Clifton</CardTitle>
-                <p className="text-xs text-muted-foreground font-medium">CEO</p>
+                <p className="text-xs text-muted-foreground font-medium">Head of Product</p>
               </CardHeader>
               <CardContent className="text-muted-foreground text-sm">
                 Visionary founder most passionate about simplifying medical
@@ -349,12 +349,31 @@ export default function Home() {
                   className="rounded-full mx-auto mb-2 object-cover"
                 />
                 <CardTitle>Andrew Furman</CardTitle>
-                <p className="text-xs text-muted-foreground font-medium">CTO</p>
+                <p className="text-xs text-muted-foreground font-medium">Head of Engineering</p>
               </CardHeader>
               <CardContent className="text-muted-foreground text-sm">
                 Experienced agentive AI developer with deep expertise in LLM
                 integrations and voice agents built to serve the healthcare
                 industry.
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <Image
+                  src="/tyler.jpg"
+                  alt="Tyler Kaufman"
+                  width={80}
+                  height={80}
+                  className="rounded-full mx-auto mb-2 object-cover"
+                />
+                <CardTitle>Tyler Kaufman</CardTitle>
+                <p className="text-xs text-muted-foreground font-medium">Head of Partnerships</p>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Strategic partnerships leader with deep experience in
+                performance marketing and revenue growth. Proven track record
+                building trust and driving innovation across healthcare
+                and technology sectors.
               </CardContent>
             </Card>
           </div>
