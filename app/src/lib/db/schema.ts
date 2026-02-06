@@ -17,8 +17,13 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   password: text("password"),
+  role: text("role").default("user").notNull(),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at", { mode: "date", withTimezone: true }),
+  timezone: text("timezone").default("America/New_York"),
+  dailySummaryEnabled: boolean("daily_summary_enabled").default(true).notNull(),
+  dailySummaryTime: text("daily_summary_time").default("08:00"),
+  lastDailySummarySentAt: timestamp("last_daily_summary_sent_at", { mode: "date", withTimezone: true }),
 });
 
 export const accounts = pgTable(
@@ -74,6 +79,9 @@ export const medications = pgTable("medications", {
   startDate: timestamp("start_date", { mode: "date" }).notNull(),
   endDate: timestamp("end_date", { mode: "date" }),
   notes: text("notes"),
+  reminderEnabled: boolean("reminder_enabled").default(false).notNull(),
+  reminderTimes: text("reminder_times"),
+  lastReminderSentAt: timestamp("last_reminder_sent_at", { mode: "date", withTimezone: true }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -134,4 +142,32 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   used: boolean("used").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const emailSends = pgTable("email_sends", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "set null" }),
+  recipientEmail: text("recipient_email").notNull(),
+  messageType: text("message_type").notNull(),
+  subject: text("subject").notNull(),
+  htmlBody: text("html_body").notNull(),
+  sgMessageId: text("sg_message_id"),
+  sentAt: timestamp("sent_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+});
+
+export const emailEvents = pgTable("email_events", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  emailSendId: text("email_send_id")
+    .references(() => emailSends.id, { onDelete: "cascade" }),
+  sgEventId: text("sg_event_id").unique(),
+  event: text("event").notNull(),
+  timestamp: timestamp("timestamp", { mode: "date", withTimezone: true }).notNull(),
+  metadata: text("metadata"),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
 });

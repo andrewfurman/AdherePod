@@ -149,14 +149,14 @@ export default function Home() {
             </div>
           )}
           <div className="max-w-3xl mx-auto mt-12">
-            <Image
-              src="/hero-image.png"
-              alt="Elderly woman talking to AdherePod at her kitchen table"
-              width={960}
-              height={540}
-              className="w-full rounded-2xl shadow-lg"
-              priority
-            />
+            <div className="relative w-full rounded-2xl shadow-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                src="https://www.loom.com/embed/43be972396664485bb522268a46aadb1?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true"
+                frameBorder="0"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
           </div>
         </div>
       </section>

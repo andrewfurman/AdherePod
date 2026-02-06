@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         expiresAt,
       });
 
-      await sendPasswordResetEmail(email, token);
+      await sendPasswordResetEmail(email, token, user.id);
     }
 
     return NextResponse.json({

@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users } from "lucide-react";
+import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail } from "lucide-react";
 import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
@@ -38,6 +38,8 @@ interface Medication {
   startDate: string;
   endDate: string | null;
   notes: string | null;
+  reminderEnabled: boolean;
+  reminderTimes: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +57,8 @@ interface User {
   id: string;
   name: string | null;
   email: string;
+  role: string;
+  timezone: string | null;
   createdAt: string;
   lastLoginAt: string | null;
 }
@@ -96,6 +100,20 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("medications");
   const [editHighlights, setEditHighlights] = useState<Map<string, { oldMed: Medication }>>(new Map());
   const medicationsRef = useRef<Medication[]>([]);
+  const [userSettings, setUserSettings] = useState({
+    timezone: "America/New_York",
+    dailySummaryEnabled: true,
+    dailySummaryTime: "08:00",
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<string>("user");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editUserForm, setEditUserForm] = useState({ name: "", email: "" });
+  const [resetSending, setResetSending] = useState<string | null>(null);
+  const [passwordForm, setPasswordForm] = useState({ current: "", new: "", confirm: "" });
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
   const fetchMedications = useCallback(async () => {
     try {
@@ -162,15 +180,73 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchSettings = useCallback(async () => {
+    setSettingsLoading(true);
+    try {
+      const res = await fetch("/api/user/settings");
+      if (res.ok) {
+        const data = await res.json();
+        setUserSettings(data);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setSettingsLoading(false);
+    }
+  }, []);
+
+  const updateSetting = async (key: string, value: unknown) => {
+    const newSettings = { ...userSettings, [key]: value };
+    setUserSettings(newSettings);
+    try {
+      await fetch("/api/user/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value }),
+      });
+    } catch {
+      // silently fail
+    }
+  };
+
   useEffect(() => {
     fetchMedications();
   }, [fetchMedications]);
+
+  // Fetch current user's role from DB so it works even with stale JWTs
+  useEffect(() => {
+    async function fetchRole() {
+      try {
+        const res = await fetch("/api/user/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.role) setCurrentUserRole(data.role);
+        }
+      } catch { /* silently fail */ }
+    }
+    fetchRole();
+  }, []);
+
+  // Auto-detect and save the user's browser timezone on each visit
+  useEffect(() => {
+    const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (detectedTz) {
+      fetch("/api/user/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timezone: detectedTz }),
+      }).catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === "users") {
       fetchUsers();
     }
-  }, [activeTab, fetchUsers]);
+    if (activeTab === "settings") {
+      fetchSettings();
+    }
+  }, [activeTab, fetchUsers, fetchSettings]);
 
   const openAddForm = () => {
     setForm(emptyForm);
@@ -261,15 +337,28 @@ export default function DashboardPage() {
     });
   };
 
-  const formatDateTime = (dateStr: string | null) => {
+  const tzAbbrev: Record<string, string> = {
+    "America/New_York": "ET",
+    "America/Chicago": "CT",
+    "America/Denver": "MT",
+    "America/Los_Angeles": "PT",
+    "America/Anchorage": "AKT",
+    "Pacific/Honolulu": "HT",
+  };
+
+  const formatDateTime = (dateStr: string | null, timezone?: string | null) => {
     if (!dateStr) return "Never";
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    const tz = timezone || undefined;
+    const formatted = new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
       minute: "2-digit",
+      timeZone: tz,
     });
+    const abbrev = tz ? tzAbbrev[tz] : null;
+    return abbrev ? `${formatted} ${abbrev}` : formatted;
   };
 
   return (
@@ -314,10 +403,16 @@ export default function DashboardPage() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setActiveTab("users")}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Users
+                  <DropdownMenuItem onClick={() => setActiveTab("settings")}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
                   </DropdownMenuItem>
+                  {currentUserRole === "admin" && (
+                    <DropdownMenuItem onClick={() => setActiveTab("users")}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Users
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
@@ -463,6 +558,7 @@ export default function DashboardPage() {
                           highlight={editHighlights.get(med.id)}
                           onEdit={openEditForm}
                           onDelete={handleDelete}
+                          onReminderChange={fetchMedications}
                           formatDate={formatDate}
                         />
                       ))}
@@ -481,7 +577,177 @@ export default function DashboardPage() {
             <ConversationHistory />
           </TabsContent>
 
-          {/* Tab 3: Users — all users table */}
+          {/* Tab 3: Settings — user preferences */}
+          <TabsContent value="settings" className="flex-1 min-h-0 overflow-y-auto">
+            <div className="max-w-lg space-y-6">
+              {/* Reminder Settings */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-6 w-6 text-primary" />
+                    <CardTitle>Reminder Settings</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {settingsLoading ? (
+                    <p className="text-muted-foreground">Loading settings...</p>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="timezone">Timezone</Label>
+                        <select
+                          id="timezone"
+                          value={userSettings.timezone}
+                          onChange={(e) => updateSetting("timezone", e.target.value)}
+                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <option value="America/New_York">Eastern (ET)</option>
+                          <option value="America/Chicago">Central (CT)</option>
+                          <option value="America/Denver">Mountain (MT)</option>
+                          <option value="America/Los_Angeles">Pacific (PT)</option>
+                          <option value="America/Anchorage">Alaska (AKT)</option>
+                          <option value="Pacific/Honolulu">Hawaii (HT)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="dailySummary">Daily Medication Summary Email</Label>
+                          <button
+                            onClick={() => updateSetting("dailySummaryEnabled", !userSettings.dailySummaryEnabled)}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                              userSettings.dailySummaryEnabled ? "bg-primary" : "bg-input"
+                            }`}
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                                userSettings.dailySummaryEnabled ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Receive a daily email listing all your active medications and their schedules.
+                        </p>
+                      </div>
+
+                      {userSettings.dailySummaryEnabled && (
+                        <div className="space-y-2">
+                          <Label htmlFor="summaryTime">Summary Time</Label>
+                          <Input
+                            id="summaryTime"
+                            type="time"
+                            value={userSettings.dailySummaryTime}
+                            onChange={(e) => updateSetting("dailySummaryTime", e.target.value)}
+                            className="w-32"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Time in your local timezone when you&apos;ll receive the summary.
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Change Password */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-6 w-6 text-primary" />
+                    <CardTitle>Change Password</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      setPasswordError("");
+                      setPasswordSuccess("");
+
+                      if (passwordForm.new !== passwordForm.confirm) {
+                        setPasswordError("New passwords do not match");
+                        return;
+                      }
+                      if (passwordForm.new.length < 8) {
+                        setPasswordError("New password must be at least 8 characters");
+                        return;
+                      }
+
+                      setPasswordSaving(true);
+                      try {
+                        const res = await fetch("/api/user/change-password", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            currentPassword: passwordForm.current,
+                            newPassword: passwordForm.new,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          setPasswordError(data.error || "Failed to change password");
+                        } else {
+                          setPasswordSuccess("Password updated successfully");
+                          setPasswordForm({ current: "", new: "", confirm: "" });
+                        }
+                      } catch {
+                        setPasswordError("Something went wrong");
+                      } finally {
+                        setPasswordSaving(false);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    {passwordError && (
+                      <p className="text-sm text-destructive">{passwordError}</p>
+                    )}
+                    {passwordSuccess && (
+                      <p className="text-sm text-green-600">{passwordSuccess}</p>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={passwordForm.current}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={passwordForm.new}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                        required
+                        minLength={8}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={passwordForm.confirm}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                        required
+                        minLength={8}
+                      />
+                    </div>
+                    <Button type="submit" disabled={passwordSaving}>
+                      {passwordSaving ? "Updating..." : "Update Password"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Tab 4: Users — all users table */}
           <TabsContent value="users" className="flex-1 min-h-0 overflow-y-auto">
             <Card>
               <CardHeader>
@@ -499,25 +765,149 @@ export default function DashboardPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>First Name</TableHead>
-                        <TableHead>Last Name</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Last Login</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {allUsers.map((user) => {
-                        const nameParts = user.name?.trim().split(/\s+/) || [];
-                        const firstName = nameParts[0] || "-";
-                        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "-";
+                      {allUsers.map((u) => {
+                        const isEditing = editingUserId === u.id;
                         return (
-                          <TableRow key={user.id}>
-                            <TableCell>{firstName}</TableCell>
-                            <TableCell>{lastName}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>{formatDateTime(user.createdAt)}</TableCell>
-                            <TableCell>{formatDateTime(user.lastLoginAt)}</TableCell>
+                          <TableRow key={u.id}>
+                            <TableCell>
+                              {isEditing ? (
+                                <Input
+                                  value={editUserForm.name}
+                                  onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })}
+                                  className="h-7 text-sm w-40"
+                                />
+                              ) : (
+                                u.name || "-"
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {isEditing ? (
+                                <Input
+                                  value={editUserForm.email}
+                                  onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
+                                  className="h-7 text-sm w-48"
+                                />
+                              ) : (
+                                u.email
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {currentUserRole === "admin" && u.id !== session?.user?.id ? (
+                                <select
+                                  value={u.role}
+                                  onChange={async (e) => {
+                                    const newRole = e.target.value;
+                                    try {
+                                      const res = await fetch("/api/users", {
+                                        method: "PUT",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ userId: u.id, role: newRole }),
+                                      });
+                                      if (res.ok) fetchUsers();
+                                    } catch { /* silently fail */ }
+                                  }}
+                                  className="text-xs rounded border border-input bg-transparent px-2 py-1"
+                                >
+                                  <option value="user">user</option>
+                                  <option value="admin">admin</option>
+                                </select>
+                              ) : (
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
+                                  {u.role}
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm">{formatDateTime(u.createdAt, u.timezone)}</TableCell>
+                            <TableCell className="text-sm">{formatDateTime(u.lastLoginAt, u.timezone)}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                {isEditing ? (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      title="Save"
+                                      onClick={async () => {
+                                        try {
+                                          const res = await fetch("/api/users", {
+                                            method: "PUT",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({
+                                              userId: u.id,
+                                              name: editUserForm.name,
+                                              email: editUserForm.email,
+                                            }),
+                                          });
+                                          if (res.ok) {
+                                            setEditingUserId(null);
+                                            fetchUsers();
+                                          }
+                                        } catch { /* silently fail */ }
+                                      }}
+                                    >
+                                      <Check className="h-3.5 w-3.5 text-green-600" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      title="Cancel"
+                                      onClick={() => setEditingUserId(null)}
+                                    >
+                                      <X className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      title="Edit user"
+                                      onClick={() => {
+                                        setEditingUserId(u.id);
+                                        setEditUserForm({ name: u.name || "", email: u.email });
+                                      }}
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      title="Send password reset email"
+                                      disabled={resetSending === u.id}
+                                      onClick={async () => {
+                                        setResetSending(u.id);
+                                        try {
+                                          const res = await fetch("/api/users", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ userId: u.id, action: "reset-password" }),
+                                          });
+                                          if (res.ok) {
+                                            alert(`Password reset email sent to ${u.email}`);
+                                          }
+                                        } catch { /* silently fail */ }
+                                        setResetSending(null);
+                                      }}
+                                    >
+                                      <Mail className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
                           </TableRow>
                         );
                       })}

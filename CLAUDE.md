@@ -8,7 +8,8 @@ Medication adherence app for elderly and low-literacy users. Voice-native, devic
 - **Auth:** NextAuth v5 (beta) with credentials provider, JWT sessions
 - **Database:** PostgreSQL via Neon (serverless), Drizzle ORM
 - **UI:** Radix UI, Tailwind CSS 4, Lucide icons
-- **Email:** SendGrid (password reset flows)
+- **Email:** SendGrid (password reset flows, medication reminders, daily summaries)
+- **Cron:** Vercel Cron Jobs (every 15 min — medication reminders + daily summary)
 - **Voice:** OpenAI Agents SDK (`@openai/agents`) with `RealtimeAgent` / `RealtimeSession`, model `gpt-4o-mini-realtime-preview`
 - **Image Generation:** Google Gemini Imagen 4.0 API (hero image)
 - **Hosting:** Vercel (deploy via `vercel --prod` from repo root)
@@ -25,10 +26,19 @@ app/
       (auth)/         # Auth pages (sign-in, sign-up, forgot/reset password)
       api/
         auth/         # NextAuth endpoints
-        medications/  # CRUD for medications (GET, POST, PUT, DELETE)
+        medications/  # CRUD for medications (GET, POST, PUT, DELETE) + reminder fields
+        user/
+          settings/   # User settings GET/PUT (timezone, daily summary prefs)
+        cron/
+          send-reminders/  # Vercel Cron — sends per-medication email reminders
+          daily-summary/   # Vercel Cron — sends daily medication summary emails
         sign-up/      # User registration
         forgot-password/
         reset-password/
+        users/        # Admin-only user list (GET) + role management (PUT)
+        emails/       # Email history API (GET with optional ?id=)
+        webhooks/
+          sendgrid/   # SendGrid Event Webhook handler (POST)
         voice/
           session/          # Generates ephemeral OpenAI realtime API keys
           conversations/    # GET (list/detail) and POST (create) conversations
@@ -36,16 +46,18 @@ app/
       dashboard/      # Protected dashboard — medications list + voice chat side by side
     components/
       ui/             # Radix-based UI components (button, card, input, badge, label)
+      medication-card.tsx  # Medication card with reminder toggle UI
+      conversation-history.tsx  # Unified history timeline (voice conversations + emails)
       voice-chat.tsx  # Voice chat component with RealtimeAgent, transcript display
     lib/
       auth.ts         # NextAuth config with DrizzleAdapter
       db/
         index.ts      # Neon/Drizzle database connection
-        schema.ts     # Database schema (users, accounts, sessions, medications, conversations, conversationMessages)
+        schema.ts     # Database schema (users, accounts, sessions, medications, conversations, conversationMessages, emailSends, emailEvents)
       voice/
-        tools.ts      # Voice agent tools (listMedications, addMedication, editMedication, deleteMedication)
+        tools.ts      # Voice agent tools (listMedications, addMedication, editMedication, deleteMedication, toggleReminder, setReminderTimes, checkCamera)
       tokens.ts       # Token generation/hashing utils
-      email.ts        # SendGrid email integration
+      email.ts        # SendGrid email integration (logs sends to emailSends table)
   public/
     hero-image.png    # Homepage hero image (generated via Imagen 4.0)
     gage-clifton.jpg  # Team photo
@@ -87,11 +99,13 @@ Schema is in `app/src/lib/db/schema.ts`. After modifying, run `npx drizzle-kit p
 
 ### Tables
 
-- **users** — NextAuth user accounts
+- **users** — NextAuth user accounts (+ role, timezone, dailySummaryEnabled, dailySummaryTime, lastDailySummarySentAt)
 - **accounts**, **sessions**, **verificationTokens** — NextAuth internals
-- **medications** — User medications (name, timesPerDay, timingDescription, startDate, endDate, notes)
+- **medications** — User medications (name, timesPerDay, timingDescription, startDate, endDate, notes, reminderEnabled, reminderTimes, lastReminderSentAt)
 - **conversations** — Voice chat conversation records (userId, status, startedAt, endedAt)
 - **conversationMessages** — Individual messages in a conversation (role, content, toolName, toolArgs)
+- **emailSends** — Logged email sends (userId, recipientEmail, messageType, subject, htmlBody, sgMessageId, sentAt)
+- **emailEvents** — SendGrid webhook events (emailSendId, sgEventId, event, timestamp, metadata)
 
 ## Voice Chat Architecture
 
@@ -99,10 +113,21 @@ The voice assistant uses OpenAI's Agents SDK with WebRTC:
 
 1. **Client** calls `/api/voice/session` to get an ephemeral OpenAI API key
 2. **Client** creates a `RealtimeSession` with a `RealtimeAgent` configured with medication tools
-3. **Agent** can call tools (`list_medications`, `add_medication`, `edit_medication`, `delete_medication`) which hit `/api/medications`
+3. **Agent** can call tools (`list_medications`, `add_medication`, `edit_medication`, `delete_medication`, `toggle_reminder`, `set_reminder_times`, `check_camera`) which hit `/api/medications`
 4. **Transcript** events are captured via `transport_event` (user speech) and `agent_end` (agent response)
 5. **Messages** are saved to the database via `/api/voice/conversations/messages`
 6. **Medications list** auto-refreshes via `agent_tool_end` callback
+
+## Email Reminders
+
+Per-medication email reminders and daily summary emails powered by SendGrid + Vercel Cron:
+
+- **Per-medication reminders:** Toggle on/off per medication with customizable HH:mm times. Cron checks every 15 min.
+- **Daily summary:** Configurable per-user (timezone, time, enable/disable). Lists all active medications.
+- **Cron endpoints:** `/api/cron/send-reminders` and `/api/cron/daily-summary` — authenticated via `CRON_SECRET` Bearer token.
+- **Voice control:** Users can say "remind me to take X at 8am" or "turn off reminders for X" via voice tools.
+- **UI:** Bell icon toggle on medication cards, Settings tab for timezone/daily summary preferences.
+- **Config:** `app/vercel.json` defines cron schedules.
 
 ## Testing
 
@@ -117,7 +142,7 @@ npx playwright test
 TEST_BASE_URL=https://adherepod.com npx playwright test
 ```
 
-### Current Tests (6)
+### Current Tests (12)
 - Homepage has Sign In button and hero image
 - Sign-in page loads with email/password fields
 - Sign-in with valid credentials redirects to dashboard (checks medications list + Talk to AdherePod button)
@@ -130,11 +155,21 @@ TEST_BASE_URL=https://adherepod.com npx playwright test
 - Credentials-based (email/password) via NextAuth v5
 - Middleware (`src/middleware.ts`) protects routes and redirects
 - Session user ID available via `auth()` in API routes
+- **User roles:** `role` column on users table (`"user"` or `"admin"`). Exposed in JWT + session. Admin-only features: Users tab, `/api/users` GET/PUT.
+- **Admin seeded:** `aifurman@gmail.com` is the initial admin account.
+
+## Email History & SendGrid Webhooks
+
+- Every email sent (password reset, medication reminder, daily summary) is logged to the `emailSends` table with the full HTML body and SendGrid message ID.
+- SendGrid Event Webhooks POST to `/api/webhooks/sendgrid` — events (delivered, open, click, bounce, etc.) are stored in `emailEvents`, deduped on `sgEventId`.
+- `/api/emails` returns email history (admin sees all users, regular users see only their own). Supports `?id=xxx` for single email detail with events.
+- The History tab shows a unified chronological timeline of both voice conversations and emails. Clicking an email shows the full HTML body rendered in an iframe and a delivery status timeline.
+- **SendGrid setup required:** In SendGrid Dashboard, configure Event Webhook URL to `https://adherepod.com/api/webhooks/sendgrid`. Store verification key as `SENDGRID_WEBHOOK_KEY` env var.
 
 ## Homepage
 
 - Sticky nav with smooth scrolling, logo links to top
-- Hero section with Imagen 4.0 generated image
+- Hero section with embedded Loom demo video
 - Voice-first callout with example phrases
 - Features grid (6 cards)
 - How It Works: Talk, Discuss, Get Notified (3 steps)
@@ -153,6 +188,8 @@ Set in `.env.local` for local dev, and in Vercel project settings for production
 - `SENDGRID_FROM_EMAIL` — From address for emails
 - `NEXT_PUBLIC_APP_URL` — Public-facing app URL
 - `OPENAI_API_KEY` — OpenAI API key (used for realtime voice sessions)
+- `CRON_SECRET` — Secret for authenticating Vercel Cron requests
+- `SENDGRID_WEBHOOK_KEY` — SendGrid Event Webhook verification key (for future signature verification)
 - `TEST_USER_EMAIL` — Test user email for Playwright tests
 - `TEST_USER_PASSWORD` — Test user password for Playwright tests
 

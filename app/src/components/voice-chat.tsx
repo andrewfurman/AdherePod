@@ -10,6 +10,8 @@ import {
   addMedication,
   editMedication,
   deleteMedication,
+  toggleReminder,
+  setReminderTimes,
   checkCamera,
 } from "@/lib/voice/tools";
 import VoiceBot from "@/components/voice-bot";
@@ -62,8 +64,15 @@ Updating medications from prescriptions:
 Drug interaction and health questions:
 - Give clear, practical advice in plain language
 - Mention common things to watch out for
-- Remind them you're an assistant, not a replacement for their doctor`,
-  tools: [listMedications, addMedication, editMedication, deleteMedication, checkCamera],
+- Remind them you're an assistant, not a replacement for their doctor
+
+Email reminders:
+- You can turn on/off email reminders for any medication using toggle_reminder
+- You can set specific reminder times using set_reminder_times (use HH:mm format like "08:00")
+- When a user says something like "remind me to take X at 8am", first list their meds to find the ID, then call toggle_reminder with enabled=true and the requested times
+- If they say "turn off reminders for X", call toggle_reminder with enabled=false
+- Default reminder times: 1x/day→08:00, 2x/day→08:00+20:00, 3x/day→08:00+14:00+20:00`,
+  tools: [listMedications, addMedication, editMedication, deleteMedication, toggleReminder, setReminderTimes, checkCamera],
 });
 
 const AUTO_CAPTURE_INTERVAL_MS = 5_000;

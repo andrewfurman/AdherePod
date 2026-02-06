@@ -75,6 +75,62 @@ export const deleteMedication = tool({
   },
 });
 
+export const toggleReminder = tool({
+  name: "toggle_reminder",
+  description:
+    "Turn email reminders on or off for a specific medication. Optionally set reminder times.",
+  parameters: z.object({
+    id: z.string().describe("The medication ID"),
+    enabled: z.boolean().describe("Whether to enable or disable reminders"),
+    reminderTimes: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Array of HH:mm time strings for when to send reminders, e.g. ["08:00","20:00"]'
+      ),
+  }),
+  execute: async (params) => {
+    const body: Record<string, unknown> = {
+      id: params.id,
+      reminderEnabled: params.enabled,
+    };
+    if (params.reminderTimes) {
+      body.reminderTimes = JSON.stringify(params.reminderTimes);
+    }
+    const res = await fetch("/api/medications", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.json();
+  },
+});
+
+export const setReminderTimes = tool({
+  name: "set_reminder_times",
+  description:
+    "Set the specific times for email reminders on a medication (must already have reminders enabled)",
+  parameters: z.object({
+    id: z.string().describe("The medication ID"),
+    reminderTimes: z
+      .array(z.string())
+      .describe(
+        'Array of HH:mm time strings, e.g. ["08:00","14:00","20:00"]'
+      ),
+  }),
+  execute: async (params) => {
+    const res = await fetch("/api/medications", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: params.id,
+        reminderTimes: JSON.stringify(params.reminderTimes),
+      }),
+    });
+    return res.json();
+  },
+});
+
 export const checkCamera = tool({
   name: "check_camera",
   description:

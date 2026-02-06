@@ -74,7 +74,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, name, timesPerDay, timingDescription, startDate, endDate, notes } =
+    const { id, name, timesPerDay, timingDescription, startDate, endDate, notes, reminderEnabled, reminderTimes } =
       body;
 
     if (!id) {
@@ -107,6 +107,8 @@ export async function PUT(req: Request) {
         startDate: startDate ? new Date(startDate) : existing.startDate,
         endDate: endDate !== undefined ? (endDate ? new Date(endDate) : null) : existing.endDate,
         notes: notes !== undefined ? notes : existing.notes,
+        reminderEnabled: reminderEnabled !== undefined ? reminderEnabled : existing.reminderEnabled,
+        reminderTimes: reminderTimes !== undefined ? (typeof reminderTimes === "string" ? reminderTimes : JSON.stringify(reminderTimes)) : existing.reminderTimes,
         updatedAt: new Date(),
       })
       .where(
