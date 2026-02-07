@@ -317,9 +317,14 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
               >
                 <div className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <p className={`text-sm font-medium truncate ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
-                    {email.subject}
-                  </p>
+                  <div className="min-w-0">
+                    <p className={`text-sm font-medium truncate ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
+                      {email.subject}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      To: {email.recipientEmail}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground ml-5.5">
                   <span className="flex items-center gap-1">
