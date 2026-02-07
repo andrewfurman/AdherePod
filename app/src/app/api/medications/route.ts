@@ -3,22 +3,28 @@ import { eq, and, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { medications } from "@/lib/db/schema";
+import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { userId } = await getEffectiveUserId(session, req.url);
+
     const userMedications = await db
       .select()
       .from(medications)
-      .where(eq(medications.userId, session.user.id))
+      .where(eq(medications.userId, userId))
       .orderBy(desc(medications.createdAt));
 
     return NextResponse.json(userMedications);
-  } catch {
+  } catch (err) {
+    if (err instanceof ImpersonationError) {
+      return NextResponse.json({ error: err.message }, { status: err.httpStatus });
+    }
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

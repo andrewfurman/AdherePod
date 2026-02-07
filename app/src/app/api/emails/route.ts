@@ -3,6 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { emailSends, emailEvents, users } from "@/lib/db/schema";
+import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,6 +11,8 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { userId: effectiveUserId, isImpersonating } = await getEffectiveUserId(session, req.url);
 
     const id = req.nextUrl.searchParams.get("id");
 
@@ -25,13 +28,20 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
       }
 
-      // Check access: admin can see all, regular user only their own
-      const caller = await db.query.users.findFirst({
-        where: eq(users.id, session.user.id),
-        columns: { role: true },
-      });
-      if (caller?.role !== "admin" && send.userId !== session.user.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      // When impersonating, only show target user's emails
+      if (isImpersonating) {
+        if (send.userId !== effectiveUserId) {
+          return NextResponse.json({ error: "Not found" }, { status: 404 });
+        }
+      } else {
+        // Normal access: admin can see all, regular user only their own
+        const caller = await db.query.users.findFirst({
+          where: eq(users.id, session.user.id),
+          columns: { role: true },
+        });
+        if (caller?.role !== "admin" && send.userId !== session.user.id) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
       }
 
       const events = await db
@@ -41,6 +51,38 @@ export async function GET(req: NextRequest) {
         .orderBy(desc(emailEvents.timestamp));
 
       return NextResponse.json({ ...send, events });
+    }
+
+    // When impersonating, always scope to target user
+    if (isImpersonating) {
+      const sends = await db
+        .select({
+          id: emailSends.id,
+          userId: emailSends.userId,
+          recipientEmail: emailSends.recipientEmail,
+          messageType: emailSends.messageType,
+          subject: emailSends.subject,
+          sgMessageId: emailSends.sgMessageId,
+          sentAt: emailSends.sentAt,
+        })
+        .from(emailSends)
+        .where(eq(emailSends.userId, effectiveUserId))
+        .orderBy(desc(emailSends.sentAt))
+        .limit(100);
+
+      const sendsWithStatus = await Promise.all(
+        sends.map(async (send) => {
+          const [latestEvent] = await db
+            .select({ event: emailEvents.event })
+            .from(emailEvents)
+            .where(eq(emailEvents.emailSendId, send.id))
+            .orderBy(desc(emailEvents.timestamp))
+            .limit(1);
+          return { ...send, latestEvent: latestEvent?.event || null };
+        })
+      );
+
+      return NextResponse.json(sendsWithStatus);
     }
 
     // List emails: admin sees all, regular user sees only theirs
@@ -94,7 +136,10 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(sendsWithStatus);
-  } catch {
+  } catch (err) {
+    if (err instanceof ImpersonationError) {
+      return NextResponse.json({ error: err.message }, { status: err.httpStatus });
+    }
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

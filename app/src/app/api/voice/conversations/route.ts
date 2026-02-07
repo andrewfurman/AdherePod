@@ -3,6 +3,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { conversations, conversationMessages, imageCaptures } from "@/lib/db/schema";
+import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
 
 export async function GET(req: Request) {
   try {
@@ -10,6 +11,8 @@ export async function GET(req: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { userId } = await getEffectiveUserId(session, req.url);
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -20,7 +23,7 @@ export async function GET(req: Request) {
         .from(conversations)
         .where(eq(conversations.id, id));
 
-      if (!conversation || conversation.userId !== session.user.id) {
+      if (!conversation || conversation.userId !== userId) {
         return NextResponse.json(
           { error: "Conversation not found" },
           { status: 404 }
@@ -45,11 +48,14 @@ export async function GET(req: Request) {
     const userConversations = await db
       .select()
       .from(conversations)
-      .where(eq(conversations.userId, session.user.id))
+      .where(eq(conversations.userId, userId))
       .orderBy(desc(conversations.startedAt));
 
     return NextResponse.json(userConversations);
-  } catch {
+  } catch (err) {
+    if (err instanceof ImpersonationError) {
+      return NextResponse.json({ error: err.message }, { status: err.httpStatus });
+    }
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

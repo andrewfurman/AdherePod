@@ -152,7 +152,11 @@ function mergeTimeline(detail: ConversationDetail): TimelineItem[] {
   return items;
 }
 
-export default function ConversationHistory() {
+interface ConversationHistoryProps {
+  viewAsUserId?: string;
+}
+
+export default function ConversationHistory({ viewAsUserId }: ConversationHistoryProps = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [emails, setEmails] = useState<EmailSend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,11 +167,13 @@ export default function ConversationHistory() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
 
+  const viewAsParam = viewAsUserId ? `?viewAs=${viewAsUserId}` : "";
+
   const fetchData = useCallback(async () => {
     try {
       const [convRes, emailRes] = await Promise.all([
-        fetch("/api/voice/conversations"),
-        fetch("/api/emails"),
+        fetch(`/api/voice/conversations${viewAsParam}`),
+        fetch(`/api/emails${viewAsParam}`),
       ]);
       if (convRes.ok) setConversations(await convRes.json());
       if (emailRes.ok) setEmails(await emailRes.json());
@@ -176,7 +182,7 @@ export default function ConversationHistory() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [viewAsParam]);
 
   useEffect(() => {
     fetchData();
@@ -211,11 +217,12 @@ export default function ConversationHistory() {
     setShowDetail(true);
 
     try {
+      const extra = viewAsUserId ? `&viewAs=${viewAsUserId}` : "";
       if (type === "conversation") {
-        const res = await fetch(`/api/voice/conversations?id=${id}`);
+        const res = await fetch(`/api/voice/conversations?id=${id}${extra}`);
         if (res.ok) setConvDetail(await res.json());
       } else {
-        const res = await fetch(`/api/emails?id=${id}`);
+        const res = await fetch(`/api/emails?id=${id}${extra}`);
         if (res.ok) setEmailDetail(await res.json());
       }
     } catch {
@@ -356,35 +363,37 @@ export default function ConversationHistory() {
               <h2 className="text-lg font-semibold">
                 {convDetail.title || "Untitled conversation"}
               </h2>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                    title="Delete conversation"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete conversation</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete this conversation and all its messages and images. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteConversation(convDetail.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      autoFocus
+              {!viewAsUserId && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      title="Delete conversation"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete conversation</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete this conversation and all its messages and images. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteConversation(convDetail.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        autoFocus
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
               <span>{formatDate(convDetail.startedAt)}</span>

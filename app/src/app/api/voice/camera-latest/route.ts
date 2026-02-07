@@ -3,13 +3,16 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { imageCaptures } from "@/lib/db/schema";
+import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { userId } = await getEffectiveUserId(session, req.url);
 
     const [latest] = await db
       .select({
@@ -18,7 +21,7 @@ export async function GET() {
         capturedAt: imageCaptures.createdAt,
       })
       .from(imageCaptures)
-      .where(eq(imageCaptures.userId, session.user.id))
+      .where(eq(imageCaptures.userId, userId))
       .orderBy(desc(imageCaptures.createdAt))
       .limit(1);
 
@@ -32,6 +35,9 @@ export async function GET() {
 
     return NextResponse.json(latest);
   } catch (err) {
+    if (err instanceof ImpersonationError) {
+      return NextResponse.json({ error: err.message }, { status: err.httpStatus });
+    }
     const message = err instanceof Error ? err.message : String(err);
     console.error("Camera latest error:", message);
     return NextResponse.json(

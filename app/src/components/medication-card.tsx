@@ -27,6 +27,7 @@ interface MedicationCardProps {
   onDelete: (id: string) => void;
   onReminderChange?: () => void;
   formatDate: (dateStr: string) => string;
+  readOnly?: boolean;
 }
 
 function ChangedField({
@@ -64,6 +65,7 @@ export default function MedicationCard({
   onDelete,
   onReminderChange,
   formatDate,
+  readOnly,
 }: MedicationCardProps) {
   const [reminderSaving, setReminderSaving] = useState(false);
 
@@ -182,14 +184,16 @@ export default function MedicationCard({
           </p>
         )}
       </div>
-      <div className="flex items-center gap-1 ml-4 shrink-0">
-        <Button variant="ghost" size="sm" onClick={() => onEdit(med)}>
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(med.id)}>
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex items-center gap-1 ml-4 shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => onEdit(med)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(med.id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      )}
       {/* Reminder toggle row — always visible */}
       <div className="w-full mt-3 pt-3 border-t border-border">
         <div className="flex items-center justify-between gap-3">
@@ -203,7 +207,7 @@ export default function MedicationCard({
           </div>
           <button
             onClick={handleToggleReminder}
-            disabled={reminderSaving}
+            disabled={reminderSaving || readOnly}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 ${
               med.reminderEnabled ? "bg-primary" : "bg-input"
             }`}
@@ -228,6 +232,7 @@ export default function MedicationCard({
                   type="time"
                   value={time}
                   onChange={(e) => handleUpdateTime(i, e.target.value)}
+                  disabled={readOnly}
                   className="w-28 h-7 text-xs"
                 />
               ))}

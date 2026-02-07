@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail } from "lucide-react";
+import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye } from "lucide-react";
 import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
@@ -115,13 +115,35 @@ export default function DashboardPage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
 
+  // Impersonation state
+  const [viewAsUserId, setViewAsUserId] = useState<string | null>(null);
+  const [viewAsUserInfo, setViewAsUserInfo] = useState<{ name: string | null; email: string } | null>(null);
+  const isImpersonating = !!viewAsUserId;
+
+  // Read viewAs from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const viewAs = params.get("viewAs");
+    if (viewAs) {
+      setViewAsUserId(viewAs);
+    }
+  }, []);
+
+  // Helper to append viewAs to API URLs
+  const apiUrl = useCallback((base: string, extraParams?: Record<string, string>) => {
+    const params = new URLSearchParams(extraParams);
+    if (viewAsUserId) params.set("viewAs", viewAsUserId);
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  }, [viewAsUserId]);
+
   const fetchMedications = useCallback(async () => {
     try {
       const snapshot = new Map(
         medicationsRef.current.map((m) => [m.id, m])
       );
 
-      const res = await fetch("/api/medications");
+      const res = await fetch(apiUrl("/api/medications"));
       if (res.ok) {
         const data: Medication[] = await res.json();
 
@@ -163,7 +185,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiUrl]);
 
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -183,7 +205,7 @@ export default function DashboardPage() {
   const fetchSettings = useCallback(async () => {
     setSettingsLoading(true);
     try {
-      const res = await fetch("/api/user/settings");
+      const res = await fetch(apiUrl("/api/user/settings"));
       if (res.ok) {
         const data = await res.json();
         setUserSettings(data);
@@ -193,9 +215,10 @@ export default function DashboardPage() {
     } finally {
       setSettingsLoading(false);
     }
-  }, []);
+  }, [apiUrl]);
 
   const updateSetting = async (key: string, value: unknown) => {
+    if (isImpersonating) return; // Block writes during impersonation
     const newSettings = { ...userSettings, [key]: value };
     setUserSettings(newSettings);
     try {
@@ -217,6 +240,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchRole() {
       try {
+        // Always fetch own role (no viewAs)
         const res = await fetch("/api/user/settings");
         if (res.ok) {
           const data = await res.json();
@@ -227,8 +251,27 @@ export default function DashboardPage() {
     fetchRole();
   }, []);
 
-  // Auto-detect and save the user's browser timezone on each visit
+  // When impersonating, fetch target user info for the banner
   useEffect(() => {
+    if (!viewAsUserId) return;
+    async function fetchViewAsInfo() {
+      try {
+        const res = await fetch("/api/users");
+        if (res.ok) {
+          const users: User[] = await res.json();
+          const target = users.find((u) => u.id === viewAsUserId);
+          if (target) {
+            setViewAsUserInfo({ name: target.name, email: target.email });
+          }
+        }
+      } catch { /* silently fail */ }
+    }
+    fetchViewAsInfo();
+  }, [viewAsUserId]);
+
+  // Auto-detect and save the user's browser timezone on each visit (skip when impersonating)
+  useEffect(() => {
+    if (isImpersonating) return;
     const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (detectedTz) {
       fetch("/api/user/settings", {
@@ -237,16 +280,16 @@ export default function DashboardPage() {
         body: JSON.stringify({ timezone: detectedTz }),
       }).catch(() => {});
     }
-  }, []);
+  }, [isImpersonating]);
 
   useEffect(() => {
-    if (activeTab === "users") {
+    if (activeTab === "users" && !isImpersonating) {
       fetchUsers();
     }
     if (activeTab === "settings") {
       fetchSettings();
     }
-  }, [activeTab, fetchUsers, fetchSettings]);
+  }, [activeTab, fetchUsers, fetchSettings, isImpersonating]);
 
   const openAddForm = () => {
     setForm(emptyForm);
@@ -361,6 +404,22 @@ export default function DashboardPage() {
     return abbrev ? `${formatted} ${abbrev}` : formatted;
   };
 
+  const startImpersonating = (userId: string) => {
+    setViewAsUserId(userId);
+    setActiveTab("medications");
+    window.history.pushState({}, "", `/my-medications?viewAs=${userId}`);
+  };
+
+  const exitImpersonation = () => {
+    setViewAsUserId(null);
+    setViewAsUserInfo(null);
+    window.history.pushState({}, "", "/my-medications");
+  };
+
+  const viewAsUserLabel = viewAsUserInfo
+    ? viewAsUserInfo.name || viewAsUserInfo.email
+    : viewAsUserId;
+
   return (
     <div className="min-h-screen flex flex-col overflow-hidden bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
@@ -403,14 +462,22 @@ export default function DashboardPage() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setActiveTab("settings")}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </DropdownMenuItem>
-                  {currentUserRole === "admin" && (
+                  {!isImpersonating && (
+                    <DropdownMenuItem onClick={() => setActiveTab("settings")}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                  )}
+                  {currentUserRole === "admin" && !isImpersonating && (
                     <DropdownMenuItem onClick={() => setActiveTab("users")}>
                       <Users className="h-4 w-4 mr-2" />
                       Users
+                    </DropdownMenuItem>
+                  )}
+                  {isImpersonating && (
+                    <DropdownMenuItem onClick={exitImpersonation}>
+                      <X className="h-4 w-4 mr-2" />
+                      Exit View As
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
@@ -423,20 +490,47 @@ export default function DashboardPage() {
           </div>
         </nav>
 
+        {/* Impersonation banner */}
+        {isImpersonating && (
+          <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 shrink-0">
+            <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-800">
+                <Eye className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Viewing as: {viewAsUserLabel} (read-only)
+                </span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs border-amber-400 text-amber-800 hover:bg-amber-200"
+                onClick={exitImpersonation}
+              >
+                <X className="h-3 w-3 mr-1" />
+                Exit
+              </Button>
+            </div>
+          </div>
+        )}
+
         <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 md:px-6 pt-4 pb-6 md:pb-10 flex flex-col">
 
           {/* Tab 1: Dashboard — medications + voice chat */}
           <TabsContent value="medications" className="flex-1 min-h-0">
-            <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`h-full grid grid-cols-1 ${isImpersonating ? "" : "lg:grid-cols-2"} gap-6`}>
               {/* Left column — Medications */}
               <Card className="flex flex-col min-h-0">
                 <CardHeader className="shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Pill className="h-6 w-6 text-primary" />
-                      <CardTitle>My Medications</CardTitle>
+                      <CardTitle>
+                        {isImpersonating
+                          ? `${viewAsUserLabel}'s Medications`
+                          : "My Medications"}
+                      </CardTitle>
                     </div>
-                    {!showForm && (
+                    {!showForm && !isImpersonating && (
                       <Button size="sm" onClick={openAddForm} className="w-44 justify-start">
                         <Plus className="h-4 w-4 mr-2 shrink-0" />
                         Add Medication
@@ -446,7 +540,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex-1 min-h-0 overflow-y-auto">
                   {/* Add/Edit Form */}
-                  {showForm && (
+                  {showForm && !isImpersonating && (
                     <form onSubmit={handleSubmit} className="mb-6 p-4 border border-border rounded-lg space-y-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold">
@@ -546,7 +640,9 @@ export default function DashboardPage() {
                     <div className="text-center py-8">
                       <Pill className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                       <p className="text-muted-foreground">
-                        No medications yet. Click &quot;Add Medication&quot; to get started.
+                        {isImpersonating
+                          ? "This user has no medications."
+                          : 'No medications yet. Click "Add Medication" to get started.'}
                       </p>
                     </div>
                   ) : (
@@ -560,6 +656,7 @@ export default function DashboardPage() {
                           onDelete={handleDelete}
                           onReminderChange={fetchMedications}
                           formatDate={formatDate}
+                          readOnly={isImpersonating}
                         />
                       ))}
                     </div>
@@ -567,356 +664,371 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* Right column — Voice Chat */}
-              <VoiceChat onMedicationsChanged={fetchMedications} />
+              {/* Right column — Voice Chat (hidden when impersonating) */}
+              {!isImpersonating && (
+                <VoiceChat onMedicationsChanged={fetchMedications} />
+              )}
             </div>
           </TabsContent>
 
           {/* Tab 2: History — conversation timeline */}
           <TabsContent value="history" className="flex-1 min-h-0 overflow-y-auto">
-            <ConversationHistory />
+            <ConversationHistory viewAsUserId={viewAsUserId || undefined} />
           </TabsContent>
 
-          {/* Tab 3: Settings — user preferences */}
-          <TabsContent value="settings" className="flex-1 min-h-0 overflow-y-auto">
-            <div className="max-w-lg space-y-6">
-              {/* Reminder Settings */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <Settings className="h-6 w-6 text-primary" />
-                    <CardTitle>Reminder Settings</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {settingsLoading ? (
-                    <p className="text-muted-foreground">Loading settings...</p>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="timezone">Timezone</Label>
-                        <select
-                          id="timezone"
-                          value={userSettings.timezone}
-                          onChange={(e) => updateSetting("timezone", e.target.value)}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                          <option value="America/New_York">Eastern (ET)</option>
-                          <option value="America/Chicago">Central (CT)</option>
-                          <option value="America/Denver">Mountain (MT)</option>
-                          <option value="America/Los_Angeles">Pacific (PT)</option>
-                          <option value="America/Anchorage">Alaska (AKT)</option>
-                          <option value="Pacific/Honolulu">Hawaii (HT)</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="dailySummary">Daily Medication Summary Email</Label>
-                          <button
-                            onClick={() => updateSetting("dailySummaryEnabled", !userSettings.dailySummaryEnabled)}
-                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                              userSettings.dailySummaryEnabled ? "bg-primary" : "bg-input"
-                            }`}
-                          >
-                            <span
-                              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-                                userSettings.dailySummaryEnabled ? "translate-x-5" : "translate-x-0"
-                              }`}
-                            />
-                          </button>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Receive a daily email listing all your active medications and their schedules.
-                        </p>
-                      </div>
-
-                      {userSettings.dailySummaryEnabled && (
+          {/* Tab 3: Settings — user preferences (hidden when impersonating) */}
+          {!isImpersonating && (
+            <TabsContent value="settings" className="flex-1 min-h-0 overflow-y-auto">
+              <div className="max-w-lg space-y-6">
+                {/* Reminder Settings */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <Settings className="h-6 w-6 text-primary" />
+                      <CardTitle>Reminder Settings</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {settingsLoading ? (
+                      <p className="text-muted-foreground">Loading settings...</p>
+                    ) : (
+                      <>
                         <div className="space-y-2">
-                          <Label htmlFor="summaryTime">Summary Time</Label>
-                          <Input
-                            id="summaryTime"
-                            type="time"
-                            value={userSettings.dailySummaryTime}
-                            onChange={(e) => updateSetting("dailySummaryTime", e.target.value)}
-                            className="w-32"
-                          />
+                          <Label htmlFor="timezone">Timezone</Label>
+                          <select
+                            id="timezone"
+                            value={userSettings.timezone}
+                            onChange={(e) => updateSetting("timezone", e.target.value)}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          >
+                            <option value="America/New_York">Eastern (ET)</option>
+                            <option value="America/Chicago">Central (CT)</option>
+                            <option value="America/Denver">Mountain (MT)</option>
+                            <option value="America/Los_Angeles">Pacific (PT)</option>
+                            <option value="America/Anchorage">Alaska (AKT)</option>
+                            <option value="Pacific/Honolulu">Hawaii (HT)</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="dailySummary">Daily Medication Summary Email</Label>
+                            <button
+                              onClick={() => updateSetting("dailySummaryEnabled", !userSettings.dailySummaryEnabled)}
+                              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                userSettings.dailySummaryEnabled ? "bg-primary" : "bg-input"
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                                  userSettings.dailySummaryEnabled ? "translate-x-5" : "translate-x-0"
+                                }`}
+                              />
+                            </button>
+                          </div>
                           <p className="text-xs text-muted-foreground">
-                            Time in your local timezone when you&apos;ll receive the summary.
+                            Receive a daily email listing all your active medications and their schedules.
                           </p>
                         </div>
-                      )}
-                    </>
-                  )}
-                </CardContent>
-              </Card>
 
-              {/* Change Password */}
+                        {userSettings.dailySummaryEnabled && (
+                          <div className="space-y-2">
+                            <Label htmlFor="summaryTime">Summary Time</Label>
+                            <Input
+                              id="summaryTime"
+                              type="time"
+                              value={userSettings.dailySummaryTime}
+                              onChange={(e) => updateSetting("dailySummaryTime", e.target.value)}
+                              className="w-32"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Time in your local timezone when you&apos;ll receive the summary.
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Change Password */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <Lock className="h-6 w-6 text-primary" />
+                      <CardTitle>Change Password</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        setPasswordError("");
+                        setPasswordSuccess("");
+
+                        if (passwordForm.new !== passwordForm.confirm) {
+                          setPasswordError("New passwords do not match");
+                          return;
+                        }
+                        if (passwordForm.new.length < 8) {
+                          setPasswordError("New password must be at least 8 characters");
+                          return;
+                        }
+
+                        setPasswordSaving(true);
+                        try {
+                          const res = await fetch("/api/user/change-password", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              currentPassword: passwordForm.current,
+                              newPassword: passwordForm.new,
+                            }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) {
+                            setPasswordError(data.error || "Failed to change password");
+                          } else {
+                            setPasswordSuccess("Password updated successfully");
+                            setPasswordForm({ current: "", new: "", confirm: "" });
+                          }
+                        } catch {
+                          setPasswordError("Something went wrong");
+                        } finally {
+                          setPasswordSaving(false);
+                        }
+                      }}
+                      className="space-y-4"
+                    >
+                      {passwordError && (
+                        <p className="text-sm text-destructive">{passwordError}</p>
+                      )}
+                      {passwordSuccess && (
+                        <p className="text-sm text-green-600">{passwordSuccess}</p>
+                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Input
+                          id="currentPassword"
+                          type="password"
+                          value={passwordForm.current}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          value={passwordForm.new}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                          required
+                          minLength={8}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={passwordForm.confirm}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                          required
+                          minLength={8}
+                        />
+                      </div>
+                      <Button type="submit" disabled={passwordSaving}>
+                        {passwordSaving ? "Updating..." : "Update Password"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Tab 4: Users — all users table (hidden when impersonating) */}
+          {!isImpersonating && (
+            <TabsContent value="users" className="flex-1 min-h-0 overflow-y-auto">
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <Lock className="h-6 w-6 text-primary" />
-                    <CardTitle>Change Password</CardTitle>
+                    <Users className="h-6 w-6 text-primary" />
+                    <CardTitle>All Users</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      setPasswordError("");
-                      setPasswordSuccess("");
-
-                      if (passwordForm.new !== passwordForm.confirm) {
-                        setPasswordError("New passwords do not match");
-                        return;
-                      }
-                      if (passwordForm.new.length < 8) {
-                        setPasswordError("New password must be at least 8 characters");
-                        return;
-                      }
-
-                      setPasswordSaving(true);
-                      try {
-                        const res = await fetch("/api/user/change-password", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            currentPassword: passwordForm.current,
-                            newPassword: passwordForm.new,
-                          }),
-                        });
-                        const data = await res.json();
-                        if (!res.ok) {
-                          setPasswordError(data.error || "Failed to change password");
-                        } else {
-                          setPasswordSuccess("Password updated successfully");
-                          setPasswordForm({ current: "", new: "", confirm: "" });
-                        }
-                      } catch {
-                        setPasswordError("Something went wrong");
-                      } finally {
-                        setPasswordSaving(false);
-                      }
-                    }}
-                    className="space-y-4"
-                  >
-                    {passwordError && (
-                      <p className="text-sm text-destructive">{passwordError}</p>
-                    )}
-                    {passwordSuccess && (
-                      <p className="text-sm text-green-600">{passwordSuccess}</p>
-                    )}
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={passwordForm.current}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        value={passwordForm.new}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                        required
-                        minLength={8}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={passwordForm.confirm}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                        required
-                        minLength={8}
-                      />
-                    </div>
-                    <Button type="submit" disabled={passwordSaving}>
-                      {passwordSaving ? "Updating..." : "Update Password"}
-                    </Button>
-                  </form>
+                  {usersLoading ? (
+                    <p className="text-muted-foreground">Loading users...</p>
+                  ) : allUsers.length === 0 ? (
+                    <p className="text-muted-foreground">No users found.</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {allUsers.map((u) => {
+                          const isEditing = editingUserId === u.id;
+                          return (
+                            <TableRow key={u.id}>
+                              <TableCell>
+                                {isEditing ? (
+                                  <Input
+                                    value={editUserForm.name}
+                                    onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })}
+                                    className="h-7 text-sm w-40"
+                                  />
+                                ) : (
+                                  u.name || "-"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {isEditing ? (
+                                  <Input
+                                    value={editUserForm.email}
+                                    onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
+                                    className="h-7 text-sm w-48"
+                                  />
+                                ) : (
+                                  u.email
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {currentUserRole === "admin" && u.id !== session?.user?.id ? (
+                                  <select
+                                    value={u.role}
+                                    onChange={async (e) => {
+                                      const newRole = e.target.value;
+                                      try {
+                                        const res = await fetch("/api/users", {
+                                          method: "PUT",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({ userId: u.id, role: newRole }),
+                                        });
+                                        if (res.ok) fetchUsers();
+                                      } catch { /* silently fail */ }
+                                    }}
+                                    className="text-xs rounded border border-input bg-transparent px-2 py-1"
+                                  >
+                                    <option value="user">user</option>
+                                    <option value="admin">admin</option>
+                                  </select>
+                                ) : (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
+                                    {u.role}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm">{formatDateTime(u.createdAt, u.timezone)}</TableCell>
+                              <TableCell className="text-sm">{formatDateTime(u.lastLoginAt, u.timezone)}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1">
+                                  {isEditing ? (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="Save"
+                                        onClick={async () => {
+                                          try {
+                                            const res = await fetch("/api/users", {
+                                              method: "PUT",
+                                              headers: { "Content-Type": "application/json" },
+                                              body: JSON.stringify({
+                                                userId: u.id,
+                                                name: editUserForm.name,
+                                                email: editUserForm.email,
+                                              }),
+                                            });
+                                            if (res.ok) {
+                                              setEditingUserId(null);
+                                              fetchUsers();
+                                            }
+                                          } catch { /* silently fail */ }
+                                        }}
+                                      >
+                                        <Check className="h-3.5 w-3.5 text-green-600" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="Cancel"
+                                        onClick={() => setEditingUserId(null)}
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="View as this user"
+                                        onClick={() => startImpersonating(u.id)}
+                                      >
+                                        <Eye className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="Edit user"
+                                        onClick={() => {
+                                          setEditingUserId(u.id);
+                                          setEditUserForm({ name: u.name || "", email: u.email });
+                                        }}
+                                      >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="Send password reset email"
+                                        disabled={resetSending === u.id}
+                                        onClick={async () => {
+                                          setResetSending(u.id);
+                                          try {
+                                            const res = await fetch("/api/users", {
+                                              method: "POST",
+                                              headers: { "Content-Type": "application/json" },
+                                              body: JSON.stringify({ userId: u.id, action: "reset-password" }),
+                                            });
+                                            if (res.ok) {
+                                              alert(`Password reset email sent to ${u.email}`);
+                                            }
+                                          } catch { /* silently fail */ }
+                                          setResetSending(null);
+                                        }}
+                                      >
+                                        <Mail className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
-
-          {/* Tab 4: Users — all users table */}
-          <TabsContent value="users" className="flex-1 min-h-0 overflow-y-auto">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Users className="h-6 w-6 text-primary" />
-                  <CardTitle>All Users</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {usersLoading ? (
-                  <p className="text-muted-foreground">Loading users...</p>
-                ) : allUsers.length === 0 ? (
-                  <p className="text-muted-foreground">No users found.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Last Login</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {allUsers.map((u) => {
-                        const isEditing = editingUserId === u.id;
-                        return (
-                          <TableRow key={u.id}>
-                            <TableCell>
-                              {isEditing ? (
-                                <Input
-                                  value={editUserForm.name}
-                                  onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })}
-                                  className="h-7 text-sm w-40"
-                                />
-                              ) : (
-                                u.name || "-"
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {isEditing ? (
-                                <Input
-                                  value={editUserForm.email}
-                                  onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
-                                  className="h-7 text-sm w-48"
-                                />
-                              ) : (
-                                u.email
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {currentUserRole === "admin" && u.id !== session?.user?.id ? (
-                                <select
-                                  value={u.role}
-                                  onChange={async (e) => {
-                                    const newRole = e.target.value;
-                                    try {
-                                      const res = await fetch("/api/users", {
-                                        method: "PUT",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({ userId: u.id, role: newRole }),
-                                      });
-                                      if (res.ok) fetchUsers();
-                                    } catch { /* silently fail */ }
-                                  }}
-                                  className="text-xs rounded border border-input bg-transparent px-2 py-1"
-                                >
-                                  <option value="user">user</option>
-                                  <option value="admin">admin</option>
-                                </select>
-                              ) : (
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
-                                  {u.role}
-                                </span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-sm">{formatDateTime(u.createdAt, u.timezone)}</TableCell>
-                            <TableCell className="text-sm">{formatDateTime(u.lastLoginAt, u.timezone)}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                {isEditing ? (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 w-7 p-0"
-                                      title="Save"
-                                      onClick={async () => {
-                                        try {
-                                          const res = await fetch("/api/users", {
-                                            method: "PUT",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({
-                                              userId: u.id,
-                                              name: editUserForm.name,
-                                              email: editUserForm.email,
-                                            }),
-                                          });
-                                          if (res.ok) {
-                                            setEditingUserId(null);
-                                            fetchUsers();
-                                          }
-                                        } catch { /* silently fail */ }
-                                      }}
-                                    >
-                                      <Check className="h-3.5 w-3.5 text-green-600" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 w-7 p-0"
-                                      title="Cancel"
-                                      onClick={() => setEditingUserId(null)}
-                                    >
-                                      <X className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 w-7 p-0"
-                                      title="Edit user"
-                                      onClick={() => {
-                                        setEditingUserId(u.id);
-                                        setEditUserForm({ name: u.name || "", email: u.email });
-                                      }}
-                                    >
-                                      <Pencil className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 w-7 p-0"
-                                      title="Send password reset email"
-                                      disabled={resetSending === u.id}
-                                      onClick={async () => {
-                                        setResetSending(u.id);
-                                        try {
-                                          const res = await fetch("/api/users", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ userId: u.id, action: "reset-password" }),
-                                          });
-                                          if (res.ok) {
-                                            alert(`Password reset email sent to ${u.email}`);
-                                          }
-                                        } catch { /* silently fail */ }
-                                        setResetSending(null);
-                                      }}
-                                    >
-                                      <Mail className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+            </TabsContent>
+          )}
         </main>
       </Tabs>
     </div>
