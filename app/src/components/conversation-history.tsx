@@ -121,6 +121,37 @@ function eventIcon(event: string) {
   }
 }
 
+function eventBadge(event: string) {
+  const styles: Record<string, string> = {
+    delivered: "bg-green-100 text-green-700",
+    open: "bg-blue-100 text-blue-700",
+    click: "bg-purple-100 text-purple-700",
+    bounce: "bg-red-100 text-red-700",
+    dropped: "bg-red-100 text-red-700",
+    spamreport: "bg-red-100 text-red-700",
+    deferred: "bg-yellow-100 text-yellow-700",
+    processed: "bg-gray-100 text-gray-600",
+  };
+  const labels: Record<string, string> = {
+    delivered: "Delivered",
+    open: "Opened",
+    click: "Clicked",
+    bounce: "Bounced",
+    dropped: "Dropped",
+    spamreport: "Spam",
+    deferred: "Deferred",
+    processed: "Sent",
+  };
+  const cls = styles[event] || "bg-gray-100 text-gray-600";
+  const label = labels[event] || event;
+  return (
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${cls}`}>
+      {eventIcon(event)}
+      {label}
+    </span>
+  );
+}
+
 function groupByDate(items: HistoryItem[]): Map<string, HistoryItem[]> {
   const groups = new Map<string, HistoryItem[]>();
   for (const item of items) {
@@ -326,7 +357,7 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground ml-5.5">
+                <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground ml-5.5 flex-wrap">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {formatTime(email.sentAt)}
@@ -334,9 +365,10 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
                   <span className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
                     {emailTypeLabel(email.messageType)}
                   </span>
-                  {email.latestEvent && (
-                    <span className="flex items-center gap-0.5">
-                      {eventIcon(email.latestEvent)}
+                  {email.latestEvent ? eventBadge(email.latestEvent) : (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600">
+                      <Mail className="h-3 w-3" />
+                      Pending
                     </span>
                   )}
                 </div>
