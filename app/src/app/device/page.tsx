@@ -263,14 +263,14 @@ export default function DevicePage() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Be the first to know when the AdherePod device is available.
           </p>
-          <a href="mailto:aifurman@gmail.com?subject=AdherePod%20Device%20Waitlist">
+          <a href="mailto:sales@adherepod.com?subject=AdherePod%20Device%20Waitlist">
             <Button size="lg">
               Email Us to Join the Waitlist
               <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
           </a>
           <p className="text-sm text-muted-foreground mt-4">
-            aifurman@gmail.com
+            sales@adherepod.com
           </p>
         </div>
       </section>
@@ -288,7 +288,7 @@ export default function DevicePage() {
             <p className="text-muted-foreground">
               Interested in bulk pricing for your organization?{" "}
               <a
-                href="mailto:aifurman@gmail.com?subject=AdherePod%20Bulk%20Pricing%20Inquiry"
+                href="mailto:sales@adherepod.com?subject=AdherePod%20Bulk%20Pricing%20Inquiry"
                 className="text-primary hover:underline"
               >
                 Contact us

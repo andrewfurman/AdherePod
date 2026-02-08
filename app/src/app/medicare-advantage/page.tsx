@@ -63,7 +63,7 @@ export default function MedicareAdvantagePage() {
             to medication non-adherence. AdherePod&apos;s voice-native platform
             targets the hardest-to-reach populations.
           </p>
-          <a href="mailto:aifurman@gmail.com">
+          <a href="mailto:sales@adherepod.com">
             <Button size="lg" variant="secondary">
               Schedule a Demo
               <ArrowRight className="h-4 w-4 ml-1.5" />
@@ -327,7 +327,7 @@ export default function MedicareAdvantagePage() {
             unlock millions in quality bonus payments.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <a href="mailto:aifurman@gmail.com">
+            <a href="mailto:sales@adherepod.com">
               <Button size="lg" variant="secondary">
                 Schedule a Demo
                 <ArrowRight className="h-4 w-4 ml-1.5" />

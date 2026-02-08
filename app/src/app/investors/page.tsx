@@ -515,10 +515,10 @@ export default function InvestorsPage() {
             <p>
               <span className="opacity-75">Email:</span>{" "}
               <a
-                href="mailto:aifurman@gmail.com"
+                href="mailto:investors@adherepod.com"
                 className="underline underline-offset-4 hover:opacity-80 transition-opacity"
               >
-                aifurman@gmail.com
+                investors@adherepod.com
               </a>
             </p>
             <p>
