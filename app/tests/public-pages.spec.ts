@@ -59,7 +59,7 @@ test.describe("Public pages", () => {
     await expect(page.getByText(/adherepod/i).first()).toBeVisible();
     // Problem stats
     await expect(page.getByText("$300B").first()).toBeVisible();
-    await expect(page.getByText("125,000").first()).toBeVisible();
+    await expect(page.getByText("100K+").first()).toBeVisible();
     // Market size
     await expect(page.getByText(/34M/i).first()).toBeVisible();
     // Team
