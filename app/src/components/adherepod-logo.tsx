@@ -2,8 +2,8 @@ export function AdherepodLogo({ size = 32 }: { size?: number }) {
   return (
     <svg
       width={size}
-      height={size}
-      viewBox="0 0 120 120"
+      height={size * 0.5}
+      viewBox="10 35 100 50"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
