@@ -644,7 +644,7 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
       {/* Desktop layout: side-by-side */}
       <div className="hidden md:flex h-full border border-border rounded-lg overflow-hidden">
         {/* Sidebar */}
-        <div className="w-72 shrink-0 border-r border-border overflow-y-auto bg-muted/30">
+        <div className="w-64 shrink-0 border-r border-border overflow-y-auto bg-muted/30">
           {sidebarContent}
         </div>
         {/* Detail pane */}

@@ -67,7 +67,7 @@ export default function Home() {
             )}
             {/* Hamburger — mobile only */}
             <button
-              className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
+              className="md:hidden p-3 lg:p-2 rounded-md hover:bg-muted transition-colors"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
@@ -80,28 +80,28 @@ export default function Home() {
           <div className="md:hidden border-t border-border bg-background px-4 py-3 space-y-2">
             <a
               href="#features"
-              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Features
             </a>
             <a
               href="#how-it-works"
-              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               How It Works
             </a>
             <a
               href="#who"
-              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Who It&apos;s For
             </a>
             <a
               href="#team"
-              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Team

@@ -117,7 +117,7 @@ export default function ClinicalNotes({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 text-xs"
+            className="text-xs"
             onClick={() => setShowForm(true)}
           >
             <Plus className="h-3 w-3 mr-1" />
@@ -135,7 +135,7 @@ export default function ClinicalNotes({
             className="w-full text-sm rounded-md border border-input bg-transparent px-3 py-2 min-h-[60px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
           <div className="flex gap-2">
-            <Button size="sm" className="h-7 text-xs" onClick={handleAdd} disabled={saving || !newNote.trim()}>
+            <Button size="sm" className="text-xs" onClick={handleAdd} disabled={saving || !newNote.trim()}>
               {saving ? "Saving..." : "Save Note"}
             </Button>
             <Button

@@ -530,7 +530,7 @@ export default function DashboardPage() {
 
           {/* Tab 1: Dashboard — medications + voice chat */}
           <TabsContent value="medications" className="flex-1 min-h-0">
-            <div className={`h-full grid grid-cols-1 ${isImpersonating ? "" : "lg:grid-cols-2"} gap-6`}>
+            <div className={`h-full grid grid-cols-1 ${isImpersonating ? "" : "md:grid-cols-2"} gap-6`}>
               {/* Left column — Medications */}
               <Card className="flex flex-col min-h-0">
                 <CardHeader className="shrink-0">
@@ -714,7 +714,7 @@ export default function DashboardPage() {
                             id="timezone"
                             value={userSettings.timezone}
                             onChange={(e) => updateSetting("timezone", e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            className="flex h-11 lg:h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                           >
                             <option value="America/New_York">Eastern (ET)</option>
                             <option value="America/Chicago">Central (CT)</option>
@@ -730,13 +730,13 @@ export default function DashboardPage() {
                             <Label htmlFor="dailySummary">Daily Medication Summary Email</Label>
                             <button
                               onClick={() => updateSetting("dailySummaryEnabled", !userSettings.dailySummaryEnabled)}
-                              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                              className={`relative inline-flex h-8 w-14 lg:h-6 lg:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                 userSettings.dailySummaryEnabled ? "bg-primary" : "bg-input"
                               }`}
                             >
                               <span
-                                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-                                  userSettings.dailySummaryEnabled ? "translate-x-5" : "translate-x-0"
+                                className={`pointer-events-none inline-block h-7 w-7 lg:h-5 lg:w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                                  userSettings.dailySummaryEnabled ? "translate-x-6 lg:translate-x-5" : "translate-x-0"
                                 }`}
                               />
                             </button>
@@ -984,7 +984,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="Save"
                                         onClick={async () => {
                                           try {
@@ -1009,7 +1009,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="Cancel"
                                         onClick={() => setEditingUserId(null)}
                                       >
@@ -1021,7 +1021,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="View as this user"
                                         onClick={() => startImpersonating(u.id)}
                                       >
@@ -1030,7 +1030,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="Edit user"
                                         onClick={() => {
                                           setEditingUserId(u.id);
@@ -1042,7 +1042,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="Send password reset email"
                                         disabled={resetSending === u.id}
                                         onClick={async () => {
@@ -1065,7 +1065,7 @@ export default function DashboardPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 w-7 p-0"
+                                        className="h-9 w-9 lg:h-7 lg:w-7 p-0"
                                         title="Set password"
                                         onClick={() => {
                                           setSetPasswordUserId(u.id);
