@@ -411,12 +411,21 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-red-500" />
-            <span className="font-semibold">AdherePod</span>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-red-500" />
+              <span className="font-semibold">AdherePod</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy &amp; Terms</Link>
+              <Link href="/security" className="hover:text-foreground transition-colors">Security</Link>
+              <Link href="/medicare-advantage" className="hover:text-foreground transition-colors">For MA Plans</Link>
+              <Link href="/device" className="hover:text-foreground transition-colors">Device</Link>
+              <Link href="/investors" className="hover:text-foreground transition-colors">Investors</Link>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             &copy; 2026 AdherePod. All rights reserved.
           </p>
         </div>
