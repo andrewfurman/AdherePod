@@ -1,5 +1,4 @@
 import {
-  Heart,
   TrendingUp,
   DollarSign,
   Users,
@@ -26,6 +25,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -51,7 +51,7 @@ export default function InvestorsPage() {
       {/* ── Slide 1: Title ── */}
       <section className="bg-primary text-primary-foreground min-h-[80vh] flex items-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center w-full">
-          <Heart className="h-16 w-16 mx-auto mb-8" />
+          <div className="mx-auto mb-8"><AdherepodLogo size={64} /></div>
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6">
             AdherePod
           </h1>
@@ -1293,7 +1293,7 @@ export default function InvestorsPage() {
       <footer className="border-t border-border py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Heart className="h-5 w-5 text-red-500" />
+            <AdherepodLogo size={20} />
             <span className="font-semibold">AdherePod</span>
           </Link>
           <p className="text-sm text-muted-foreground">

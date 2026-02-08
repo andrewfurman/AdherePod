@@ -24,7 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye, KeyRound } from "lucide-react";
+import { Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye, KeyRound } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
@@ -430,7 +431,7 @@ export default function DashboardPage() {
         <nav className="shrink-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Heart className="h-7 w-7 text-red-500" />
+              <AdherepodLogo size={56} />
               <span className="text-xl font-bold">AdherePod</span>
             </Link>
             <div className="flex items-center gap-4">

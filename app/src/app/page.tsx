@@ -23,6 +23,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -34,7 +35,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <a href="#" className="flex items-center gap-2">
-            <Heart className="h-8 w-8 text-red-500" />
+            <AdherepodLogo size={64} />
             <span className="text-xl font-bold">AdherePod</span>
           </a>
           <div className="flex items-center gap-3">
@@ -414,7 +415,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-red-500" />
+              <AdherepodLogo size={20} />
               <span className="font-semibold">AdherePod</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
