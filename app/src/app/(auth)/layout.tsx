@@ -13,7 +13,7 @@ export default function AuthLayout({
           href="/"
           className="flex items-center justify-center gap-2 mb-8"
         >
-          <AdherepodLogo size={32} />
+          <AdherepodLogo size={64} />
           <span className="text-2xl font-bold">AdherePod</span>
         </Link>
         {children}

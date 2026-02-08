@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 import { auth } from "@/lib/auth";
 
 export default async function NotFound() {
@@ -8,7 +9,7 @@ export default async function NotFound() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-      <Heart className="h-12 w-12 text-red-500 mb-6" />
+      <div className="mb-6"><AdherepodLogo size={48} /></div>
       <h1 className="text-4xl font-bold mb-2">Page not found</h1>
       <p className="text-muted-foreground mb-8 text-center max-w-md">
         Sorry, we couldn&apos;t find the page you&apos;re looking for.
