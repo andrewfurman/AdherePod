@@ -4,6 +4,58 @@ import { emailSends } from "@/lib/db/schema";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
+function emailWrapper(content: string): string {
+  const year = new Date().getFullYear();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://adherepod.com";
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width: 480px; width: 100%;">
+          <!-- Logo Header -->
+          <tr>
+            <td align="center" style="padding-bottom: 24px;">
+              <a href="${appUrl}" style="text-decoration: none; display: inline-block;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td valign="middle" style="padding-right: 8px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    </td>
+                    <td valign="middle">
+                      <span style="font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">AdherePod</span>
+                    </td>
+                  </tr>
+                </table>
+              </a>
+            </td>
+          </tr>
+          <!-- Content Card -->
+          <tr>
+            <td style="background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+              ${content}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top: 24px;">
+              <p style="margin: 0 0 4px; color: #9ca3af; font-size: 12px;">&copy; ${year} AdherePod &mdash; Medication adherence made simple.</p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                <a href="${appUrl}" style="color: #9ca3af; text-decoration: underline;">adherepod.com</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function logEmailSend(
   userId: string | null,
   recipientEmail: string,
@@ -41,20 +93,18 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
   const subject = "Reset your AdherePod password";
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2>Reset your password</h2>
-      <p>You requested a password reset for your AdherePod account.</p>
-      <p>
-        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px;">
-          Reset Password
-        </a>
-      </p>
-      <p style="color: #6b7280; font-size: 14px;">
-        This link expires in 1 hour. If you didn&apos;t request this, you can safely ignore this email.
-      </p>
-    </div>
-  `;
+  const html = emailWrapper(`
+    <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a;">Reset your password</h2>
+    <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.5;">You requested a password reset for your AdherePod account.</p>
+    <p style="margin: 0 0 24px;">
+      <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        Reset Password
+      </a>
+    </p>
+    <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
+      This link expires in 1 hour. If you didn&apos;t request this, you can safely ignore this email.
+    </p>
+  `);
 
   const response = await sgMail.send({
     to: email,
@@ -76,29 +126,27 @@ export async function sendMedicationReminder(
 ): Promise<void> {
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/my-medications`;
   const timingLine = timingDescription
-    ? `<p style="color: #6b7280; font-size: 14px;">Timing: ${timingDescription}</p>`
+    ? `<p style="margin: 0 0 8px; color: #6b7280; font-size: 14px; line-height: 1.5;">Timing: ${timingDescription}</p>`
     : "";
   const notesLine = notes
-    ? `<p style="color: #6b7280; font-size: 14px;">Notes: ${notes}</p>`
+    ? `<p style="margin: 0 0 16px; color: #6b7280; font-size: 14px; line-height: 1.5;">Notes: ${notes}</p>`
     : "";
 
   const subject = `Reminder: Time to take ${medicationName}`;
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2>Time to take ${medicationName}</h2>
-      <p>This is your AdherePod medication reminder.</p>
-      ${timingLine}
-      ${notesLine}
-      <p>
-        <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px;">
-          View My Medications
-        </a>
-      </p>
-      <p style="color: #9ca3af; font-size: 12px;">
-        You can manage your reminder settings on your AdherePod dashboard.
-      </p>
-    </div>
-  `;
+  const html = emailWrapper(`
+    <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a;">Time to take ${medicationName}</h2>
+    <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.5;">This is your AdherePod medication reminder.</p>
+    ${timingLine}
+    ${notesLine}
+    <p style="margin: 0 0 24px;">
+      <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        View My Medications
+      </a>
+    </p>
+    <p style="margin: 0; color: #9ca3af; font-size: 13px; line-height: 1.5;">
+      You can manage your reminder settings on your AdherePod dashboard.
+    </p>
+  `);
 
   const response = await sgMail.send({
     to: email,
@@ -128,20 +176,18 @@ export async function sendDailySummary(
     .join("");
 
   const subject = "Your medications for today — AdherePod";
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2>${greeting}, here are your medications for today</h2>
-      <ul style="padding-left: 20px;">${medList}</ul>
-      <p>
-        <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px;">
-          View My Medications
-        </a>
-      </p>
-      <p style="color: #9ca3af; font-size: 12px;">
-        You can manage your daily summary settings on your AdherePod dashboard.
-      </p>
-    </div>
-  `;
+  const html = emailWrapper(`
+    <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a;">${greeting}, here are your medications for today</h2>
+    <ul style="padding-left: 20px; margin: 0 0 24px; color: #374151; font-size: 15px; line-height: 1.7;">${medList}</ul>
+    <p style="margin: 0 0 24px;">
+      <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        View My Medications
+      </a>
+    </p>
+    <p style="margin: 0; color: #9ca3af; font-size: 13px; line-height: 1.5;">
+      You can manage your daily summary settings on your AdherePod dashboard.
+    </p>
+  `);
 
   const response = await sgMail.send({
     to: email,
