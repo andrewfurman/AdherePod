@@ -336,8 +336,7 @@ export default function MedicareAdvantagePage() {
             <Link href="/device">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                variant="secondary"
               >
                 Learn More About the Device
               </Button>
