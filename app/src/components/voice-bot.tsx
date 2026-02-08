@@ -134,14 +134,14 @@ export default function VoiceBot({ state }: { state: BotState }) {
 
       {/* Status text */}
       <div className="ml-3">
-        <p className="text-xs font-medium">
+        <p className="text-sm lg:text-xs font-medium">
           {state === "speaking"
             ? "AdherePod is talking..."
             : state === "listening"
               ? "Listening..."
               : "Ready to chat"}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm lg:text-xs text-muted-foreground">
           {state === "speaking"
             ? "I'm responding to you"
             : state === "listening"

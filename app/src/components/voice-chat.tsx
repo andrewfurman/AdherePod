@@ -435,7 +435,7 @@ export default function VoiceChat({
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col gap-3">
         {/* Bot + Camera side by side — responsive height */}
-        <div className="shrink-0 h-32 sm:h-40 flex items-stretch gap-4">
+        <div className="shrink-0 h-32 sm:h-40 md:h-48 lg:h-40 flex items-stretch gap-4">
           {/* Bot on left */}
           <div className="flex-1 flex items-center justify-center rounded-lg border border-border bg-muted/30">
             <VoiceBot state={botState} />
@@ -467,7 +467,7 @@ export default function VoiceChat({
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
                   </span>
-                  <span className="text-[10px] font-medium text-muted-foreground">
+                  <span className="text-xs lg:text-[10px] font-medium text-muted-foreground">
                     Camera Live
                     {isCapturing && (
                       <span className="text-amber-600 dark:text-amber-400 ml-1">analyzing...</span>
@@ -498,7 +498,7 @@ export default function VoiceChat({
                   </svg>
                 </div>
                 <div className="shrink-0 px-2 py-1 bg-muted/50">
-                  <p className="text-[10px] text-muted-foreground text-center">
+                  <p className="text-xs lg:text-[10px] text-muted-foreground text-center">
                     {isConnected ? "Starting camera..." : "Camera starts on call"}
                   </p>
                 </div>
@@ -523,8 +523,8 @@ export default function VoiceChat({
             if (entry.role === "image") {
               return (
                 <div key={i} className="flex justify-center">
-                  <div className="max-w-[90%] rounded-lg px-2.5 py-1.5 text-xs bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                    <p className="font-medium text-xs mb-1 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                  <div className="max-w-[90%] rounded-lg px-3 py-2 lg:px-2.5 lg:py-1.5 text-sm lg:text-xs bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <p className="font-medium text-sm lg:text-xs mb-1 text-amber-700 dark:text-amber-400 flex items-center gap-1">
                       <Camera className="h-3 w-3" />
                       Image Detected
                     </p>
@@ -548,13 +548,13 @@ export default function VoiceChat({
                 className={`flex ${entry.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs ${
+                  className={`max-w-[80%] rounded-lg px-3 py-2 lg:px-2.5 lg:py-1.5 text-sm lg:text-xs ${
                     entry.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-background border border-border"
                   }`}
                 >
-                  <p className="font-medium text-[10px] mb-0.5 opacity-70">
+                  <p className="font-medium text-xs lg:text-[10px] mb-0.5 opacity-70">
                     {entry.role === "user" ? "You" : "AdherePod"}
                   </p>
                   {entry.text}

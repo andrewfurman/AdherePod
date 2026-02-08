@@ -360,7 +360,47 @@ export default function ProviderDashboardPage() {
       {/* Main content */}
       <main className="flex-1 min-h-0 flex">
         {/* Left sidebar — Patient list */}
-        <div className="w-72 shrink-0 border-r border-border flex flex-col bg-muted/30">
+        {/* Mobile patient selector — horizontal chips */}
+        <div className="md:hidden shrink-0 border-b border-border bg-muted/30 px-3 py-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search patients..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 text-sm"
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={() => {
+                setShowAddPatient(true);
+                setPatientSearch("");
+                setSearchResults([]);
+              }}
+            >
+              <UserPlus className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {filteredPatients.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedPatientId(p.patientId)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  selectedPatientId === p.patientId
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background border border-border text-foreground/80 hover:bg-muted"
+                }`}
+              >
+                {p.patientName || p.patientEmail.split("@")[0]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="hidden md:flex w-64 shrink-0 border-r border-border flex-col bg-muted/30">
           <div className="p-3 border-b border-border space-y-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

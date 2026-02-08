@@ -27,7 +27,7 @@ export default function ProviderPatientCard({
       <div className="flex items-center gap-2">
         <User className="h-4 w-4 text-muted-foreground shrink-0" />
         <div className="min-w-0">
-          <p className={`text-sm font-medium truncate ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
+          <p className={`text-sm md:text-base lg:text-sm font-medium truncate ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
             {patientName || "Unnamed Patient"}
           </p>
           <p className="text-xs text-muted-foreground truncate">{patientEmail}</p>
