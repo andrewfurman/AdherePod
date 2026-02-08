@@ -5,6 +5,7 @@ import {
   boolean,
   primaryKey,
   integer,
+  unique,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -17,7 +18,9 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   password: text("password"),
-  role: text("role").default("user").notNull(),
+  role: text("role").default("patient").notNull(),
+  providerType: text("provider_type"),
+  phone: text("phone"),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at", { mode: "date", withTimezone: true }),
   timezone: text("timezone").default("America/New_York"),
@@ -170,4 +173,41 @@ export const emailEvents = pgTable("email_events", {
   timestamp: timestamp("timestamp", { mode: "date", withTimezone: true }).notNull(),
   metadata: text("metadata"),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+});
+
+export const providerPatients = pgTable(
+  "provider_patients",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    providerId: text("provider_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    patientId: text("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    assignedBy: text("assigned_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique().on(table.providerId, table.patientId),
+  ]
+);
+
+export const clinicalNotes = pgTable("clinical_notes", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  medicationId: text("medication_id")
+    .notNull()
+    .references(() => medications.id, { onDelete: "cascade" }),
+  authorId: text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
 });

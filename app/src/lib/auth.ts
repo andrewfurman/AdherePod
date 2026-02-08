@@ -14,6 +14,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       role?: string;
+      providerType?: string | null;
     };
   }
 }
@@ -53,6 +54,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           image: user.image,
           role: user.role,
+          providerType: user.providerType,
         };
       },
     }),
@@ -62,6 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role;
+        token.providerType = (user as { providerType?: string | null }).providerType;
       }
       return token;
     },
@@ -72,6 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.role) {
         session.user.role = token.role as string;
       }
+      session.user.providerType = (token.providerType as string | null) ?? null;
       return session;
     },
   },

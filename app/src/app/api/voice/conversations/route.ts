@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { conversations, conversationMessages, imageCaptures } from "@/lib/db/schema";
 import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
+import { canAccessPatientData } from "@/lib/authorization";
 
 export async function GET(req: Request) {
   try {
@@ -12,7 +13,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId } = await getEffectiveUserId(session, req.url);
+    const { searchParams: params } = new URL(req.url);
+    const patientId = params.get("patientId");
+
+    // If patientId is provided (provider context), use that instead of impersonation
+    let userId: string;
+    if (patientId) {
+      const allowed = await canAccessPatientData(session.user.id, patientId);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      userId = patientId;
+    } else {
+      const effective = await getEffectiveUserId(session, req.url);
+      userId = effective.userId;
+    }
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

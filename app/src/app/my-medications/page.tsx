@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye } from "lucide-react";
+import { Heart, Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye, KeyRound } from "lucide-react";
 import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
 import ConversationHistory from "@/components/conversation-history";
@@ -58,6 +58,7 @@ interface User {
   name: string | null;
   email: string;
   role: string;
+  providerType: string | null;
   timezone: string | null;
   createdAt: string;
   lastLoginAt: string | null;
@@ -110,6 +111,9 @@ export default function DashboardPage() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editUserForm, setEditUserForm] = useState({ name: "", email: "" });
   const [resetSending, setResetSending] = useState<string | null>(null);
+  const [setPasswordUserId, setSetPasswordUserId] = useState<string | null>(null);
+  const [setPasswordValue, setSetPasswordValue] = useState("");
+  const [adminSetPwSaving, setAdminSetPwSaving] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ current: "", new: "", confirm: "" });
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
@@ -904,27 +908,58 @@ export default function DashboardPage() {
                               </TableCell>
                               <TableCell>
                                 {currentUserRole === "admin" && u.id !== session?.user?.id ? (
-                                  <select
-                                    value={u.role}
-                                    onChange={async (e) => {
-                                      const newRole = e.target.value;
-                                      try {
-                                        const res = await fetch("/api/users", {
-                                          method: "PUT",
-                                          headers: { "Content-Type": "application/json" },
-                                          body: JSON.stringify({ userId: u.id, role: newRole }),
-                                        });
-                                        if (res.ok) fetchUsers();
-                                      } catch { /* silently fail */ }
-                                    }}
-                                    className="text-xs rounded border border-input bg-transparent px-2 py-1"
-                                  >
-                                    <option value="user">user</option>
-                                    <option value="admin">admin</option>
-                                  </select>
+                                  <div className="flex items-center gap-2">
+                                    <select
+                                      value={u.role === "user" ? "patient" : u.role}
+                                      onChange={async (e) => {
+                                        const newRole = e.target.value;
+                                        try {
+                                          const updates: Record<string, string | null> = { userId: u.id, role: newRole };
+                                          // Clear providerType when switching away from provider
+                                          if (newRole !== "provider") {
+                                            updates.providerType = null;
+                                          }
+                                          const res = await fetch("/api/users", {
+                                            method: "PUT",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(updates),
+                                          });
+                                          if (res.ok) fetchUsers();
+                                        } catch { /* silently fail */ }
+                                      }}
+                                      className="text-xs rounded border border-input bg-transparent px-2 py-1"
+                                    >
+                                      <option value="patient">patient</option>
+                                      <option value="provider">provider</option>
+                                      <option value="admin">admin</option>
+                                    </select>
+                                    {(u.role === "provider") && (
+                                      <select
+                                        value={u.providerType || ""}
+                                        onChange={async (e) => {
+                                          const newType = e.target.value || null;
+                                          try {
+                                            const res = await fetch("/api/users", {
+                                              method: "PUT",
+                                              headers: { "Content-Type": "application/json" },
+                                              body: JSON.stringify({ userId: u.id, providerType: newType }),
+                                            });
+                                            if (res.ok) fetchUsers();
+                                          } catch { /* silently fail */ }
+                                        }}
+                                        className="text-xs rounded border border-input bg-transparent px-2 py-1"
+                                      >
+                                        <option value="">Type...</option>
+                                        <option value="nurse">Nurse</option>
+                                        <option value="doctor">Doctor</option>
+                                        <option value="care_team_member">Care Team</option>
+                                      </select>
+                                    )}
+                                  </div>
                                 ) : (
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
-                                    {u.role}
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-primary/10 text-primary font-medium" : u.role === "provider" ? "bg-blue-100 text-blue-700 font-medium" : "bg-muted text-muted-foreground"}`}>
+                                    {u.role === "user" ? "patient" : u.role}
+                                    {u.role === "provider" && u.providerType && ` (${u.providerType.replace("_", " ")})`}
                                   </span>
                                 )}
                               </TableCell>
@@ -1015,6 +1050,18 @@ export default function DashboardPage() {
                                       >
                                         <Mail className="h-3.5 w-3.5" />
                                       </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0"
+                                        title="Set password"
+                                        onClick={() => {
+                                          setSetPasswordUserId(u.id);
+                                          setSetPasswordValue("");
+                                        }}
+                                      >
+                                        <KeyRound className="h-3.5 w-3.5" />
+                                      </Button>
                                     </>
                                   )}
                                 </div>
@@ -1027,6 +1074,75 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Set Password Dialog */}
+              {setPasswordUserId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                  <Card className="w-96">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">Set Password</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={() => setSetPasswordUserId(null)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Set a new password for {allUsers.find(u => u.id === setPasswordUserId)?.email}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="setPassword">New Password</Label>
+                          <Input
+                            id="setPassword"
+                            type="text"
+                            placeholder="Enter new password (min 8 chars)"
+                            value={setPasswordValue}
+                            onChange={(e) => setSetPasswordValue(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            disabled={adminSetPwSaving || setPasswordValue.length < 8}
+                            onClick={async () => {
+                              setAdminSetPwSaving(true);
+                              try {
+                                const res = await fetch("/api/users", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    userId: setPasswordUserId,
+                                    action: "set-password",
+                                    password: setPasswordValue,
+                                  }),
+                                });
+                                if (res.ok) {
+                                  alert("Password updated successfully");
+                                  setSetPasswordUserId(null);
+                                  setSetPasswordValue("");
+                                } else {
+                                  const data = await res.json();
+                                  alert(data.error || "Failed to set password");
+                                }
+                              } catch {
+                                alert("Something went wrong");
+                              } finally {
+                                setAdminSetPwSaving(false);
+                              }
+                            }}
+                          >
+                            {adminSetPwSaving ? "Saving..." : "Set Password"}
+                          </Button>
+                          <Button variant="outline" onClick={() => setSetPasswordUserId(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
           )}
         </main>

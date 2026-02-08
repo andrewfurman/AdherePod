@@ -35,19 +35,26 @@ app/
         sign-up/      # User registration
         forgot-password/
         reset-password/
-        users/        # Admin-only user list (GET) + role management (PUT)
-        emails/       # Email history API (GET with optional ?id=)
+        users/        # Admin-only user list (GET) + role/providerType management (PUT) + set-password (POST)
+        emails/       # Email history API (GET with optional ?id= or ?patientId=)
         webhooks/
           sendgrid/   # SendGrid Event Webhook handler (POST)
         voice/
           session/          # Generates ephemeral OpenAI realtime API keys
-          conversations/    # GET (list/detail) and POST (create) conversations
+          conversations/    # GET (list/detail, supports ?patientId=) and POST (create) conversations
             messages/       # POST (save message) and PATCH (end conversation)
-      dashboard/      # Protected dashboard — medications list + voice chat side by side
+        provider/
+          patients/         # Provider-patient assignment CRUD (GET/POST/DELETE)
+            [patientId]/
+              notes/        # Clinical notes per medication (GET/POST/DELETE)
+      my-medications/ # Patient dashboard — medications list + voice chat side by side
+      provider-dashboard/  # Provider dashboard — patient list + medications/conversations
     components/
       ui/             # Radix-based UI components (button, card, input, badge, label)
       medication-card.tsx  # Medication card with reminder toggle UI
-      conversation-history.tsx  # Unified history timeline (voice conversations + emails)
+      conversation-history.tsx  # Unified history timeline (voice conversations + emails, supports patientId prop)
+      clinical-notes.tsx  # Clinical notes list + add form per medication
+      provider-patient-card.tsx  # Compact patient card for provider sidebar
       voice-chat.tsx  # Voice chat component with RealtimeAgent, transcript display
     lib/
       auth.ts         # NextAuth config with DrizzleAdapter
@@ -99,9 +106,11 @@ Schema is in `app/src/lib/db/schema.ts`. After modifying, run `npx drizzle-kit p
 
 ### Tables
 
-- **users** — NextAuth user accounts (+ role, timezone, dailySummaryEnabled, dailySummaryTime, lastDailySummarySentAt)
+- **users** — NextAuth user accounts (+ role [patient/provider/admin], providerType [nurse/doctor/care_team_member], timezone, dailySummaryEnabled, dailySummaryTime, lastDailySummarySentAt)
 - **accounts**, **sessions**, **verificationTokens** — NextAuth internals
 - **medications** — User medications (name, timesPerDay, timingDescription, startDate, endDate, notes, reminderEnabled, reminderTimes, lastReminderSentAt)
+- **providerPatients** — Many-to-many junction table (providerId, patientId, assignedBy, createdAt). UNIQUE on (providerId, patientId)
+- **clinicalNotes** — Provider notes on medications (medicationId, authorId, content, createdAt, updatedAt)
 - **conversations** — Voice chat conversation records (userId, status, startedAt, endedAt)
 - **conversationMessages** — Individual messages in a conversation (role, content, toolName, toolArgs)
 - **emailSends** — Logged email sends (userId, recipientEmail, messageType, subject, htmlBody, sgMessageId, sentAt)
@@ -142,20 +151,25 @@ npx playwright test
 TEST_BASE_URL=https://adherepod.com npx playwright test
 ```
 
-### Current Tests (12)
-- Homepage has Sign In button and hero image
-- Sign-in page loads with email/password fields
-- Sign-in with valid credentials redirects to dashboard (checks medications list + Talk to AdherePod button)
-- Sign-in with wrong password shows error
-- Sign-out returns to homepage
-- Dashboard redirects to sign-in when not authenticated
+### Current Tests (30)
+- **Auth flow (7):** homepage, sign-in, sign-out, redirect tests
+- **Public pages (5):** privacy, security, medicare-advantage, device, investors, logos
+- **Camera & Voice (5):** camera API, voice assistant card, transcript area
+- **View as User (3):** admin impersonation, read-only mode, history tab
+- **Provider & Patient (7):** role dropdown options, provider sub-type, provider-dashboard access/redirect, empty patient list, search, sign out
+- **Provider API (3):** auth required for provider patients and clinical notes endpoints
 
 ## Auth
 
 - Credentials-based (email/password) via NextAuth v5
 - Middleware (`src/middleware.ts`) protects routes and redirects
 - Session user ID available via `auth()` in API routes
-- **User roles:** `role` column on users table (`"user"` or `"admin"`). Exposed in JWT + session. Admin-only features: Users tab, `/api/users` GET/PUT.
+- **User types:** Three roles — `"patient"` (default), `"provider"`, `"admin"`. Exposed in JWT + session along with `providerType`.
+  - **Patient:** Regular user, sees /my-medications dashboard
+  - **Provider:** Nurse/Doctor/Care Team Member. Sub-type is display-only (no permission differences). Redirected to /provider-dashboard on login. Can view/edit/add/delete assigned patients' medications and add clinical notes.
+  - **Admin:** Full access. Impersonation, user management, can assign patients to providers, can set user passwords.
+- **Provider-Patient:** Many-to-many via `providerPatients` table. Both admins and providers can establish links.
+- **Authorization:** `src/lib/authorization.ts` — `canAccessPatientData(callerId, patientId)` checks if caller is the patient, an admin, or an assigned provider.
 - **Admin seeded:** `aifurman@gmail.com` is the initial admin account.
 
 ## Email History & SendGrid Webhooks

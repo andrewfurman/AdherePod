@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { medications } from "@/lib/db/schema";
 import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
+import { canAccessPatientData } from "@/lib/authorization";
 
 export async function GET(req: Request) {
   try {
@@ -12,7 +13,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId } = await getEffectiveUserId(session, req.url);
+    const { searchParams } = new URL(req.url);
+    const patientId = searchParams.get("patientId");
+
+    let userId: string;
+    if (patientId) {
+      // Provider context: verify access
+      const allowed = await canAccessPatientData(session.user.id, patientId);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      userId = patientId;
+    } else {
+      const effective = await getEffectiveUserId(session, req.url);
+      userId = effective.userId;
+    }
 
     const userMedications = await db
       .select()
@@ -40,7 +55,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, timesPerDay, timingDescription, startDate, endDate, notes } =
+    const { name, timesPerDay, timingDescription, startDate, endDate, notes, patientId } =
       body;
 
     if (!name || !timesPerDay || !startDate) {
@@ -50,10 +65,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // If patientId is provided, verify caller can access that patient's data
+    const targetUserId = patientId || session.user.id;
+    if (patientId && patientId !== session.user.id) {
+      const allowed = await canAccessPatientData(session.user.id, patientId);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     const [medication] = await db
       .insert(medications)
       .values({
-        userId: session.user.id,
+        userId: targetUserId,
         name,
         timesPerDay: Number(timesPerDay),
         timingDescription: timingDescription || null,
@@ -90,18 +114,23 @@ export async function PUT(req: Request) {
       );
     }
 
+    // Find the medication first (without userId filter)
     const [existing] = await db
       .select()
       .from(medications)
-      .where(
-        and(eq(medications.id, id), eq(medications.userId, session.user.id))
-      );
+      .where(eq(medications.id, id));
 
     if (!existing) {
       return NextResponse.json(
         { error: "Medication not found" },
         { status: 404 }
       );
+    }
+
+    // Check authorization
+    const allowed = await canAccessPatientData(session.user.id, existing.userId);
+    if (!allowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const [updated] = await db
@@ -117,9 +146,7 @@ export async function PUT(req: Request) {
         reminderTimes: reminderTimes !== undefined ? (typeof reminderTimes === "string" ? reminderTimes : JSON.stringify(reminderTimes)) : existing.reminderTimes,
         updatedAt: new Date(),
       })
-      .where(
-        and(eq(medications.id, id), eq(medications.userId, session.user.id))
-      )
+      .where(eq(medications.id, id))
       .returning();
 
     return NextResponse.json(updated);
@@ -148,12 +175,11 @@ export async function DELETE(req: Request) {
       );
     }
 
+    // Find medication first
     const [existing] = await db
       .select()
       .from(medications)
-      .where(
-        and(eq(medications.id, id), eq(medications.userId, session.user.id))
-      );
+      .where(eq(medications.id, id));
 
     if (!existing) {
       return NextResponse.json(
@@ -162,11 +188,15 @@ export async function DELETE(req: Request) {
       );
     }
 
+    // Check authorization
+    const allowed = await canAccessPatientData(session.user.id, existing.userId);
+    if (!allowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await db
       .delete(medications)
-      .where(
-        and(eq(medications.id, id), eq(medications.userId, session.user.id))
-      );
+      .where(eq(medications.id, id));
 
     return NextResponse.json({ message: "Medication deleted" });
   } catch {

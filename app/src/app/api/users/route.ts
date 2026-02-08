@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { asc, eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, passwordResetTokens } from "@/lib/db/schema";
@@ -32,6 +33,8 @@ export async function GET() {
         name: users.name,
         email: users.email,
         role: users.role,
+        providerType: users.providerType,
+        phone: users.phone,
         timezone: users.timezone,
         createdAt: users.createdAt,
         lastLoginAt: users.lastLoginAt,
@@ -68,16 +71,23 @@ export async function PUT(req: Request) {
     }
 
     // Build update object from allowed fields
-    const updates: Record<string, string> = {};
+    const updates: Record<string, string | null> = {};
 
     if (body.role !== undefined) {
-      if (!["user", "admin"].includes(body.role)) {
+      if (!["patient", "provider", "admin"].includes(body.role)) {
         return NextResponse.json({ error: "Invalid role" }, { status: 400 });
       }
       if (userId === session.user.id && body.role !== "admin") {
         return NextResponse.json({ error: "Cannot demote yourself" }, { status: 400 });
       }
       updates.role = body.role;
+    }
+
+    if (body.providerType !== undefined) {
+      if (body.providerType !== null && !["nurse", "doctor", "care_team_member"].includes(body.providerType)) {
+        return NextResponse.json({ error: "Invalid provider type" }, { status: 400 });
+      }
+      updates.providerType = body.providerType;
     }
 
     if (body.name !== undefined) {
@@ -89,6 +99,17 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: "Invalid email" }, { status: 400 });
       }
       updates.email = body.email;
+    }
+
+    if (body.phone !== undefined) {
+      updates.phone = body.phone;
+    }
+
+    if (body.password !== undefined) {
+      if (!body.password || body.password.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+      }
+      updates.password = await bcrypt.hash(body.password, 10);
     }
 
     if (Object.keys(updates).length === 0) {
@@ -119,10 +140,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { userId, action } = await req.json();
+    const { userId, action, password } = await req.json();
 
-    if (action !== "reset-password" || !userId) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    }
+
+    if (action === "set-password") {
+      if (!password || password.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+      }
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { id: true },
+      });
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+      const hashed = await bcrypt.hash(password, 10);
+      await db.update(users).set({ password: hashed }).where(eq(users.id, userId));
+      return NextResponse.json({ success: true });
+    }
+
+    if (action !== "reset-password") {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
     const user = await db.query.users.findFirst({

@@ -17,7 +17,23 @@ export default auth((req) => {
 
   // Redirect logged-in users away from auth pages
   if (isLoggedIn && isAuthRoute) {
+    // Treat "user" as "patient" (legacy JWT)
+    const role = req.auth?.user?.role === "user" ? "patient" : req.auth?.user?.role;
+    if (role === "provider") {
+      return NextResponse.redirect(new URL("/provider-dashboard", req.url));
+    }
     return NextResponse.redirect(new URL("/my-medications", req.url));
+  }
+
+  // Protect /provider-dashboard — only providers and admins
+  if (pathname.startsWith("/provider-dashboard")) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
+    const role = req.auth?.user?.role === "user" ? "patient" : req.auth?.user?.role;
+    if (role !== "provider" && role !== "admin") {
+      return NextResponse.redirect(new URL("/my-medications", req.url));
+    }
   }
 
   // Redirect unauthenticated users from protected routes

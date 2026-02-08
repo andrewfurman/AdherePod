@@ -185,9 +185,10 @@ function mergeTimeline(detail: ConversationDetail): TimelineItem[] {
 
 interface ConversationHistoryProps {
   viewAsUserId?: string;
+  patientId?: string;
 }
 
-export default function ConversationHistory({ viewAsUserId }: ConversationHistoryProps = {}) {
+export default function ConversationHistory({ viewAsUserId, patientId }: ConversationHistoryProps = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [emails, setEmails] = useState<EmailSend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,12 +200,16 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
   const [showDetail, setShowDetail] = useState(false);
 
   const viewAsParam = viewAsUserId ? `?viewAs=${viewAsUserId}` : "";
+  const patientParam = patientId ? `?patientId=${patientId}` : "";
 
   const fetchData = useCallback(async () => {
     try {
+      // Use patientId param for provider context, viewAs for admin impersonation
+      const convQuery = patientId ? `?patientId=${patientId}` : viewAsParam;
+      const emailQuery = patientId ? `?patientId=${patientId}` : viewAsParam;
       const [convRes, emailRes] = await Promise.all([
-        fetch(`/api/voice/conversations${viewAsParam}`),
-        fetch(`/api/emails${viewAsParam}`),
+        fetch(`/api/voice/conversations${convQuery}`),
+        fetch(`/api/emails${emailQuery}`),
       ]);
       if (convRes.ok) setConversations(await convRes.json());
       if (emailRes.ok) setEmails(await emailRes.json());
@@ -213,7 +218,7 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
     } finally {
       setLoading(false);
     }
-  }, [viewAsParam]);
+  }, [viewAsParam, patientId]);
 
   useEffect(() => {
     fetchData();
@@ -248,7 +253,7 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
     setShowDetail(true);
 
     try {
-      const extra = viewAsUserId ? `&viewAs=${viewAsUserId}` : "";
+      const extra = patientId ? `&patientId=${patientId}` : viewAsUserId ? `&viewAs=${viewAsUserId}` : "";
       if (type === "conversation") {
         const res = await fetch(`/api/voice/conversations?id=${id}${extra}`);
         if (res.ok) setConvDetail(await res.json());
@@ -400,7 +405,7 @@ export default function ConversationHistory({ viewAsUserId }: ConversationHistor
               <h2 className="text-lg font-semibold">
                 {convDetail.title || "Untitled conversation"}
               </h2>
-              {!viewAsUserId && (
+              {!viewAsUserId && !patientId && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <button

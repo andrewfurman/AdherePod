@@ -4,12 +4,50 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { emailSends, emailEvents, users } from "@/lib/db/schema";
 import { getEffectiveUserId, ImpersonationError } from "@/lib/impersonation";
+import { canAccessPatientData } from "@/lib/authorization";
 
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check for patientId query param (provider context)
+    const patientId = req.nextUrl.searchParams.get("patientId");
+    if (patientId) {
+      const allowed = await canAccessPatientData(session.user.id, patientId);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      // Return emails for this patient
+      const sends = await db
+        .select({
+          id: emailSends.id,
+          userId: emailSends.userId,
+          recipientEmail: emailSends.recipientEmail,
+          messageType: emailSends.messageType,
+          subject: emailSends.subject,
+          sgMessageId: emailSends.sgMessageId,
+          sentAt: emailSends.sentAt,
+        })
+        .from(emailSends)
+        .where(eq(emailSends.userId, patientId))
+        .orderBy(desc(emailSends.sentAt))
+        .limit(100);
+
+      const sendsWithStatus = await Promise.all(
+        sends.map(async (send) => {
+          const [latestEvent] = await db
+            .select({ event: emailEvents.event })
+            .from(emailEvents)
+            .where(eq(emailEvents.emailSendId, send.id))
+            .orderBy(desc(emailEvents.timestamp))
+            .limit(1);
+          return { ...send, latestEvent: latestEvent?.event || null };
+        })
+      );
+      return NextResponse.json(sendsWithStatus);
     }
 
     const { userId: effectiveUserId, isImpersonating } = await getEffectiveUserId(session, req.url);
