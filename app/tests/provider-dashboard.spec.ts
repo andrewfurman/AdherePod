@@ -118,7 +118,7 @@ test.describe("Provider & Patient User Types", () => {
 
     // Admin should see "Provider Dashboard" text and patient list area
     await expect(page.getByText("Provider Dashboard")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByPlaceholder("Search patients...")).toBeVisible();
+    await expect(page.getByPlaceholder("Search patients...").last()).toBeVisible();
   });
 
   test("provider dashboard shows empty patient list message", async ({
@@ -144,7 +144,7 @@ test.describe("Provider & Patient User Types", () => {
     await page.goto("/provider-dashboard");
 
     // Search input
-    await expect(page.getByPlaceholder("Search patients...")).toBeVisible({
+    await expect(page.getByPlaceholder("Search patients...").last()).toBeVisible({
       timeout: 10000,
     });
 
