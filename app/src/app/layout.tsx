@@ -16,6 +16,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AdherePod - Voice-Native Medical Adherence",
   description: "A voice-native, plug-and-play medical adherence device and data platform for elderly and low-literacy users.",
+  openGraph: {
+    title: "AdherePod - Voice-Native Medical Adherence",
+    description: "A voice-native, plug-and-play medical adherence device and data platform for elderly and low-literacy users.",
+    images: [{ url: "/hero-image.png", width: 1200, height: 630 }],
+    siteName: "AdherePod",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/hero-image.png"],
+  },
 };
 
 export default function RootLayout({

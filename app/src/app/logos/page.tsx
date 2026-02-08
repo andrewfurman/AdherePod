@@ -1,9 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 
 export const metadata = {
   title: "Logo Concepts | AdherePod",
   description: "AdherePod logo design concepts for team review.",
+  openGraph: {
+    title: "Logo Concepts | AdherePod",
+    description: "AdherePod logo design concepts for team review.",
+    images: [{ url: "/og/og-logos.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-logos.png"],
+  },
 };
 
 const logos = [
@@ -515,6 +525,13 @@ export default function LogosPage() {
           ))}
         </div>
       </section>
+
+      {/* Image */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+          <Image src="/og/og-logos.png" alt="Logo design concepts" fill className="object-cover" />
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center">

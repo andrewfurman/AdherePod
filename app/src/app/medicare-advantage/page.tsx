@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Heart,
   Star,
@@ -19,6 +20,16 @@ export const metadata = {
   title: "Medicare Advantage Star Ratings | AdherePod",
   description:
     "Improve your Medicare Advantage Star Ratings with voice-native medication adherence technology. Target PDC measures D08, D09, D10.",
+  openGraph: {
+    title: "Medicare Advantage Star Ratings | AdherePod",
+    description:
+      "Improve your Medicare Advantage Star Ratings with voice-native medication adherence technology.",
+    images: [{ url: "/og/og-medicare.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-medicare.png"],
+  },
 };
 
 export default function MedicareAdvantagePage() {
@@ -229,6 +240,13 @@ export default function MedicareAdvantagePage() {
           </div>
         </div>
       </section>
+
+      {/* Image */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+          <Image src="/og/og-medicare.png" alt="Medicare Advantage Star Ratings" fill className="object-cover" />
+        </div>
+      </div>
 
       {/* How AdherePod Helps */}
       <section className="py-20 px-4 sm:px-6 bg-muted">

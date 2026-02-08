@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Heart,
   Shield,
@@ -19,6 +20,16 @@ export const metadata = {
   title: "Security & Compliance | AdherePod",
   description:
     "Learn about AdherePod's security measures and SOC 2 / HIPAA compliance progress.",
+  openGraph: {
+    title: "Security & Compliance | AdherePod",
+    description:
+      "Learn about AdherePod's security measures and SOC 2 / HIPAA compliance progress.",
+    images: [{ url: "/og/og-security.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-security.png"],
+  },
 };
 
 export default function SecurityPage() {
@@ -263,6 +274,13 @@ export default function SecurityPage() {
           </div>
         </div>
       </section>
+
+      {/* Image */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+          <Image src="/og/og-security.png" alt="Healthcare data security" fill className="object-cover" />
+        </div>
+      </div>
 
       {/* What We're Working On */}
       <section className="py-16 px-4 sm:px-6">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Heart,
   Tablet,
@@ -21,6 +22,16 @@ export const metadata = {
   title: "The AdherePod Device | AdherePod",
   description:
     "A dedicated tablet that sits in your home and manages your medications through voice. No smartphone required.",
+  openGraph: {
+    title: "The AdherePod Device | AdherePod",
+    description:
+      "A dedicated tablet that sits in your home and manages your medications through voice. No smartphone required.",
+    images: [{ url: "/og/og-device.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-device.png"],
+  },
 };
 
 export default function DevicePage() {
@@ -190,6 +201,13 @@ export default function DevicePage() {
           </div>
         </div>
       </section>
+
+      {/* Image */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+          <Image src="/og/og-device.png" alt="AdherePod tablet device" fill className="object-cover" />
+        </div>
+      </div>
 
       {/* Who It's For */}
       <section className="py-24 px-4 sm:px-6">

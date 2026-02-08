@@ -1,10 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 
 export const metadata = {
   title: "Privacy Policy & Terms of Service | AdherePod",
   description:
     "Privacy Policy, Terms of Service, and SMS consent information for AdherePod medication adherence platform.",
+  openGraph: {
+    title: "Privacy Policy & Terms of Service | AdherePod",
+    description:
+      "Privacy Policy, Terms of Service, and SMS consent information for AdherePod medication adherence platform.",
+    images: [{ url: "/og/og-privacy.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-privacy.png"],
+  },
 };
 
 export default function PrivacyPage() {
@@ -505,6 +516,13 @@ export default function PrivacyPage() {
             </ul>
           </div>
         </section>
+
+        {/* Image */}
+        <div className="my-12">
+          <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+            <Image src="/og/og-privacy.png" alt="Privacy and trust" fill className="object-cover" />
+          </div>
+        </div>
 
         {/* Footer */}
         <footer className="border-t border-border pt-8 mt-12 text-center">

@@ -20,6 +20,16 @@ export const metadata = {
   title: "Investors | AdherePod",
   description:
     "AdherePod investor pitch deck. Voice-native medication adherence platform targeting Medicare Advantage Star Ratings.",
+  openGraph: {
+    title: "Investors | AdherePod",
+    description:
+      "Voice-native medication adherence platform targeting Medicare Advantage Star Ratings.",
+    images: [{ url: "/og/og-investors.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og/og-investors.png"],
+  },
 };
 
 export default function InvestorsPage() {
@@ -104,6 +114,11 @@ export default function InvestorsPage() {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               AdherePod is a voice-native medication management platform
             </p>
+          </div>
+          <div className="max-w-2xl mx-auto mb-12">
+            <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden shadow-md">
+              <Image src="/og/og-investors.png" alt="AdherePod in action" fill className="object-cover" />
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="flex items-start gap-4">
