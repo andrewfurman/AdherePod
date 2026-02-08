@@ -11,6 +11,10 @@ import {
   BarChart3,
   Globe,
   Smartphone,
+  Target,
+  Building2,
+  ShoppingCart,
+  FlaskConical,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -284,7 +288,7 @@ export default function InvestorsPage() {
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16">
             Business Model
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <Card>
               <CardHeader>
                 <DollarSign className="h-10 w-10 text-primary mb-2" />
@@ -293,8 +297,8 @@ export default function InvestorsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Medicare Advantage plans pay for adherence improvement. Revenue
-                scales with enrolled member count.
+                Medicare Advantage plans pay $3&ndash;$8 PMPM for adherence
+                improvement. Revenue scales with enrolled member count.
               </CardContent>
             </Card>
             <Card>
@@ -322,6 +326,66 @@ export default function InvestorsPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Unit Economics */}
+          <h3 className="text-2xl font-bold text-center mb-4">
+            Unit Economics: Why $3&ndash;$8 PMPM Works
+          </h3>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+            MA plans that reach 4+ stars earn ~$50 PMPM in CMS bonus payments.
+            Medication adherence drives 1/3 of their Star Rating. AdherePod
+            pays for itself many times over.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+            <Card className="text-center">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  AdherePod Cost
+                </p>
+                <CardTitle className="text-4xl font-bold text-foreground">
+                  $3&ndash;$8
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                per member per month
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  CMS Bonus Earned
+                </p>
+                <CardTitle className="text-4xl font-bold text-primary">
+                  ~$50
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                per member per month at 4+ stars
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 border-primary">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Plan ROI
+                </p>
+                <CardTitle className="text-4xl font-bold text-primary">
+                  6&ndash;16x
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                return on investment for the health plan
+              </CardContent>
+            </Card>
+          </div>
+          <div className="max-w-4xl mx-auto rounded-xl border border-border bg-muted p-6">
+            <p className="text-sm text-muted-foreground text-center">
+              <span className="font-semibold text-foreground">Example:</span>{" "}
+              A 100K-member MA plan paying $5 PMPM = $6M/year to AdherePod.
+              Reaching 4+ stars unlocks ~$60M/year in CMS bonus payments
+              &mdash; a{" "}
+              <span className="font-semibold text-primary">10x return</span>.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -334,7 +398,7 @@ export default function InvestorsPage() {
           <div className="space-y-5">
             {[
               "Working voice-native web app live at adherepod.com",
-              "Real-time AI voice assistant with GPT-4o Realtime",
+              "Real-time AI voice assistant with OpenAI Realtime Voice API",
               "Medication CRUD with voice and web interfaces",
               "Email reminder system with SendGrid integration",
               "Admin dashboard with user management and impersonation",
@@ -360,7 +424,7 @@ export default function InvestorsPage() {
             {[
               {
                 icon: Star,
-                text: "AI voice technology is finally good enough (GPT-4o Realtime API)",
+                text: "AI voice technology is finally good enough (OpenAI Realtime Voice API)",
               },
               {
                 icon: Users,
@@ -463,14 +527,59 @@ export default function InvestorsPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">The Ask</h2>
-            <p className="text-4xl sm:text-5xl font-bold text-primary">
-              Seed Round
-            </p>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+            <Card className="text-center border-2 border-primary">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Seed Round
+                </p>
+                <CardTitle className="text-5xl font-bold text-primary">
+                  $3M&ndash;$5M
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Target raise amount
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 border-primary/40">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Pre-Money Valuation
+                </p>
+                <CardTitle className="text-4xl sm:text-5xl font-bold text-primary">
+                  $12M&ndash;$18M
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Working product, 3 co-founders, $12.7B addressable market,
+                AI voice healthcare sector raising at premium multiples
+              </CardContent>
+            </Card>
+            <Card className="text-center border-2 border-primary/20">
+              <CardHeader>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Round Structure
+                </p>
+                <CardTitle className="text-4xl font-bold text-primary">
+                  SAFE / Priced
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Flexible structure for the right partners
+              </CardContent>
+            </Card>
+          </div>
+          <h3 className="text-2xl font-bold text-center mb-8">
+            Use of Funds
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Engineering</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Engineering</CardTitle>
+                  <span className="text-2xl font-bold text-primary">40%</span>
+                </div>
               </CardHeader>
               <CardContent className="text-muted-foreground">
                 Build the dedicated tablet device and expand platform
@@ -479,23 +588,37 @@ export default function InvestorsPage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Pilot Programs</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Pilot Programs</CardTitle>
+                  <span className="text-2xl font-bold text-primary">25%</span>
+                </div>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Launch pilots with 2-3 Medicare Advantage plans
+                Launch pilots with 2&ndash;3 Medicare Advantage plans
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Sales &amp; Marketing</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">
+                    Sales &amp; Partnerships
+                  </CardTitle>
+                  <span className="text-2xl font-bold text-primary">20%</span>
+                </div>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Build sales team targeting MA plan administrators
+                Build sales team targeting MA plan administrators and strategic
+                partners
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Compliance</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">
+                    Compliance &amp; Ops
+                  </CardTitle>
+                  <span className="text-2xl font-bold text-primary">15%</span>
+                </div>
               </CardHeader>
               <CardContent className="text-muted-foreground">
                 Complete SOC 2 and HIPAA certifications
@@ -505,7 +628,149 @@ export default function InvestorsPage() {
         </div>
       </section>
 
-      {/* ── Slide 11: Contact ── */}
+      {/* ── Slide 11: Exit Strategy ── */}
+      <section className="bg-muted py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-6">
+            <Target className="h-10 w-10 mx-auto mb-4 text-primary" />
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Exit Strategy &amp; Strategic Landscape
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              The medication adherence market is projected to grow from $4.9B to
+              $9.4B by 2030 (14% CAGR), creating significant acquisition
+              interest.
+            </p>
+          </div>
+          <div className="max-w-4xl mx-auto rounded-xl border border-primary/30 bg-primary/5 p-5 text-center mb-12">
+            <p className="text-foreground font-semibold text-base">
+              Currently in active partnership conversations across all five
+              acquirer categories
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <Card className="border-2 border-primary/30">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-1">
+                  <Star className="h-8 w-8 text-primary" />
+                  <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                    Primary
+                  </div>
+                </div>
+                <CardTitle className="text-lg">
+                  Medicare Advantage Payers
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                UnitedHealth / Optum, Humana, CVS / Aetna, Elevance Health.
+                Star Rating improvement directly impacts billions in CMS bonus
+                payments.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Smartphone className="h-8 w-8 text-primary mb-1" />
+                <CardTitle className="text-lg">
+                  Health Tech Platforms
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Omnicell, Teladoc, Inovalon. Expanding chronic care and
+                patient-facing adherence capabilities.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Pill className="h-8 w-8 text-primary mb-1" />
+                <CardTitle className="text-lg">
+                  Pharmacy Benefit Managers
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                CVS Caremark, Express Scripts. Direct interest in adherence for
+                rebate optimization and plan performance.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <ShoppingCart className="h-8 w-8 text-primary mb-1" />
+                <CardTitle className="text-lg">Retail Pharmacy</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Amazon Pharmacy, Walgreens. Building medication management
+                ecosystems to increase patient lifetime value.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <FlaskConical className="h-8 w-8 text-primary mb-1" />
+                <CardTitle className="text-lg">
+                  Pharmaceutical Companies
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Pfizer, Lilly, AstraZeneca. Drug manufacturers benefit directly
+                when patients stay on therapy longer.
+              </CardContent>
+            </Card>
+          </div>
+          <h3 className="text-2xl font-bold text-center mb-8">
+            Comparable Exits in Healthcare
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <Card className="text-center">
+              <CardHeader>
+                <CardTitle className="text-3xl sm:text-4xl font-bold text-primary">
+                  $8.0B
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                CVS &rarr; Signify Health
+                <br />
+                <span className="text-xs">MA quality improvement</span>
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <CardTitle className="text-3xl sm:text-4xl font-bold text-primary">
+                  $11.0B
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                KKR &rarr; Cotiviti
+                <br />
+                <span className="text-xs">Health plan analytics</span>
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <CardTitle className="text-3xl sm:text-4xl font-bold text-primary">
+                  $7.3B
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Nordic Capital &rarr; Inovalon
+                <br />
+                <span className="text-xs">Health plan SaaS</span>
+              </CardContent>
+            </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <CardTitle className="text-3xl sm:text-4xl font-bold text-primary">
+                  $753M
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Amazon &rarr; PillPack
+                <br />
+                <span className="text-xs">Medication management</span>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Slide 12: Contact ── */}
       <section className="bg-primary text-primary-foreground py-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-8">
