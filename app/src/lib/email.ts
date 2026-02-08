@@ -159,6 +159,73 @@ export async function sendMedicationReminder(
   await logEmailSend(userId || null, email, "medication_reminder", subject, html, sgMessageId);
 }
 
+export async function sendAssignmentNotificationToProvider(
+  providerEmail: string,
+  providerName: string | null,
+  patientName: string | null,
+  patientEmail: string,
+  providerId?: string
+): Promise<void> {
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/provider-dashboard`;
+  const greeting = providerName ? `Hi ${providerName}` : "Hi there";
+  const patientDisplay = patientName || patientEmail;
+
+  const subject = `New patient assigned: ${patientDisplay}`;
+  const html = emailWrapper(`
+    <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a;">${greeting}, a new patient has been assigned to you</h2>
+    <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.5;">${patientDisplay} (${patientEmail}) has been added to your patient list on AdherePod.</p>
+    <p style="margin: 0 0 24px;">
+      <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        View Provider Dashboard
+      </a>
+    </p>
+  `);
+
+  const response = await sgMail.send({
+    to: providerEmail,
+    from: process.env.SENDGRID_FROM_EMAIL!,
+    subject,
+    html,
+  });
+
+  const sgMessageId = extractMessageId(response);
+  await logEmailSend(providerId || null, providerEmail, "assignment_notification", subject, html, sgMessageId);
+}
+
+export async function sendAssignmentNotificationToPatient(
+  patientEmail: string,
+  patientName: string | null,
+  providerName: string | null,
+  providerType: string | null,
+  patientId?: string
+): Promise<void> {
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/my-medications`;
+  const greeting = patientName ? `Hi ${patientName}` : "Hi there";
+  const typeLabel = providerType ? providerType.replace(/_/g, " ") : "care team member";
+  const providerDisplay = providerName ? `${providerName} (${typeLabel})` : `a new ${typeLabel}`;
+
+  const subject = "Your care team has been updated";
+  const html = emailWrapper(`
+    <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a;">${greeting}, your care team has been updated</h2>
+    <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.5;">${providerDisplay} has been added to your care team on AdherePod. They can now help manage your medications and view your conversation history.</p>
+    <p style="margin: 0 0 24px;">
+      <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        View My Medications
+      </a>
+    </p>
+  `);
+
+  const response = await sgMail.send({
+    to: patientEmail,
+    from: process.env.SENDGRID_FROM_EMAIL!,
+    subject,
+    html,
+  });
+
+  const sgMessageId = extractMessageId(response);
+  await logEmailSend(patientId || null, patientEmail, "assignment_notification", subject, html, sgMessageId);
+}
+
 export async function sendDailySummary(
   email: string,
   userName: string | null,

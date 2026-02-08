@@ -36,6 +36,17 @@ export default auth((req) => {
     }
   }
 
+  // Protect /admin — only admins
+  if (pathname.startsWith("/admin")) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
+    const role = req.auth?.user?.role === "user" ? "patient" : req.auth?.user?.role;
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/my-medications", req.url));
+    }
+  }
+
   // Redirect unauthenticated users from protected routes
   if (!isLoggedIn && !isPublic && !isAuthRoute) {
     return NextResponse.redirect(new URL("/sign-in", req.url));
