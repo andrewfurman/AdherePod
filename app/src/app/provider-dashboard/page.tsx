@@ -306,7 +306,7 @@ export default function ProviderDashboardPage() {
   return (
     <div className="min-h-screen flex flex-col overflow-hidden bg-background">
       {/* Nav */}
-      <nav className="border-b border-border shrink-0">
+      <nav className="sticky top-0 z-50 border-b border-border shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Heart className="h-7 w-7 text-red-500" />
@@ -513,7 +513,7 @@ export default function ProviderDashboardPage() {
               </div>
 
               {/* Tab content */}
-              <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+              <div className={`flex-1 min-h-0 ${activeTab === "conversations" ? "overflow-hidden" : "overflow-y-auto"} px-5 py-4`}>
                 {activeTab === "medications" && (
                   <div>
                     <div className="flex items-center justify-between mb-4">
@@ -653,7 +653,9 @@ export default function ProviderDashboardPage() {
                 )}
 
                 {activeTab === "conversations" && (
-                  <ConversationHistory patientId={selectedPatientId} />
+                  <div className="h-full">
+                    <ConversationHistory patientId={selectedPatientId} />
+                  </div>
                 )}
               </div>
             </>
