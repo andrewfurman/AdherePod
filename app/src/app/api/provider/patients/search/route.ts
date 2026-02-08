@@ -25,11 +25,14 @@ export async function GET(req: Request) {
       return NextResponse.json([]);
     }
 
+    // Admins can optionally target a specific provider for "already assigned" check
+    const targetProviderId = (role === "admin" && searchParams.get("providerId")) || session.user.id;
+
     // Get already-assigned patient IDs for this provider
     const assigned = await db
       .select({ patientId: providerPatients.patientId })
       .from(providerPatients)
-      .where(eq(providerPatients.providerId, session.user.id));
+      .where(eq(providerPatients.providerId, targetProviderId));
 
     const assignedSet = new Set(assigned.map((a) => a.patientId));
 

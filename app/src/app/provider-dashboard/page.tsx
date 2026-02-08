@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Pill, LogOut, Plus, X, MessageCircle, Search, Clock, Calendar, UserPlus, Trash2 } from "lucide-react";
+import { Pill, LogOut, Plus, X, MessageCircle, Search, Clock, Calendar, UserPlus, Trash2, Shield } from "lucide-react";
 import { AdherepodLogo } from "@/components/adherepod-logo";
 import Link from "next/link";
 import MedicationCard from "@/components/medication-card";
@@ -339,6 +339,14 @@ export default function ProviderDashboardPage() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {currentUserRole === "admin" && (
+                  <Link href="/admin">
+                    <DropdownMenuItem>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                  </Link>
+                )}
                 <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out

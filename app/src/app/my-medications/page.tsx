@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye, KeyRound } from "lucide-react";
+import { Pill, LogOut, Plus, X, MessageCircle, Users, Settings, Lock, Pencil, Check, Mail, Eye, KeyRound, Shield } from "lucide-react";
 import { AdherepodLogo } from "@/components/adherepod-logo";
 import Link from "next/link";
 import VoiceChat from "@/components/voice-chat";
@@ -478,6 +478,14 @@ export default function DashboardPage() {
                       <Users className="h-4 w-4 mr-2" />
                       Users
                     </DropdownMenuItem>
+                  )}
+                  {currentUserRole === "admin" && !isImpersonating && (
+                    <Link href="/admin">
+                      <DropdownMenuItem>
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    </Link>
                   )}
                   {isImpersonating && (
                     <DropdownMenuItem onClick={exitImpersonation}>
@@ -956,6 +964,7 @@ export default function DashboardPage() {
                                         <option value="nurse">Nurse</option>
                                         <option value="doctor">Doctor</option>
                                         <option value="care_team_member">Care Team</option>
+                                        <option value="family_member">Family</option>
                                       </select>
                                     )}
                                   </div>

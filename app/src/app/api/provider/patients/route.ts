@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, providerPatients, medications } from "@/lib/db/schema";
 import { getUserRole } from "@/lib/authorization";
+import { sendAssignmentNotificationToProvider, sendAssignmentNotificationToPatient } from "@/lib/email";
 
 export async function GET(req: Request) {
   try {
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
 
     const role = await getUserRole(session.user.id);
     const body = await req.json();
-    const { providerId, patientId } = body;
+    const { providerId, patientId, sendNotification } = body;
 
     if (!providerId || !patientId) {
       return NextResponse.json(
@@ -134,7 +135,7 @@ export async function POST(req: Request) {
     // Verify provider exists with correct role
     const provider = await db.query.users.findFirst({
       where: eq(users.id, providerId),
-      columns: { id: true, role: true },
+      columns: { id: true, role: true, name: true, email: true, providerType: true },
     });
     if (!provider || provider.role !== "provider") {
       return NextResponse.json(
@@ -146,7 +147,7 @@ export async function POST(req: Request) {
     // Verify patient exists with correct role
     const patient = await db.query.users.findFirst({
       where: eq(users.id, patientId),
-      columns: { id: true, role: true },
+      columns: { id: true, role: true, name: true, email: true },
     });
     if (!patient || (patient.role !== "patient" && patient.role !== "user")) {
       return NextResponse.json(
@@ -177,6 +178,30 @@ export async function POST(req: Request) {
         assignedBy: session.user.id,
       })
       .returning();
+
+    // Send notification emails if requested
+    if (sendNotification) {
+      try {
+        await Promise.all([
+          sendAssignmentNotificationToProvider(
+            provider.email,
+            provider.name,
+            patient.name,
+            patient.email,
+            provider.id
+          ),
+          sendAssignmentNotificationToPatient(
+            patient.email,
+            patient.name,
+            provider.name,
+            provider.providerType,
+            patient.id
+          ),
+        ]);
+      } catch {
+        // Email failures shouldn't block the assignment
+      }
+    }
 
     return NextResponse.json(link, { status: 201 });
   } catch {

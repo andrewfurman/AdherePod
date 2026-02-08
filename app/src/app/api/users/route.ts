@@ -84,7 +84,7 @@ export async function PUT(req: Request) {
     }
 
     if (body.providerType !== undefined) {
-      if (body.providerType !== null && !["nurse", "doctor", "care_team_member"].includes(body.providerType)) {
+      if (body.providerType !== null && !["nurse", "doctor", "care_team_member", "family_member"].includes(body.providerType)) {
         return NextResponse.json({ error: "Invalid provider type" }, { status: 400 });
       }
       updates.providerType = body.providerType;
