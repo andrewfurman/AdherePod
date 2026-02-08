@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Camera, Clock, Mail, MessageCircle, Trash2, CheckCircle, Eye, MousePointerClick, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { ArrowLeft, Camera, Clock, Mail, MessageCircle, Trash2, CheckCircle, Eye, MousePointerClick, AlertTriangle, X, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -198,6 +198,8 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
   const [emailDetail, setEmailDetail] = useState<EmailDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
+  const pendingImageDirection = useRef<"first" | "last" | null>(null);
 
   const viewAsParam = viewAsUserId ? `?viewAs=${viewAsUserId}` : "";
   const patientParam = patientId ? `?patientId=${patientId}` : "";
@@ -272,6 +274,74 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
     setShowDetail(false);
   };
 
+  // Merge conversations and emails into a single chronological list
+  const historyItems: HistoryItem[] = useMemo(() => [
+    ...conversations.map((c) => ({ type: "conversation" as const, data: c })),
+    ...emails.map((e) => ({ type: "email" as const, data: e })),
+  ].sort((a, b) => new Date(getItemDate(b)).getTime() - new Date(getItemDate(a)).getTime()), [conversations, emails]);
+
+  const grouped = useMemo(() => groupByDate(historyItems), [historyItems]);
+  const timeline = useMemo(() => convDetail ? mergeTimeline(convDetail) : [], [convDetail]);
+
+  // Build list of images in the current conversation for lightbox navigation
+  const currentImages = useMemo(() => {
+    return timeline.filter((item): item is TimelineItem & { type: "image" } => item.type === "image");
+  }, [timeline]);
+
+  // When convDetail changes, check if we need to open lightbox at a pending position
+  useEffect(() => {
+    if (pendingImageDirection.current && convDetail) {
+      const imgs = mergeTimeline(convDetail).filter((item) => item.type === "image");
+      if (imgs.length > 0) {
+        setLightboxImageIndex(pendingImageDirection.current === "first" ? 0 : imgs.length - 1);
+      }
+      pendingImageDirection.current = null;
+    }
+  }, [convDetail]);
+
+  const navigateImage = useCallback((direction: -1 | 1) => {
+    if (lightboxImageIndex === null) return;
+    const newIndex = lightboxImageIndex + direction;
+    if (newIndex >= 0 && newIndex < currentImages.length) {
+      setLightboxImageIndex(newIndex);
+      return;
+    }
+    // Cross-conversation navigation
+    const sortedConvs = [...conversations].sort(
+      (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+    );
+    const sortedIdx = sortedConvs.findIndex((c) => c.id === convDetail?.id);
+    if (sortedIdx === -1) return;
+    const nextSortedIdx = direction === 1 ? sortedIdx + 1 : sortedIdx - 1;
+    if (nextSortedIdx < 0 || nextSortedIdx >= sortedConvs.length) return;
+    const nextConv = sortedConvs[nextSortedIdx];
+    pendingImageDirection.current = direction === 1 ? "first" : "last";
+    selectItem(nextConv.id, "conversation");
+  }, [lightboxImageIndex, currentImages.length, conversations, convDetail, selectItem]);
+
+  // Keyboard and scroll lock for lightbox
+  useEffect(() => {
+    if (lightboxImageIndex === null) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightboxImageIndex(null);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        navigateImage(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        navigateImage(1);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [lightboxImageIndex, navigateImage]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -290,15 +360,6 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
       </div>
     );
   }
-
-  // Merge conversations and emails into a single chronological list
-  const historyItems: HistoryItem[] = [
-    ...conversations.map((c) => ({ type: "conversation" as const, data: c })),
-    ...emails.map((e) => ({ type: "email" as const, data: e })),
-  ].sort((a, b) => new Date(getItemDate(b)).getTime() - new Date(getItemDate(a)).getTime());
-
-  const grouped = groupByDate(historyItems);
-  const timeline = convDetail ? mergeTimeline(convDetail) : [];
 
   // Sidebar content
   const sidebarContent = (
@@ -483,9 +544,13 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
                   }
 
                   const img = item.data;
+                  const imgIndex = currentImages.findIndex((i) => i.data.id === img.id);
                   return (
                     <div key={`img-${img.id}`} className="flex justify-center">
-                      <div className="w-full max-w-sm border border-border rounded-lg overflow-hidden bg-muted/50">
+                      <div
+                        className="w-full max-w-sm border border-border rounded-lg overflow-hidden bg-muted/50 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                        onClick={() => setLightboxImageIndex(imgIndex)}
+                      >
                         <img
                           src={img.imageUrl}
                           alt={img.description || "Captured image"}
@@ -497,10 +562,10 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
                             Image Capture
                           </div>
                           {img.description && (
-                            <p className="text-sm font-medium">{img.description}</p>
+                            <p className="text-sm font-medium line-clamp-2">{img.description}</p>
                           )}
                           {img.extractedText && (
-                            <p className="text-xs text-muted-foreground whitespace-pre-line">
+                            <p className="text-xs text-muted-foreground whitespace-pre-line line-clamp-2">
                               {img.extractedText}
                             </p>
                           )}
@@ -611,6 +676,103 @@ export default function ConversationHistory({ viewAsUserId, patientId }: Convers
           </div>
         )}
       </div>
+
+      {/* Image Lightbox */}
+      {lightboxImageIndex !== null && currentImages[lightboxImageIndex] && (() => {
+        const img = currentImages[lightboxImageIndex].data;
+        const hasPrev = lightboxImageIndex > 0 || (() => {
+          const sortedConvs = [...conversations].sort(
+            (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+          );
+          const idx = sortedConvs.findIndex((c) => c.id === convDetail?.id);
+          return idx > 0;
+        })();
+        const hasNext = lightboxImageIndex < currentImages.length - 1 || (() => {
+          const sortedConvs = [...conversations].sort(
+            (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+          );
+          const idx = sortedConvs.findIndex((c) => c.id === convDetail?.id);
+          return idx < sortedConvs.length - 1;
+        })();
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setLightboxImageIndex(null)}
+          >
+            <div
+              className="relative w-full max-w-5xl max-h-[90vh] bg-background rounded-xl overflow-hidden flex flex-col md:flex-row shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setLightboxImageIndex(null)}
+                className="absolute top-3 right-3 z-10 rounded-full bg-background/80 backdrop-blur p-1.5 text-foreground hover:bg-background transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              {/* Image section */}
+              <div className="relative md:w-3/5 bg-black flex items-center justify-center min-h-[250px] md:min-h-0">
+                <img
+                  src={img.imageUrl}
+                  alt={img.description || "Captured image"}
+                  className="w-full h-full max-h-[50vh] md:max-h-[90vh] object-contain"
+                />
+
+                {/* Prev arrow */}
+                {hasPrev && (
+                  <button
+                    onClick={() => navigateImage(-1)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/70 backdrop-blur p-1.5 text-foreground hover:bg-background transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                )}
+
+                {/* Next arrow */}
+                {hasNext && (
+                  <button
+                    onClick={() => navigateImage(1)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/70 backdrop-blur p-1.5 text-foreground hover:bg-background transition-colors"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                )}
+
+                {/* Image counter */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-background/70 backdrop-blur rounded-full px-3 py-1 text-xs font-medium text-foreground">
+                  {lightboxImageIndex + 1} / {currentImages.length}
+                </div>
+              </div>
+
+              {/* Text section */}
+              <div className="md:w-2/5 overflow-y-auto p-5 space-y-4 max-h-[40vh] md:max-h-[90vh]">
+                {img.description && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Description
+                    </h3>
+                    <p className="text-sm leading-relaxed">{img.description}</p>
+                  </div>
+                )}
+                {img.extractedText && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Extracted Text
+                    </h3>
+                    <div className="bg-muted rounded-lg p-3 font-mono text-xs whitespace-pre-line leading-relaxed">
+                      {img.extractedText}
+                    </div>
+                  </div>
+                )}
+                {!img.description && !img.extractedText && (
+                  <p className="text-sm text-muted-foreground">No text extracted from this image.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

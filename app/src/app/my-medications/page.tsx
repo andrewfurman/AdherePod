@@ -425,9 +425,9 @@ export default function DashboardPage() {
     : viewAsUserId;
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden bg-background">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
-        <nav className="border-b border-border shrink-0">
+        <nav className="shrink-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Heart className="h-7 w-7 text-red-500" />
@@ -676,8 +676,10 @@ export default function DashboardPage() {
           </TabsContent>
 
           {/* Tab 2: History — conversation timeline */}
-          <TabsContent value="history" className="flex-1 min-h-0 overflow-y-auto">
-            <ConversationHistory viewAsUserId={viewAsUserId || undefined} />
+          <TabsContent value="history" className="flex-1 min-h-0 overflow-hidden [&[data-state=active]]:flex [&[data-state=active]]:flex-col">
+            <div className="flex-1 min-h-0">
+              <ConversationHistory viewAsUserId={viewAsUserId || undefined} />
+            </div>
           </TabsContent>
 
           {/* Tab 3: Settings — user preferences (hidden when impersonating) */}
