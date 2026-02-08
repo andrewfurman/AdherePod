@@ -83,6 +83,8 @@ All emails logged to `emailSends` (full HTML body + SendGrid message ID). Webhoo
 Sticky nav, hero with Loom demo, voice-first callout, features grid (6), How It Works (3 steps), Who It's For (6 cards), team bios, CTA, footer.
 ## Environment Variables
 Set in `.env.local` (local) and Vercel project settings (production): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `NEXT_PUBLIC_APP_URL`, `OPENAI_API_KEY`, `CRON_SECRET`, `SENDGRID_WEBHOOK_KEY`, `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`.
+## Git Safety
+Before every commit, check that no sensitive files (.env, .env.local, credentials, API keys, passwords) are being staged. Never commit secrets. Files with credentials must be in .gitignore.
 ## Deployment
 Vercel project: `andrew-furmans-projects/adherepod`, root dir `app/`. Pushing to `main` auto-deploys to **AdherePod.com**. Single environment (production only). Manual: `cd /path/to/AdherePod && vercel --prod`.
 ## Email Preferences

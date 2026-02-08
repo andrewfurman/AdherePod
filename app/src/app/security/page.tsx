@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Heart,
   Shield,
   Lock,
   Key,
@@ -15,6 +14,7 @@ import {
   Clock,
   ArrowRight,
 } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 
 export const metadata = {
   title: "Security & Compliance | AdherePod",
@@ -134,7 +134,7 @@ export default function SecurityPage() {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-8 w-8 text-red-500" />
+            <AdherepodLogo size={32} />
             <span className="text-xl font-bold">AdherePod</span>
           </Link>
           <Link
@@ -336,7 +336,7 @@ export default function SecurityPage() {
       <footer className="border-t border-border py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-red-500" />
+            <AdherepodLogo size={20} />
             <span className="font-semibold">AdherePod</span>
           </Link>
           <p className="text-sm text-muted-foreground">

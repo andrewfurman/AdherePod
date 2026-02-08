@@ -1,5 +1,5 @@
-import { Heart } from "lucide-react";
 import Link from "next/link";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 
 export default function AuthLayout({
   children,
@@ -13,7 +13,7 @@ export default function AuthLayout({
           href="/"
           className="flex items-center justify-center gap-2 mb-8"
         >
-          <Heart className="h-8 w-8 text-red-500" />
+          <AdherepodLogo size={32} />
           <span className="text-2xl font-bold">AdherePod</span>
         </Link>
         {children}

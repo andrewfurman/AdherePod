@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 
 export const metadata = {
   title: "Logo Concepts | AdherePod",
@@ -418,17 +418,164 @@ const logos = [
           fill="#0f172a"
         />
         {/* "A" bars — peak shape */}
-        <rect x="26" y="62" width="5" height="10" rx="2" fill="#ef4444" />
-        <rect x="33" y="54" width="5" height="18" rx="2" fill="#ef4444" />
-        <rect x="40" y="42" width="5" height="30" rx="2" fill="#ef4444" />
-        <rect x="47" y="54" width="5" height="18" rx="2" fill="#ef4444" />
-        <rect x="54" y="62" width="5" height="10" rx="2" fill="#ef4444" />
-        {/* "P" bars — tall then rounded hump */}
-        <rect x="64" y="42" width="5" height="30" rx="2" fill="white" />
-        <rect x="71" y="44" width="5" height="18" rx="2" fill="white" />
-        <rect x="78" y="48" width="5" height="14" rx="2" fill="white" />
-        <rect x="85" y="44" width="5" height="18" rx="2" fill="white" />
-        <rect x="92" y="55" width="5" height="17" rx="2" fill="white" />
+        <rect x="26" y="65" width="5" height="10" rx="2" fill="#ef4444" />
+        <rect x="33" y="57" width="5" height="18" rx="2" fill="#ef4444" />
+        <rect x="40" y="45" width="5" height="30" rx="2" fill="#ef4444" />
+        <rect x="47" y="57" width="5" height="18" rx="2" fill="#ef4444" />
+        <rect x="54" y="65" width="5" height="10" rx="2" fill="#ef4444" />
+        {/* "P" bars — tall stem then rounded bowl */}
+        <rect x="64" y="45" width="5" height="30" rx="2" fill="white" />
+        <rect x="71" y="45" width="5" height="18" rx="2" fill="white" />
+        <rect x="78" y="47" width="5" height="14" rx="2" fill="white" />
+        <rect x="85" y="45" width="5" height="18" rx="2" fill="white" />
+      </svg>
+    ),
+  },
+  {
+    name: "Pill + AP Waveform v3b",
+    description:
+      'Dark filled pill with red A peak and white P bowl — wider spacing, cleaner letter separation.',
+    svg: (
+      <svg
+        width="120"
+        height="120"
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Pill filled */}
+        <rect
+          x="10"
+          y="35"
+          width="100"
+          height="50"
+          rx="25"
+          fill="#0f172a"
+        />
+        {/* "A" bars — red peak, wider spacing */}
+        <rect x="22" y="64" width="6" height="8" rx="2" fill="#ef4444" />
+        <rect x="30" y="54" width="6" height="18" rx="2" fill="#ef4444" />
+        <rect x="38" y="42" width="6" height="30" rx="2" fill="#ef4444" />
+        <rect x="46" y="54" width="6" height="18" rx="2" fill="#ef4444" />
+        <rect x="54" y="64" width="6" height="8" rx="2" fill="#ef4444" />
+        {/* "P" bars — white, stem + bowl that returns to stem height */}
+        <rect x="66" y="42" width="6" height="30" rx="2" fill="white" />
+        <rect x="74" y="42" width="6" height="16" rx="2" fill="white" />
+        <rect x="82" y="45" width="6" height="12" rx="2" fill="white" />
+        <rect x="90" y="42" width="6" height="16" rx="2" fill="white" />
+      </svg>
+    ),
+  },
+  {
+    name: "Pill + AP Waveform v4",
+    description:
+      'Outlined pill with wider spaced bars — A as a symmetric peak with visible crossbar, P as tall stem with upper-only bowl.',
+    svg: (
+      <svg
+        width="120"
+        height="120"
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Pill outline */}
+        <rect
+          x="10"
+          y="35"
+          width="100"
+          height="50"
+          rx="25"
+          stroke="#0f172a"
+          strokeWidth="4"
+          fill="none"
+        />
+        {/* "A" bars — symmetric peak */}
+        <rect x="22" y="64" width="6" height="8" rx="3" fill="#ef4444" />
+        <rect x="30" y="52" width="6" height="20" rx="3" fill="#ef4444" />
+        <rect x="38" y="40" width="6" height="32" rx="3" fill="#ef4444" />
+        <rect x="46" y="52" width="6" height="20" rx="3" fill="#ef4444" />
+        <rect x="54" y="64" width="6" height="8" rx="3" fill="#ef4444" />
+        {/* A crossbar */}
+        <rect x="30" y="57" width="22" height="3" rx="1.5" fill="#ef4444" opacity="0.5" />
+        {/* "P" bars — stem + upper bowl */}
+        <rect x="66" y="40" width="6" height="32" rx="3" fill="#ef4444" />
+        <rect x="74" y="40" width="6" height="16" rx="3" fill="#ef4444" />
+        <rect x="82" y="42" width="6" height="12" rx="3" fill="#ef4444" />
+        <rect x="90" y="40" width="6" height="16" rx="3" fill="#ef4444" />
+      </svg>
+    ),
+  },
+  {
+    name: "Pill + AP Waveform v5",
+    description:
+      'Dark filled pill with two-tone waveform — white bars form the A peak, red bars form the P stem and bowl.',
+    svg: (
+      <svg
+        width="120"
+        height="120"
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Pill filled */}
+        <rect
+          x="10"
+          y="35"
+          width="100"
+          height="50"
+          rx="25"
+          fill="#0f172a"
+        />
+        {/* "A" bars — white */}
+        <rect x="22" y="64" width="6" height="8" rx="3" fill="white" />
+        <rect x="30" y="52" width="6" height="20" rx="3" fill="white" />
+        <rect x="38" y="40" width="6" height="32" rx="3" fill="white" />
+        <rect x="46" y="52" width="6" height="20" rx="3" fill="white" />
+        <rect x="54" y="64" width="6" height="8" rx="3" fill="white" />
+        {/* A crossbar */}
+        <rect x="30" y="57" width="22" height="3" rx="1.5" fill="white" opacity="0.4" />
+        {/* "P" bars — red */}
+        <rect x="66" y="40" width="6" height="32" rx="3" fill="#ef4444" />
+        <rect x="74" y="40" width="6" height="16" rx="3" fill="#ef4444" />
+        <rect x="82" y="42" width="6" height="12" rx="3" fill="#ef4444" />
+        <rect x="90" y="40" width="6" height="16" rx="3" fill="#ef4444" />
+      </svg>
+    ),
+  },
+  {
+    name: "Pill + AP Waveform v6",
+    description:
+      'Red filled pill with white A bars and dark P bars — inverted color scheme for a bold, distinctive look.',
+    svg: (
+      <svg
+        width="120"
+        height="120"
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Pill filled red */}
+        <rect
+          x="10"
+          y="35"
+          width="100"
+          height="50"
+          rx="25"
+          fill="#ef4444"
+        />
+        {/* "A" bars — white */}
+        <rect x="22" y="64" width="6" height="8" rx="3" fill="white" />
+        <rect x="30" y="52" width="6" height="20" rx="3" fill="white" />
+        <rect x="38" y="40" width="6" height="32" rx="3" fill="white" />
+        <rect x="46" y="52" width="6" height="20" rx="3" fill="white" />
+        <rect x="54" y="64" width="6" height="8" rx="3" fill="white" />
+        {/* A crossbar */}
+        <rect x="30" y="57" width="22" height="3" rx="1.5" fill="white" opacity="0.5" />
+        {/* "P" bars — dark */}
+        <rect x="66" y="40" width="6" height="32" rx="3" fill="#0f172a" />
+        <rect x="74" y="40" width="6" height="16" rx="3" fill="#0f172a" />
+        <rect x="82" y="42" width="6" height="12" rx="3" fill="#0f172a" />
+        <rect x="90" y="40" width="6" height="16" rx="3" fill="#0f172a" />
       </svg>
     ),
   },
@@ -487,7 +634,7 @@ export default function LogosPage() {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-8 w-8 text-red-500" />
+            <AdherepodLogo size={32} />
             <span className="text-xl font-bold">AdherePod</span>
           </Link>
           <Link
@@ -503,8 +650,8 @@ export default function LogosPage() {
       <section className="text-center py-16 px-4 sm:px-6">
         <h1 className="text-4xl font-bold mb-4">Logo Concepts</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          13 logo design concepts for AdherePod. Each logo uses our brand colors
-          and can be exported as SVG. Includes 3 variations of the Pill + AP Waveform concept.
+          17 logo design concepts for AdherePod. Each logo uses our brand colors
+          and can be exported as SVG. Includes 7 variations of the Pill + AP Waveform concept.
         </p>
       </section>
 
@@ -521,6 +668,32 @@ export default function LogosPage() {
               <p className="text-sm text-muted-foreground">
                 {logo.description}
               </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* AI-Generated Logos */}
+      <section className="px-4 sm:px-6 pb-20">
+        <h2 className="text-2xl font-bold text-center mb-2">AI-Generated Logos</h2>
+        <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
+          Generated with Google Gemini Imagen — Pill + AP Waveform concept in 3 color variations.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {[
+            { src: "/logos/ap-waveform-pill-1.png", name: "Outlined Pill + Red AP", description: "Navy outlined pill with red waveform bars forming A peak and P stem." },
+            { src: "/logos/ap-waveform-pill-2.png", name: "Dark Pill + Two-Tone AP", description: "Dark filled pill with white A bars and red P bars for clear letter contrast." },
+            { src: "/logos/ap-waveform-pill-3.png", name: "Red Pill + Dark AP", description: "Red filled pill with white A bars and dark navy P bars — inverted color scheme." },
+          ].map((logo, i) => (
+            <div
+              key={i}
+              className="border border-border rounded-xl p-8 text-center bg-white"
+            >
+              <div className="flex justify-center mb-6">
+                <Image src={logo.src} alt={logo.name} width={200} height={200} className="rounded-lg" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">{logo.name}</h3>
+              <p className="text-sm text-muted-foreground">{logo.description}</p>
             </div>
           ))}
         </div>

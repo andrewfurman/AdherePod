@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { AdherepodLogo } from "@/components/adherepod-logo";
 
 export const metadata = {
   title: "Privacy Policy & Terms of Service | AdherePod",
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-8 w-8 text-red-500" />
+            <AdherepodLogo size={32} />
             <span className="text-xl font-bold">AdherePod</span>
           </Link>
           <Link
