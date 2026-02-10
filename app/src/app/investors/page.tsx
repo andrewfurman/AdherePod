@@ -232,15 +232,17 @@ export default function InvestorsPage() {
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Pill className="h-6 w-6 text-primary" />
+                <Camera className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h4 className="font-semibold text-lg mb-1">
-                  Smart Dispensing
+                  Camera-Based Health Import
                 </h4>
                 <p className="text-muted-foreground text-sm">
-                  Physical pill storage and automated dispensing at scheduled
-                  times with alerts
+                  Show any prescription, pill bottle, after-visit summary, or
+                  medical document to the camera. AI reads and imports it
+                  instantly &mdash; building a complete health record without
+                  manual data entry.
                 </p>
               </div>
             </div>
@@ -355,8 +357,8 @@ export default function InvestorsPage() {
               },
               {
                 num: "3",
-                title: "Automated Dispensing",
-                text: "Pills dispensed on schedule with voice prompts and screen alerts.",
+                title: "Import Health Records",
+                text: "Show prescriptions, pill bottles, or doctor documents to the camera. AI reads and imports everything automatically.",
               },
               {
                 num: "4",
@@ -451,7 +453,7 @@ export default function InvestorsPage() {
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16">
             Business Model
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             <Card>
               <CardHeader>
                 <DollarSign className="h-10 w-10 text-primary mb-2" />
@@ -460,7 +462,7 @@ export default function InvestorsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Medicare Advantage plans pay $3&ndash;$8 PMPM for adherence
+                Medicare Advantage plans pay $3&ndash;$10 PMPM for adherence
                 improvement. Revenue scales with enrolled member count.
               </CardContent>
             </Card>
@@ -487,6 +489,19 @@ export default function InvestorsPage() {
                 Anonymized adherence analytics for pharma companies, real-world
                 evidence packages, and SaaS dashboards for payer care management
                 teams.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Shield className="h-10 w-10 text-primary mb-2" />
+                <CardTitle className="text-lg">
+                  Zero-Risk Outcomes-Based
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Pay nothing until adherence metrics improve. Tied to PDC
+                thresholds, Star Rating gains, and hospitalization reduction.
+                Aligns incentives completely.
               </CardContent>
             </Card>
           </div>
@@ -518,7 +533,7 @@ export default function InvestorsPage() {
 
           {/* Unit Economics */}
           <h3 className="text-2xl font-bold text-center mb-4">
-            Unit Economics: Why $3&ndash;$8 PMPM Works
+            Unit Economics: Why $3&ndash;$10 PMPM Works
           </h3>
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-8">
             MA plans that reach 4+ stars earn ~$50 PMPM in CMS bonus payments.
@@ -532,7 +547,7 @@ export default function InvestorsPage() {
                   AdherePod Cost
                 </p>
                 <CardTitle className="text-4xl font-bold text-foreground">
-                  $3&ndash;$8
+                  $3&ndash;$10
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground text-sm">
@@ -566,13 +581,69 @@ export default function InvestorsPage() {
               </CardContent>
             </Card>
           </div>
-          <div className="max-w-4xl mx-auto rounded-xl border border-border bg-background p-6">
+          <div className="max-w-4xl mx-auto rounded-xl border border-border bg-background p-6 mb-16">
             <p className="text-sm text-muted-foreground text-center">
               <span className="font-semibold text-foreground">Example:</span>{" "}
               A 100K-member MA plan paying $5 PMPM = $6M/year to AdherePod.
               Reaching 4+ stars unlocks ~$60M/year in CMS bonus payments
               &mdash; a{" "}
               <span className="font-semibold text-primary">10x return</span>.
+            </p>
+          </div>
+
+          {/* Health Data as the Core Asset */}
+          <h3 className="text-2xl font-bold text-center mb-4">
+            The Data Flywheel
+          </h3>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+            The device is the distribution. The data is the asset. Every interaction deepens the moat.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-8">
+            <Card>
+              <CardHeader>
+                <Mic className="h-8 w-8 text-primary mb-2" />
+                <CardTitle className="text-base">Voice Conversations</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Every conversation captures health context, symptoms, concerns,
+                and medication experiences.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Camera className="h-8 w-8 text-primary mb-2" />
+                <CardTitle className="text-base">Camera Import</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Prescriptions, pill bottles, after-visit summaries, and any
+                medical document &mdash; just show it to the camera.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Pill className="h-8 w-8 text-primary mb-2" />
+                <CardTitle className="text-base">Out-of-Pocket Medications</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Captures ALL medications including drugs paid out-of-pocket that
+                never appear in claims data (e.g., 78% of GLP-1 users).
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Activity className="h-8 w-8 text-primary mb-2" />
+                <CardTitle className="text-base">Longitudinal Health Record</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm">
+                Over time, builds the most comprehensive real-time health data
+                source for each member.
+              </CardContent>
+            </Card>
+          </div>
+          <div className="max-w-4xl mx-auto rounded-xl border border-primary/30 bg-primary/5 p-6 text-center">
+            <p className="text-foreground font-semibold italic">
+              &ldquo;The device is the distribution. The data is the asset.
+              Every interaction deepens the moat.&rdquo;
             </p>
           </div>
         </div>
@@ -680,10 +751,10 @@ export default function InvestorsPage() {
                   <td className="text-center py-3 px-4">&mdash;</td>
                 </tr>
                 <tr className="border-b border-border/50">
-                  <td className="py-3 px-4">Automated dispensing</td>
+                  <td className="py-3 px-4">Camera-based health data import</td>
                   <td className="text-center py-3 px-4 text-primary font-bold">&#10003;</td>
-                  <td className="text-center py-3 px-4">&#10003;</td>
-                  <td className="text-center py-3 px-4">&#10003;</td>
+                  <td className="text-center py-3 px-4">&mdash;</td>
+                  <td className="text-center py-3 px-4">&mdash;</td>
                   <td className="text-center py-3 px-4">&mdash;</td>
                 </tr>
                 <tr className="border-b border-border/50">
