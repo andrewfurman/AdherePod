@@ -12,7 +12,8 @@ import {
   Pill,
   Activity,
   ShieldCheck,
-  Bluetooth,
+  Tablet,
+  Camera,
   BarChart3,
   DollarSign,
   Users,
@@ -122,9 +123,9 @@ export default function Home() {
             <span className="text-muted-foreground">No screens. No confusion.</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            AdherePod is a plug-and-play device that sits in your home and manages
-            your medications through simple voice conversation. Designed for people
-            who need health management to just work.
+            AdherePod is a pre-configured tablet with built-in LTE, shipped directly
+            to your door and ready to use out of the box. No WiFi setup needed. No
+            smartphone required. Just plug it in and start talking.
           </p>
           {!session?.user && (
             <div className="flex items-center justify-center gap-3 mb-10">
@@ -193,7 +194,7 @@ export default function Home() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Everything your health needs in one device</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              No apps to download. No menus to navigate. Just plug in, pair your devices, and start talking.
+              No apps to download. No menus to navigate. Just plug in and start talking.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -210,12 +211,12 @@ export default function Home() {
 
             <Card>
               <CardHeader>
-                <Bluetooth className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Device Integration</CardTitle>
+                <Tablet className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Pre-Configured Tablet</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Connects to blood pressure monitors, glucose meters, pulse oximeters,
-                scales, and wearables. Automatic data capture.
+                An LTE-connected tablet that arrives ready to use. Always-on display,
+                built-in camera and mic. No WiFi setup needed.
               </CardContent>
             </Card>
 
@@ -243,12 +244,12 @@ export default function Home() {
 
             <Card>
               <CardHeader>
-                <Activity className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Adherence Tracking</CardTitle>
+                <Camera className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Health Data Capture</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">
-                Logs medication doses and vitals automatically. Builds a
-                comprehensive adherence score over time.
+                Show prescriptions, pill bottles, or after-visit summaries to the
+                camera to build your complete health record automatically.
               </CardContent>
             </Card>
 
@@ -272,9 +273,9 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-16">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: "1", icon: Mic, title: "Talk", desc: "Have a live voice conversation with AdherePod about your medications, schedule, and health questions." },
-              { step: "2", icon: MessageCircle, title: "Discuss", desc: "AdherePod helps you manage your medications, check for interactions, and track your adherence over time." },
-              { step: "3", icon: Bell, title: "Get Notified", desc: "Receive reminders and new health advice via phone call or SMS when it's time to take your medications or when the system has guidance for you." },
+              { step: "1", icon: Mic, title: "Receive", desc: "Your AdherePod tablet arrives pre-configured and pre-logged-in. Just plug it in." },
+              { step: "2", icon: MessageCircle, title: "Import", desc: "Show your pill bottles, prescriptions, or doctor documents to the camera. Talk to set up reminders." },
+              { step: "3", icon: Bell, title: "Stay on Track", desc: "Daily voice check-ins, medication reminders, and care team oversight keep you on track." },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">

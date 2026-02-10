@@ -3,7 +3,7 @@ import Image from "next/image";
 import {
   Heart,
   Tablet,
-  Wifi,
+  Signal,
   Camera,
   Mic,
   Volume2,
@@ -62,9 +62,9 @@ export default function DevicePage() {
             The AdherePod Device
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            A dedicated tablet that sits in your home and manages your
-            medications through voice. No smartphone required. No app store. No
-            setup.
+            A dedicated tablet with built-in LTE that ships pre-configured and
+            pre-logged-in. No WiFi setup needed. No smartphone required.
+            Just plug it in and start talking.
           </p>
           <Badge variant="secondary" className="text-sm px-4 py-1">
             Coming Soon
@@ -79,28 +79,28 @@ export default function DevicePage() {
             A New Kind of Health Device
           </h2>
           <p className="text-lg text-muted-foreground text-center max-w-3xl mx-auto mb-10">
-            The AdherePod device is a custom Samsung tablet pre-loaded with the
-            AdherePod platform. It&apos;s an always-on, always-listening
-            medication assistant that sits on your kitchen counter or nightstand.
-            Just plug it in and start talking.
+            The AdherePod device is a Samsung tablet that ships pre-configured
+            with your account and built-in LTE cellular. It&apos;s an always-on,
+            always-listening medication assistant that sits on your kitchen
+            counter or nightstand. Just plug it in and press the button.
           </p>
           <div className="max-w-2xl mx-auto space-y-4">
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
               <p className="text-foreground">
-                No smartphone required &mdash; works independently
+                No WiFi setup required &mdash; built-in LTE cellular
               </p>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
               <p className="text-foreground">
-                No app store, no downloads, no updates to manage
+                Pre-logged-in with your account &mdash; zero configuration
               </p>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
               <p className="text-foreground">
-                Pre-configured and ready to use out of the box
+                Shipped directly to your door via FedEx
               </p>
             </div>
           </div>
@@ -119,13 +119,13 @@ export default function DevicePage() {
                 step: "1",
                 icon: Power,
                 title: "Unbox & Plug In",
-                desc: "Your AdherePod arrives pre-configured. Just plug it in and connect to your WiFi network. That's it.",
+                desc: "Your AdherePod arrives pre-configured with your account and built-in LTE. Just take it out of the box and plug it in. That's it.",
               },
               {
                 step: "2",
                 icon: Mic,
                 title: "Add Your Medications",
-                desc: "Tell AdherePod your medications by voice, or have a caregiver set them up through the web dashboard.",
+                desc: "Tell AdherePod your medications by voice, show your pill bottles to the built-in camera for instant import, or have a caregiver set them up through the web dashboard.",
               },
               {
                 step: "3",
@@ -167,7 +167,7 @@ export default function DevicePage() {
               {
                 icon: Camera,
                 title: "Built-In Camera",
-                desc: "Point your pills at the camera for instant identification. Never wonder 'what is this pill?' again.",
+                desc: "Show prescriptions, pill bottles, or after-visit summaries to build your complete health record. Never wonder 'what is this pill?' again.",
               },
               {
                 icon: Mic,
@@ -175,9 +175,9 @@ export default function DevicePage() {
                 desc: "Built-in speaker and microphone for hands-free voice conversation with your medication assistant.",
               },
               {
-                icon: Wifi,
-                title: "WiFi Connected",
-                desc: "Cloud sync keeps your data safe and enables caregiver access through the web dashboard.",
+                icon: Signal,
+                title: "Built-in LTE Cellular",
+                desc: "Always connected via cellular. No WiFi setup needed. Cloud sync keeps your data safe and enables caregiver access.",
               },
               {
                 icon: Sun,
@@ -282,9 +282,8 @@ export default function DevicePage() {
           <div className="border border-border rounded-lg p-8 sm:p-10 text-center">
             <h2 className="text-3xl font-bold mb-6">Pricing</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-              Pricing will be announced soon. We&apos;re exploring both direct
-              purchase and subscription models to make AdherePod accessible to
-              everyone.
+              Free for qualifying Medicare Advantage members. Your insurance
+              plan covers the device and service.
             </p>
             <p className="text-muted-foreground">
               Interested in bulk pricing for your organization?{" "}

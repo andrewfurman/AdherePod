@@ -315,6 +315,83 @@ export default function MedicareAdvantagePage() {
         </div>
       </section>
 
+      {/* Flexible Pricing */}
+      <section className="py-20 px-4 sm:px-6 bg-muted">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <DollarSign className="h-10 w-10 mx-auto mb-4 text-primary" />
+            <h2 className="text-3xl font-bold mb-4">Flexible Pricing</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Choose the model that works for your plan &mdash; or combine both.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            <Card className="border-2 border-primary/30">
+              <CardHeader>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold w-fit mb-2">
+                  Model 1
+                </div>
+                <CardTitle className="text-xl">Per-Member-Per-Month</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-muted-foreground text-sm">
+                <p className="text-2xl font-bold text-primary">$3&ndash;$10 PMPM</p>
+                <p>Predictable, budgetable cost depending on population size and scope.</p>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Includes device, platform, and ongoing support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Revenue scales with enrolled member count</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Simple, predictable budget line item</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-2 border-primary/30">
+              <CardHeader>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold w-fit mb-2">
+                  Model 2
+                </div>
+                <CardTitle className="text-xl">Zero-Risk Outcomes-Based</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-muted-foreground text-sm">
+                <p className="text-lg font-semibold text-primary">Pay nothing until adherence metrics improve</p>
+                <p>Tied to specific measurable outcomes:</p>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span><span className="font-semibold text-foreground">PDC improvement</span> &mdash; increase Proportion of Days Covered toward the 80% threshold across D08, D09, D10. Research shows increasing diabetes drug adherence from 50% to 100% reduces hospitalizations by 23.3% and ER visits by 46.2%.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span><span className="font-semibold text-foreground">Star Rating improvement</span> &mdash; payment tied to measurable gains. These 3 Part D adherence measures account for 11.1% of overall Star Rating weight in 2026. Moving from 3 to 4 stars increases plan revenue 13&ndash;17%.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span><span className="font-semibold text-foreground">Hospitalization reduction</span> &mdash; reduced ER visits and inpatient admissions attributable to non-adherence. Non-adherent patients require 3+ extra medical visits/year, adding $2,000+ per patient annually.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span><span className="font-semibold text-foreground">Medication gap closure</span> &mdash; percentage of identified adherence gaps closed within a measurement period</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="max-w-4xl mx-auto rounded-xl border border-primary/30 bg-primary/5 p-6 text-center">
+            <BarChart3 className="h-8 w-8 mx-auto mb-3 text-primary" />
+            <p className="text-foreground font-semibold text-base leading-relaxed">
+              Adherence interventions show benefit-cost ratios of 13.5:1 (hypertension), 8.6:1 (diabetes/heart failure), and 3.8:1 (statins). Statin adherence alone saves $157 PMPM in total costs.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 px-4 sm:px-6 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
@@ -324,7 +401,8 @@ export default function MedicareAdvantagePage() {
           </h2>
           <p className="text-lg opacity-90 mb-8">
             See how AdherePod can help your plan reach the 4-star threshold and
-            unlock millions in quality bonus payments.
+            unlock millions in quality bonus payments. Choose the model that
+            works for your plan &mdash; or combine both.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <a href="mailto:sales@adherepod.com">
