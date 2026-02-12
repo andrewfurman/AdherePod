@@ -4,8 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "AdherePod",
     short_name: "AdherePod",
-    description:
-      "Voice-native medication adherence for elderly and low-literacy users",
+    description: "AdherePod",
     start_url: "/",
     display: "standalone",
     background_color: "#000000",
