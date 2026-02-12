@@ -428,19 +428,26 @@ export default function DashboardPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
-        <nav className="shrink-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="h-[3px] bg-red-500" />
+        <nav className="shrink-0 z-50 border-b border-white/10 bg-black text-white">
           <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <AdherepodLogo size={56} />
-              <span className="text-xl font-bold">AdherePod</span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2">
+                <AdherepodLogo size={56} />
+                <span className="text-xl font-bold">AdherePod</span>
+              </Link>
+              <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                <Pill className="h-3 w-3" />
+                My Medications
+              </span>
+            </div>
             <div className="flex items-center gap-4">
-              <TabsList>
-                <TabsTrigger value="medications">
+              <TabsList className="bg-white/10">
+                <TabsTrigger value="medications" className="text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/15">
                   <Pill className="h-4 w-4 sm:mr-1.5" />
                   <span className="hidden sm:inline">My Medications</span>
                 </TabsTrigger>
-                <TabsTrigger value="history">
+                <TabsTrigger value="history" className="text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/15">
                   <MessageCircle className="h-4 w-4 sm:mr-1.5" />
                   <span className="hidden sm:inline">History</span>
                 </TabsTrigger>

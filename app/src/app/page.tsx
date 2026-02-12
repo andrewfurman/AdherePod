@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 border-b border-white/10 bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <a href="#" className="flex items-center gap-2">
             <AdherepodLogo size={64} />
@@ -41,11 +41,11 @@ export default function Home() {
           </a>
           <div className="flex items-center gap-3">
             {/* Desktop nav links */}
-            <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-              <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-              <a href="#who" className="hover:text-foreground transition-colors">Who It&apos;s For</a>
-              <a href="#team" className="hover:text-foreground transition-colors">Team</a>
+            <div className="hidden md:flex items-center gap-8 text-sm text-white/70">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
+              <a href="#who" className="hover:text-white transition-colors">Who It&apos;s For</a>
+              <a href="#team" className="hover:text-white transition-colors">Team</a>
             </div>
             {/* Auth buttons — always visible */}
             {session?.user ? (
@@ -59,7 +59,7 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/sign-in">
-                  <Button variant="ghost" size="sm">Sign In</Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">Sign In</Button>
                 </Link>
                 <Link href="/sign-up">
                   <Button size="sm">Sign Up</Button>
@@ -68,7 +68,7 @@ export default function Home() {
             )}
             {/* Hamburger — mobile only */}
             <button
-              className="md:hidden p-3 lg:p-2 rounded-md hover:bg-muted transition-colors"
+              className="md:hidden p-3 lg:p-2 rounded-md hover:bg-white/10 transition-colors text-white"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
@@ -78,31 +78,31 @@ export default function Home() {
         </div>
         {/* Mobile dropdown */}
         {menuOpen && (
-          <div className="md:hidden border-t border-border bg-background px-4 py-3 space-y-2">
+          <div className="md:hidden border-t border-white/10 bg-black px-4 py-3 space-y-2">
             <a
               href="#features"
-              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Features
             </a>
             <a
               href="#how-it-works"
-              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               How It Works
             </a>
             <a
               href="#who"
-              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Who It&apos;s For
             </a>
             <a
               href="#team"
-              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm hover:bg-muted transition-colors"
+              className="block px-3 py-3 lg:py-2 rounded-md text-base lg:text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Team

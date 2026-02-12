@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Pill, LogOut, Plus, X, MessageCircle, Search, Clock, Calendar, UserPlus, Trash2, Shield } from "lucide-react";
+import { Pill, LogOut, Plus, X, MessageCircle, Search, Clock, Calendar, UserPlus, Trash2, Shield, Stethoscope } from "lucide-react";
 import { AdherepodLogo } from "@/components/adherepod-logo";
 import Link from "next/link";
 import MedicationCard from "@/components/medication-card";
@@ -307,16 +307,20 @@ export default function ProviderDashboardPage() {
   return (
     <div className="min-h-screen flex flex-col overflow-hidden bg-background">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="h-[3px] bg-blue-500" />
+      <nav className="sticky top-0 z-50 border-b border-white/10 shrink-0 bg-black text-white">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <AdherepodLogo size={56} />
-            <span className="text-xl font-bold">AdherePod</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
-              Provider Dashboard
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <AdherepodLogo size={56} />
+              <span className="text-xl font-bold">AdherePod</span>
+            </Link>
+            <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <Stethoscope className="h-3 w-3" />
+              Care Team
             </span>
+          </div>
+          <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
