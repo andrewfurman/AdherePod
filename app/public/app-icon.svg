@@ -2,17 +2,17 @@
   <!-- Black background -->
   <rect width="512" height="512" fill="#000000"/>
 
-  <!-- Waveform bars centered both horizontally and vertically -->
+  <!-- Waveform bars, horizontally centered -->
   <!-- Red bars (left group) -->
-  <rect x="72" y="228" width="28" height="56" rx="10" fill="#ef4444"/>
-  <rect x="112" y="184" width="28" height="100" rx="10" fill="#ef4444"/>
-  <rect x="152" y="170" width="28" height="172" rx="10" fill="#ef4444"/>
-  <rect x="192" y="184" width="28" height="100" rx="10" fill="#ef4444"/>
-  <rect x="232" y="228" width="28" height="56" rx="10" fill="#ef4444"/>
+  <rect x="72" y="296" width="28" height="56" rx="10" fill="#ef4444"/>
+  <rect x="112" y="252" width="28" height="100" rx="10" fill="#ef4444"/>
+  <rect x="152" y="180" width="28" height="172" rx="10" fill="#ef4444"/>
+  <rect x="192" y="252" width="28" height="100" rx="10" fill="#ef4444"/>
+  <rect x="232" y="296" width="28" height="56" rx="10" fill="#ef4444"/>
 
   <!-- White bars (right group) -->
-  <rect x="292" y="170" width="28" height="172" rx="10" fill="white"/>
-  <rect x="332" y="206" width="28" height="100" rx="10" fill="white"/>
-  <rect x="372" y="218" width="28" height="76" rx="10" fill="white"/>
-  <rect x="412" y="206" width="28" height="100" rx="10" fill="white"/>
+  <rect x="292" y="180" width="28" height="172" rx="10" fill="white"/>
+  <rect x="332" y="180" width="28" height="100" rx="10" fill="white"/>
+  <rect x="372" y="192" width="28" height="76" rx="10" fill="white"/>
+  <rect x="412" y="180" width="28" height="100" rx="10" fill="white"/>
 </svg>
