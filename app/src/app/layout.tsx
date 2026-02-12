@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/next";
+import { InstallBanner } from "@/components/install-banner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,6 +28,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: ["/hero-image.png"],
   },
+  icons: {
+    apple: "/icon-180x180.png",
+  },
 };
 
 export default function RootLayout({
@@ -40,6 +44,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider>{children}</SessionProvider>
+        <InstallBanner />
         <Analytics />
       </body>
     </html>
