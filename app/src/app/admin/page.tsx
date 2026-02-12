@@ -223,16 +223,19 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 border-b border-white/10 shrink-0 bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <AdherepodLogo size={56} />
-            <span className="text-xl font-bold">AdherePod</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
-              Admin Dashboard
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <AdherepodLogo size={56} />
+              <span className="text-xl font-bold">AdherePod</span>
+            </Link>
+            <span className="bg-white/10 text-white/70 border border-white/20 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <Shield className="h-3 w-3" />
+              Admin
             </span>
+          </div>
+          <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">

@@ -116,8 +116,8 @@ test.describe("Provider & Patient User Types", () => {
     await page.goto("/provider-dashboard");
     await page.waitForTimeout(2000);
 
-    // Admin should see "Provider Dashboard" text and patient list area
-    await expect(page.getByText("Provider Dashboard")).toBeVisible({ timeout: 10000 });
+    // Admin should see "Care Team" badge and patient list area
+    await expect(page.getByText("Care Team")).toBeVisible({ timeout: 10000 });
     await expect(page.getByPlaceholder("Search patients...").last()).toBeVisible();
   });
 
