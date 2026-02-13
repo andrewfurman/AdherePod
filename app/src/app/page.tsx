@@ -59,10 +59,10 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/sign-in">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">Sign In</Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">Sign In</Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button size="sm">Sign Up</Button>
+                  <Button size="sm" className="hover:opacity-90">Sign Up</Button>
                 </Link>
               </div>
             )}
