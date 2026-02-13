@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "login": "npx tsx scripts/login.ts",
+    "login:doctor": "npx tsx scripts/login.ts -u doctor",
+    "login:admin": "npx tsx scripts/login.ts -u admin",
+    "login:prod": "npx tsx scripts/login.ts -e prod",
+    "login:doctor:prod": "npx tsx scripts/login.ts -u doctor -e prod"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.20",
