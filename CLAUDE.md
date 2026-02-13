@@ -41,6 +41,8 @@ app/
   public/             # hero-image.png, gage-clifton.jpg, andrew-furman.jpg
   tests/              # Playwright e2e tests
   drizzle.config.ts, playwright.config.ts
+  scripts/
+    login.ts          # Browser login automation (Playwright) — see CLI Commands below
 ```
 ## Development Workflow
 After implementing a new feature, start dev server and open browser to verify: `cd app && npm run dev & open http://localhost:3000`
@@ -53,6 +55,26 @@ npx drizzle-kit push                                  # Push schema to Neon DB
 TEST_BASE_URL=https://adherepod.com npx playwright test  # Tests against production
 cd .. && vercel --prod                                # Deploy (from repo root)
 ```
+## CLI Commands (Developer Tools)
+Located in `app/scripts/`. Run from `app/` via npm scripts.
+### Login Script
+Opens a real browser window logged into AdherePod — useful for demos and manual testing.
+```bash
+cd app
+npm run login                    # admin on localhost:3000
+npm run login:doctor             # doctor on localhost:3000 → provider-dashboard
+npm run login:admin              # admin on localhost:3000 → my-medications
+npm run login:prod               # admin on adherepod.com
+npm run login:doctor:prod        # doctor on adherepod.com
+
+# With extra options:
+npm run login -- -u doctor -e prod -p admin
+npm run login -- --email user@example.com --password yourpassword
+npm run login -- --url https://preview-xyz.vercel.app -u admin
+```
+**Options:** `--user/-u` (admin|doctor|patient), `--env/-e` (local|prod|preview URL), `--page/-p` (meds|provider|admin|home), `--port`, `--email`, `--password`
+
+**Env vars used:** `TEST_USER_EMAIL`/`TEST_USER_PASSWORD` (admin), `TEST_DOCTOR_EMAIL`/`TEST_DOCTOR_PASSWORD` (doctor), `TEST_PATIENT_EMAIL`/`TEST_PATIENT_PASSWORD` (patient, optional)
 ## Database
 Schema: `app/src/lib/db/schema.ts`. After modifying, run `npx drizzle-kit push` from `app/`. `DATABASE_URL` must be set in `.env.local`.
 ### Tables
@@ -69,7 +91,7 @@ OpenAI Agents SDK with WebRTC: Client gets ephemeral key via `/api/voice/session
 SendGrid + Vercel Cron. Per-medication reminders (toggle on/off, customizable HH:mm times, cron checks every 15 min). Daily summary (per-user timezone/time/enable). Cron endpoints: `/api/cron/send-reminders` and `/api/cron/daily-summary` (authenticated via `CRON_SECRET` Bearer). Voice-controllable ("remind me to take X at 8am"). Bell icon toggle on med cards, Settings tab for preferences. Config in `app/vercel.json`.
 ## Testing
 Playwright at `app/playwright.config.ts`. Default: `localhost:3001`. Production: `TEST_BASE_URL=https://adherepod.com npx playwright test`.
-### Current Tests (30)
+### Current Tests (39)
 Auth flow (7), Public pages (5), Camera & Voice (5), View as User (3), Provider & Patient (7), Provider API (3).
 ## Auth
 Credentials-based (email/password) via NextAuth v5. Middleware (`src/middleware.ts`) protects routes. Session user ID via `auth()` in API routes.
@@ -90,4 +112,4 @@ Vercel project: `andrew-furmans-projects/adherepod`, root dir `app/`. Pushing to
 ## Email Preferences
 Emails via Himalaya: "Hi" greeting, plaintext (no bold/italic), no em dashes, clickable hyperlinks. Use multipart (text/plain + text/html).
 ## Maintaining This File
-Update when changing: tables/schema, API routes/pages, dependencies, commands/workflows, test patterns, architecture decisions.
+**This is a living document.** Keep it up to date as the app evolves. Update when changing: tables/schema, API routes/pages, dependencies, commands/workflows, test patterns, architecture decisions, CLI tools, or environment variables. Every developer should update this file when they make changes that affect project structure, conventions, or setup.
