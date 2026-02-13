@@ -2,32 +2,40 @@
 /**
  * CLI Login Script — opens a browser logged into AdherePod
  *
- * Usage:
- *   npx tsx scripts/login.ts [options]
+ * Usage (from app/):
+ *   npm run login                    # admin on localhost:3000
+ *   npm run login:doctor             # doctor on localhost:3000
+ *   npm run login:admin              # admin on localhost:3000
+ *   npm run login:prod               # admin on adherepod.com
+ *   npm run login:doctor:prod        # doctor on adherepod.com
  *
  * Options:
  *   --env, -e       Environment: local | preview | prod (default: local)
  *   --url           Custom base URL (overrides --env)
- *   --user, -u      User preset: admin | doctor | patient (reads from .env.local)
+ *   --user, -u      User preset: admin | doctor | patient (reads from app/.env.local)
  *   --email         Email address (overrides --user)
  *   --password      Password (overrides --user)
  *   --page, -p      Page to open after login: meds | provider | admin | home (default: auto by role)
  *   --port          Local dev server port (default: 3000)
  *
  * Examples:
- *   npx tsx scripts/login.ts                           # admin on localhost:3000
- *   npx tsx scripts/login.ts -u doctor                 # doctor on localhost:3000
- *   npx tsx scripts/login.ts -u doctor -e prod         # doctor on adherepod.com
- *   npx tsx scripts/login.ts -u doctor -p provider     # doctor → provider-dashboard
- *   npx tsx scripts/login.ts --email foo@bar.com --password secret123
- *   npx tsx scripts/login.ts --url https://preview-xyz.vercel.app -u admin
+ *   npm run login -- -u doctor -e prod
+ *   npm run login -- --email foo@bar.com --password secret123
+ *   npm run login -- --url https://preview-xyz.vercel.app -u admin
+ *
+ * Environment Variables (in app/.env.local):
+ *   TEST_USER_EMAIL / TEST_USER_PASSWORD       — admin user credentials
+ *   TEST_DOCTOR_EMAIL / TEST_DOCTOR_PASSWORD   — doctor/provider credentials
+ *   TEST_PATIENT_EMAIL / TEST_PATIENT_PASSWORD — patient credentials (optional, falls back to admin)
  */
 
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import dotenv from "dotenv";
 import { resolve } from "path";
 
-dotenv.config({ path: resolve(__dirname, "../.env.local") });
+// Load env — try both app/.env.local (from repo root) and .env.local (from app/)
+dotenv.config({ path: resolve(process.cwd(), ".env.local") });
+dotenv.config({ path: resolve(process.cwd(), "app/.env.local") });
 
 // --- Parse args ---
 const args = process.argv.slice(2);
@@ -38,10 +46,6 @@ function getArg(flags: string[]): string | undefined {
     if (idx !== -1 && idx + 1 < args.length) return args[idx + 1];
   }
   return undefined;
-}
-
-function hasFlag(flags: string[]): boolean {
-  return flags.some((f) => args.includes(f));
 }
 
 const envName = getArg(["--env", "-e"]) || "local";
@@ -62,7 +66,7 @@ function resolveBaseUrl(): string {
     case "production":
       return "https://adherepod.com";
     default:
-      // Treat as a Vercel preview URL slug
+      // Treat as a Vercel preview URL slug or full URL
       if (envName.startsWith("http")) return envName.replace(/\/$/, "");
       return `https://${envName}.vercel.app`;
   }
@@ -87,7 +91,6 @@ function resolveCredentials(): { email: string; password: string } {
         password: process.env.TEST_DOCTOR_PASSWORD || "",
       };
     case "patient":
-      // Falls back to admin user if no separate patient creds exist
       return {
         email: process.env.TEST_PATIENT_EMAIL || process.env.TEST_USER_EMAIL || "",
         password: process.env.TEST_PATIENT_PASSWORD || process.env.TEST_USER_PASSWORD || "",
@@ -116,7 +119,6 @@ function resolveTargetPage(role: string): string {
       case "homepage":
         return "/";
       default:
-        // Treat as a raw path
         return pageName.startsWith("/") ? pageName : `/${pageName}`;
     }
   }
@@ -133,7 +135,9 @@ async function main() {
   const targetPage = resolveTargetPage(userPreset);
 
   if (!creds.email || !creds.password) {
-    console.error("Missing credentials. Set TEST_USER_EMAIL/TEST_USER_PASSWORD (or TEST_DOCTOR_EMAIL/TEST_DOCTOR_PASSWORD) in .env.local, or pass --email and --password.");
+    console.error(
+      "Missing credentials. Set TEST_USER_EMAIL/TEST_USER_PASSWORD (or TEST_DOCTOR_EMAIL/TEST_DOCTOR_PASSWORD) in app/.env.local, or pass --email and --password."
+    );
     process.exit(1);
   }
 
