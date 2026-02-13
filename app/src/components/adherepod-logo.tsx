@@ -7,7 +7,7 @@ export function AdherepodLogo({ size = 32 }: { size?: number }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="10" y="35" width="100" height="50" rx="25" fill="#0f172a" />
+      <rect x="10" y="35" width="100" height="50" rx="25" fill="black" />
       <rect x="26" y="65" width="5" height="10" rx="2" fill="#ef4444" />
       <rect x="33" y="57" width="5" height="18" rx="2" fill="#ef4444" />
       <rect x="40" y="45" width="5" height="30" rx="2" fill="#ef4444" />
