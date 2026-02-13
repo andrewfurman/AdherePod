@@ -427,8 +427,8 @@ export default function DashboardPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
-        <div className="h-[3px] bg-red-500" />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col !gap-0">
+        <div className="h-[3px] bg-red-500 shrink-0" />
         <nav className="shrink-0 z-50 border-b border-white/10 bg-black text-white">
           <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -443,11 +443,11 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               <TabsList className="bg-white/10">
-                <TabsTrigger value="medications" className="text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/15">
+                <TabsTrigger value="medications" className="!text-white/60 hover:!text-white data-[state=active]:!text-white data-[state=active]:!bg-white/15">
                   <Pill className="h-4 w-4 sm:mr-1.5" />
                   <span className="hidden sm:inline">My Medications</span>
                 </TabsTrigger>
-                <TabsTrigger value="history" className="text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/15">
+                <TabsTrigger value="history" className="!text-white/60 hover:!text-white data-[state=active]:!text-white data-[state=active]:!bg-white/15">
                   <MessageCircle className="h-4 w-4 sm:mr-1.5" />
                   <span className="hidden sm:inline">History</span>
                 </TabsTrigger>
