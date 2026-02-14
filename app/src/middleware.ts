@@ -25,6 +25,14 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/my-medications", req.url));
   }
 
+  // Redirect providers away from /my-medications to /provider-dashboard
+  if (isLoggedIn && pathname.startsWith("/my-medications")) {
+    const role = req.auth?.user?.role === "user" ? "patient" : req.auth?.user?.role;
+    if (role === "provider") {
+      return NextResponse.redirect(new URL("/provider-dashboard", req.url));
+    }
+  }
+
   // Protect /provider-dashboard — only providers and admins
   if (pathname.startsWith("/provider-dashboard")) {
     if (!isLoggedIn) {

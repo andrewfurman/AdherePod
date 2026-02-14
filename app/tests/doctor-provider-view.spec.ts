@@ -19,29 +19,26 @@ async function signIn(
 }
 
 test.describe("Doctor Provider View", () => {
-  test("doctor can sign in and is redirected to my-medications", async ({
+  test("doctor can sign in and is redirected to provider-dashboard", async ({
     context,
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
-    // Verify the red badge in the nav
-    await expect(
-      page.locator("nav").getByText("My Medications").first()
-    ).toBeVisible();
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
+    await expect(page.getByText("Care Team")).toBeVisible();
   });
 
-  test("doctor can access provider-dashboard with Care Team badge", async ({
+  test("doctor accessing my-medications is redirected to provider-dashboard", async ({
     context,
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
 
-    await page.goto("/provider-dashboard");
-    await expect(page.getByText("Care Team")).toBeVisible({ timeout: 10000 });
-    // Blue accent bar should be present (the provider-dashboard page)
-    await expect(page.getByText("AdherePod")).toBeVisible();
+    // Try navigating to my-medications — should redirect back
+    await page.goto("/my-medications");
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
+    await expect(page.getByText("Care Team")).toBeVisible();
   });
 
   test("doctor sees patient list sidebar with search and Add Patient button", async ({
@@ -49,9 +46,8 @@ test.describe("Doctor Provider View", () => {
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
 
-    await page.goto("/provider-dashboard");
     await expect(page.getByPlaceholder("Search patients...").last()).toBeVisible({
       timeout: 10000,
     });
@@ -63,9 +59,8 @@ test.describe("Doctor Provider View", () => {
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
 
-    await page.goto("/provider-dashboard");
     await expect(
       page.getByText("Select a patient to view their details")
     ).toBeVisible({ timeout: 10000 });
@@ -76,27 +71,11 @@ test.describe("Doctor Provider View", () => {
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
-
-    await page.goto("/provider-dashboard");
-    await page.waitForTimeout(2000);
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
 
     // Open avatar dropdown
     await page.locator("[data-slot='avatar']").click();
     await expect(page.getByRole("menuitem", { name: "Sign Out" })).toBeVisible();
-  });
-
-  test("doctor my-medications page has red accent badge", async ({
-    context,
-    page,
-  }) => {
-    await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
-
-    // Red "My Medications" badge should be visible in the header
-    await expect(
-      page.locator("nav").getByText("My Medications").first()
-    ).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -130,14 +109,8 @@ test.describe("Patient vs Doctor Header Comparison", () => {
     page,
   }) => {
     await signIn(context, page, DOCTOR_EMAIL, DOCTOR_PASSWORD);
-    await page.waitForURL("**/my-medications", { timeout: 10000 });
-
-    await page.goto("/provider-dashboard");
+    await page.waitForURL("**/provider-dashboard", { timeout: 10000 });
     await page.waitForTimeout(2000);
-
-    // If doctor has patients assigned, click the first one
-    const patientButtons = page.locator(".hidden.md\\:flex .flex-1.overflow-y-auto button, .hidden.md\\:flex .flex-1.overflow-y-auto [role='button']");
-    const patientCards = page.locator("[class*='border-b'][class*='cursor-pointer'], [class*='hover\\:bg']").filter({ hasText: /@/ });
 
     // Try clicking any patient in the sidebar
     const sidebarPatients = page.locator(".hidden.md\\:flex.w-64 .flex-1.overflow-y-auto > div");
@@ -148,11 +121,11 @@ test.describe("Patient vs Doctor Header Comparison", () => {
       await page.waitForTimeout(1000);
 
       // Should see Medications and Conversations tabs
-      await expect(page.getByRole("button", { name: "Medications" })).toBeVisible({
+      await expect(page.getByRole("button", { name: "Medications", exact: true })).toBeVisible({
         timeout: 10000,
       });
       await expect(
-        page.getByRole("button", { name: "Conversations" })
+        page.getByRole("button", { name: "Conversations", exact: true })
       ).toBeVisible();
     } else {
       // No patients assigned — verify the empty state
