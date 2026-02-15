@@ -20,7 +20,7 @@
  *
  * Examples:
  *   npm run login -- -u doctor -e prod
- *   npm run login -- --email foo@bar.com --password yourpassword
+ *   npm run login -- --email user@example.com --password yourpassword
  *   npm run login -- --url https://preview-xyz.vercel.app -u admin
  *
  * Environment Variables (in app/.env.local):
