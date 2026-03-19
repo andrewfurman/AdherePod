@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdherePod — Investor Deck</title>
+
+    <!-- Fonts: Archivo Black + Space Grotesk (Bold Signal preset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (BOLD SIGNAL THEME)
+           =========================================== */
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-gradient: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+            --card-bg: #FF5722;
+            --card-bg-alt: #FF7043;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-on-card: #0f0f0f;
+            --accent: #FF5722;
+            --accent-glow: rgba(255, 87, 34, 0.15);
+
+            --font-display: 'Archivo Black', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+
+            --title-size: clamp(2.5rem, 7vw, 6rem);
+            --h2-size: clamp(2rem, 5vw, 4.5rem);
+            --h3-size: clamp(1.1rem, 2.5vw, 1.8rem);
+            --body-size: clamp(0.9rem, 1.8vw, 1.35rem);
+            --small-size: clamp(0.8rem, 1.3vw, 1.1rem);
+
+            --slide-padding: clamp(2rem, 5vw, 5rem);
+            --content-gap: clamp(1rem, 2.5vw, 2rem);
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.6s;
+        }
+
+        /* ===========================================
+           BASE STYLES
+           =========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+        }
+
+        /* ===========================================
+           SLIDE CONTAINER
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-gradient);
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            font-family: var(--font-body);
+            font-size: var(--h3-size);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        p, li {
+            font-size: var(--body-size);
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: var(--slide-padding);
+            left: var(--slide-padding);
+            font-family: var(--font-display);
+            font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* ===========================================
+           ACCENT CARD (Bold Signal signature)
+           =========================================== */
+        .accent-card {
+            background: var(--card-bg);
+            color: var(--text-on-card);
+            padding: clamp(1.2rem, 2.5vw, 2.5rem);
+            border-radius: 12px;
+            margin-top: var(--content-gap);
+        }
+
+        .accent-card p,
+        .accent-card li {
+            color: var(--text-on-card);
+            opacity: 0.85;
+        }
+
+        .accent-card h3 {
+            color: var(--text-on-card);
+        }
+
+        /* ===========================================
+           GRID LAYOUTS
+           =========================================== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(1rem, 2vw, 1.8rem);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(1rem, 2vw, 1.8rem);
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: clamp(1rem, 2vw, 1.8rem);
+        }
+
+        .feature-card h3 {
+            font-size: clamp(1rem, 1.8vw, 1.5rem);
+            margin-bottom: clamp(0.3rem, 0.6vw, 0.5rem);
+            color: var(--accent);
+        }
+
+        .feature-card p {
+            font-size: var(--small-size);
+            line-height: 1.45;
+        }
+
+        /* ===========================================
+           STAT BLOCKS
+           =========================================== */
+        .stat-row {
+            display: flex;
+            gap: clamp(1rem, 3vw, 3rem);
+            margin-top: var(--content-gap);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: var(--body-size);
+            color: var(--text-secondary);
+            margin-top: clamp(0.3rem, 0.8vw, 0.75rem);
+        }
+
+        /* ===========================================
+           BULLET LISTS
+           =========================================== */
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.5rem, 1.2vw, 1rem);
+            margin-top: var(--content-gap);
+        }
+
+        .bullet-list li {
+            padding-left: 1.5em;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.55em;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        /* ===========================================
+           CHANNEL CARDS (Go-To-Market)
+           =========================================== */
+        .channel-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: clamp(1rem, 2vw, 1.8rem);
+            border-left: 3px solid var(--accent);
+        }
+
+        .channel-card h3 {
+            font-size: clamp(1rem, 1.8vw, 1.5rem);
+            color: var(--text-primary);
+            margin-bottom: clamp(0.2rem, 0.5vw, 0.4rem);
+        }
+
+        .channel-card p {
+            font-size: var(--small-size);
+            line-height: 1.45;
+        }
+
+        /* ===========================================
+           TEAM SECTION
+           =========================================== */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(1rem, 2.5vw, 2.5rem);
+            margin-top: var(--content-gap);
+        }
+
+        .team-member {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: clamp(1.2rem, 2.5vw, 2.5rem) clamp(1rem, 2vw, 2rem);
+        }
+
+        .team-member .avatar {
+            width: clamp(70px, 8vw, 120px);
+            height: clamp(70px, 8vw, 120px);
+            border-radius: 50%;
+            margin: 0 auto clamp(0.5rem, 1vw, 1rem);
+            overflow: hidden;
+            border: 3px solid var(--accent);
+        }
+
+        .team-member .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .team-member h3 {
+            font-size: clamp(1rem, 1.8vw, 1.5rem);
+            color: var(--text-primary);
+        }
+
+        .team-member .role {
+            font-size: var(--body-size);
+            color: var(--accent);
+            margin-bottom: clamp(0.3rem, 0.6vw, 0.5rem);
+            font-weight: 600;
+        }
+
+        .team-member p {
+            font-size: var(--small-size);
+            line-height: 1.4;
+        }
+
+        /* ===========================================
+           CLOSING SLIDE
+           =========================================== */
+        .closing-tagline {
+            font-family: var(--font-body);
+            font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: clamp(0.5rem, 1.5vw, 1.5rem);
+            max-width: 800px;
+        }
+
+        .contact-info {
+            margin-top: clamp(1.5rem, 3vw, 3rem);
+            font-size: clamp(1.1rem, 2vw, 1.6rem);
+            color: var(--text-secondary);
+        }
+
+        .contact-info a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ===========================================
+           DECORATIVE ELEMENTS
+           =========================================== */
+        .accent-line {
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            margin-bottom: clamp(0.5rem, 1.2vw, 1.2rem);
+        }
+
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.6rem);
+            color: var(--text-secondary);
+            margin-top: clamp(0.4rem, 1vw, 1rem);
+            font-weight: 400;
+            max-width: 900px;
+        }
+
+        /* ===========================================
+           ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .reveal:nth-child(2) { transition-delay: 0.12s; }
+        .reveal:nth-child(3) { transition-delay: 0.19s; }
+        .reveal:nth-child(4) { transition-delay: 0.26s; }
+        .reveal:nth-child(5) { transition-delay: 0.33s; }
+
+        /* ===========================================
+           PROGRESS BAR
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        /* ===========================================
+           NAV DOTS
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.5rem, 1.5vw, 1.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        /* ===========================================
+           RESPONSIVE BREAKPOINTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2.5rem);
+                --content-gap: clamp(0.5rem, 1.5vw, 1.2rem);
+                --title-size: clamp(1.8rem, 5vw, 3.5rem);
+                --h2-size: clamp(1.5rem, 4vw, 2.8rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 2.5vw, 2rem);
+                --content-gap: clamp(0.4rem, 1vw, 0.8rem);
+                --title-size: clamp(1.4rem, 4vw, 2.5rem);
+                --body-size: clamp(0.8rem, 1.3vw, 1rem);
+            }
+            .nav-dots, .decorative { display: none; }
+        }
+
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2vw, 1.5rem);
+                --title-size: clamp(1.2rem, 3.5vw, 2rem);
+                --h2-size: clamp(1rem, 2.5vw, 1.5rem);
+                --body-size: clamp(0.7rem, 1vw, 0.9rem);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .grid-2, .grid-3, .team-grid { grid-template-columns: 1fr 1fr; }
+            .stat-row { flex-wrap: wrap; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .grid-2, .grid-3, .team-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
+        /* ===========================================
+           PRINT / PDF STYLES
+           =========================================== */
+        @media print {
+            html { scroll-snap-type: none; }
+            .slide {
+                height: 100vh;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .nav-dots, .progress-bar { display: none; }
+            .reveal { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <!-- ============================================
+         SLIDE 1: TITLE
+         ============================================ -->
+    <section class="slide" id="slide-1">
+        <div class="glow-orb decorative" style="width:400px;height:400px;top:-100px;right:-100px;"></div>
+        <span class="slide-number">01</span>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h1 class="reveal">AdherePod</h1>
+            <p class="subtitle reveal">Voice-first medication adherence for chronic disease patients.<br>No screens. No confusion. Just talk.</p>
+            <div class="accent-card reveal" style="max-width: 500px; margin-top: clamp(1rem, 2vw, 2rem);">
+                <p style="font-weight: 600; font-size: var(--body-size);">A pre-configured, LTE-connected tablet that manages medications through natural conversation — built for the people who need it most.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 2: THE PROBLEM
+         ============================================ -->
+    <section class="slide" id="slide-2">
+        <span class="slide-number">02</span>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">The Problem</h2>
+            <p class="subtitle reveal">Medication non-adherence is one of the most expensive and preventable problems in healthcare.</p>
+            <div class="stat-row reveal">
+                <div class="stat">
+                    <div class="stat-number">50%</div>
+                    <div class="stat-label">of chronic disease patients<br>don't take meds correctly</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">1 in 4</div>
+                    <div class="stat-label">ER visits caused by<br>medication errors</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$528B</div>
+                    <div class="stat-label">annual cost of<br>non-adherence in the U.S.</div>
+                </div>
+            </div>
+            <ul class="bullet-list reveal" style="margin-top: var(--content-gap);">
+                <li>Seniors managing 5+ medications struggle with complex regimens</li>
+                <li>Existing tools require smartphone literacy most patients don't have</li>
+                <li>Caregivers and providers lack real-time visibility into adherence</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 3: MARKET OPPORTUNITY
+         ============================================ -->
+    <section class="slide" id="slide-3">
+        <span class="slide-number">03</span>
+        <div class="glow-orb decorative" style="width:300px;height:300px;bottom:-80px;left:-80px;"></div>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">Market Opportunity</h2>
+            <p class="subtitle reveal">The medication adherence market is massive, fragmented, and underserved by technology.</p>
+            <div class="grid-2 reveal" style="margin-top: var(--content-gap);">
+                <div class="feature-card">
+                    <h3>$22B+ Market</h3>
+                    <p>Global medication adherence market projected by 2028, growing at 14% CAGR</p>
+                </div>
+                <div class="feature-card">
+                    <h3>131M Americans</h3>
+                    <p>Take at least one prescription drug daily — the majority are over 65</p>
+                </div>
+                <div class="feature-card">
+                    <h3>No Clear Leader</h3>
+                    <p>No brand dominates consumer mindshare for medication management</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Employer Demand</h3>
+                    <p>Self-funded employers actively seek cost containment strategies for drug spend</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 4: OUR SOLUTION
+         ============================================ -->
+    <section class="slide" id="slide-4">
+        <span class="slide-number">04</span>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">Our Solution</h2>
+            <p class="subtitle reveal">A voice-native AI health companion — shipped ready to use, no setup required.</p>
+            <div class="grid-3 reveal" style="margin-top: var(--content-gap);">
+                <div class="feature-card">
+                    <h3>Voice-First</h3>
+                    <p>Natural conversation — no typing, no screens, no app to download. Supports multiple languages.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Camera Intake</h3>
+                    <p>Hold up prescriptions, pill bottles, or after-visit summaries. The device reads and records everything.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Pre-Configured</h3>
+                    <p>LTE-connected tablet arrives ready to use. Plug in and start talking. No WiFi setup needed.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Interaction Alerts</h3>
+                    <p>Automatically flags dangerous drug interactions and cross-references all medications.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Health Records</h3>
+                    <p>Builds a complete medical history through conversation — across doctors and visits.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Provider Portal</h3>
+                    <p>Real-time dashboards for physicians and care teams. Adherence data at a glance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 5: HOW IT WORKS
+         ============================================ -->
+    <section class="slide" id="slide-5">
+        <span class="slide-number">05</span>
+        <div class="glow-orb decorative" style="width:350px;height:350px;top:50%;right:-100px;transform:translateY(-50%);"></div>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">How It Works</h2>
+            <div class="grid-3 reveal" style="margin-top: var(--content-gap);">
+                <div class="accent-card" style="text-align:center;">
+                    <div style="font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 0.3em;">1</div>
+                    <h3>Receive</h3>
+                    <p>Your AdherePod tablet arrives pre-configured and pre-logged-in. Just plug it in.</p>
+                </div>
+                <div class="accent-card" style="text-align:center; background: var(--card-bg-alt);">
+                    <div style="font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 0.3em;">2</div>
+                    <h3>Import</h3>
+                    <p>Show pill bottles, prescriptions, or doctor documents to the camera. Talk to set up reminders.</p>
+                </div>
+                <div class="accent-card" style="text-align:center;">
+                    <div style="font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 0.3em;">3</div>
+                    <h3>Stay on Track</h3>
+                    <p>Daily voice check-ins, medication reminders, and care team oversight keep patients adherent.</p>
+                </div>
+            </div>
+            <div class="reveal" style="margin-top: var(--content-gap); background: rgba(255,255,255,0.04); border-radius: 8px; padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.8rem, 1.5vw, 1.2rem); border: 1px solid rgba(255,255,255,0.08);">
+                <p style="font-style: italic; color: var(--text-secondary); font-size: var(--small-size);">"AdherePod, what pills do I take this morning?" — "AdherePod, my doctor just prescribed something new. Can you check for interactions?"</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 6: COMPETITIVE LANDSCAPE
+         ============================================ -->
+    <section class="slide" id="slide-6">
+        <span class="slide-number">06</span>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">Competitive Landscape</h2>
+            <p class="subtitle reveal">The market has solutions — but none built voice-first for the people who need help most.</p>
+            <div class="grid-2 reveal" style="margin-top: var(--content-gap);">
+                <div class="feature-card">
+                    <h3>Pill Reminder Apps</h3>
+                    <p>Require smartphone literacy, manual data entry, and ongoing engagement. Low retention among seniors.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Smart Pill Dispensers</h3>
+                    <p>Hardware-only, no AI intelligence, limited to dispensing — can't capture health data or answer questions.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Care Navigation Firms</h3>
+                    <p>Human-intensive, expensive to scale. Can only handle so many patients per coordinator.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>PBM Programs</h3>
+                    <p>Carrier-driven adherence programs are rigid, lack personalization, and serve the PBM's interests first.</p>
+                </div>
+            </div>
+            <div class="accent-card reveal" style="margin-top: var(--content-gap); max-width: 100%;">
+                <p style="font-weight: 600;">AdherePod's edge: Voice-native AI that enhances existing programs — not a replacement, but a force multiplier for care teams, employers, and patients alike.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 7: GO-TO-MARKET
+         ============================================ -->
+    <section class="slide" id="slide-7">
+        <span class="slide-number">07</span>
+        <div class="glow-orb decorative" style="width:300px;height:300px;top:-80px;left:40%;"></div>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">Go-To-Market</h2>
+            <p class="subtitle reveal">We're exploring partnerships across the healthcare benefits ecosystem to offer AdherePod as an employee or member benefit.</p>
+            <div class="grid-2 reveal" style="margin-top: var(--content-gap);">
+                <div class="channel-card">
+                    <h3>Self-Funded Employers</h3>
+                    <p>Employers using independent TPAs have the flexibility to customize benefits and directly measure cost savings from improved adherence.</p>
+                </div>
+                <div class="channel-card">
+                    <h3>PBM Consultants</h3>
+                    <p>Independent PBM consultants advise employers on drug management — AdherePod enhances their cost containment strategies.</p>
+                </div>
+                <div class="channel-card">
+                    <h3>Provider Networks</h3>
+                    <p>Physician groups and health systems gain real-time adherence data between office visits, improving outcomes and reducing readmissions.</p>
+                </div>
+                <div class="channel-card">
+                    <h3>Payers &amp; Insurers</h3>
+                    <p>Health plans can reduce costs through verified adherence and early intervention, with data-driven ROI measurement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 8: BUSINESS MODEL
+         ============================================ -->
+    <section class="slide" id="slide-8">
+        <span class="slide-number">08</span>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">Business Model</h2>
+            <p class="subtitle reveal">B2B2C through enterprise healthcare partnerships.</p>
+            <div class="grid-2 reveal" style="margin-top: var(--content-gap);">
+                <div class="feature-card">
+                    <h3>Per-Member Subscription</h3>
+                    <p>Employers or payers subscribe on a per-member-per-month basis. Pricing scales with population size.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Device + Platform</h3>
+                    <p>Pre-configured tablets bundled with the AI platform. Hardware margin plus recurring SaaS revenue.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Pilot Programs</h3>
+                    <p>Targeted 90-day pilot engagements with enterprise partners to validate outcomes and measure ROI before full rollout.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Data & Insights</h3>
+                    <p>Aggregated, de-identified adherence analytics for population health management and care optimization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 9: TEAM
+         ============================================ -->
+    <section class="slide" id="slide-9">
+        <span class="slide-number">09</span>
+        <div class="glow-orb decorative" style="width:250px;height:250px;bottom:-60px;right:-60px;"></div>
+        <div class="slide-content">
+            <div class="accent-line reveal"></div>
+            <h2 class="reveal">The Team</h2>
+            <div class="team-grid reveal">
+                <div class="team-member">
+                    <div class="avatar"><img src="gage-clifton.jpg" alt="Gage Clifton"></div>
+                    <p class="role">Head of Product</p>
+                    <h3>Gage Clifton</h3>
+                    <p>Visionary founder passionate about simplifying medical adherence. Deep experience working with the nation's largest health insurance companies.</p>
+                </div>
+                <div class="team-member">
+                    <div class="avatar"><img src="andrew-furman.jpg" alt="Andrew Furman"></div>
+                    <p class="role">Head of Engineering</p>
+                    <h3>Andrew Furman</h3>
+                    <p>AI developer with deep expertise in LLM integrations and voice agents. Former PwC consultant building software for UnitedHealthcare, Aetna, and BCBS.</p>
+                </div>
+                <div class="team-member">
+                    <div class="avatar"><img src="tyler.jpg" alt="Tyler Kaufman"></div>
+                    <p class="role">Head of Partnerships</p>
+                    <h3>Tyler Kaufman</h3>
+                    <p>Strategic partnerships leader with deep experience in performance marketing and revenue growth across healthcare and technology sectors.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 10: THE ASK / CONTACT
+         ============================================ -->
+    <section class="slide" id="slide-10">
+        <span class="slide-number">10</span>
+        <div class="glow-orb decorative" style="width:400px;height:400px;top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+        <div class="slide-content" style="align-items: center; text-align: center;">
+            <div class="accent-line reveal" style="margin-left:auto;margin-right:auto;"></div>
+            <h2 class="reveal">Let's Talk</h2>
+            <p class="closing-tagline reveal">We're looking for enterprise partners to bring voice-first medication adherence to the people who need it most.</p>
+            <div class="accent-card reveal" style="max-width: 500px; margin-top: clamp(1rem, 2vw, 2rem); text-align: center;">
+                <h3 style="margin-bottom: 0.3em;">What We're Looking For</h3>
+                <p>Pilot partnerships with forward-thinking employers, payers, provider networks, and PBM consultants ready to improve outcomes and reduce costs.</p>
+            </div>
+            <div class="contact-info reveal">
+                <p><a href="https://adherepod.com">adherepod.com</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+       JAVASCRIPT: Navigation & Animations
+       ============================================ -->
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.progressBar = document.getElementById('progressBar');
+                this.navDotsContainer = document.getElementById('navDots');
+                this.currentSlide = 0;
+
+                this.createNavDots();
+                this.setupObserver();
+                this.setupKeyboard();
+                this.updateProgress();
+            }
+
+            createNavDots() {
+                this.slides.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+                    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                    dot.addEventListener('click', () => {
+                        this.slides[i].scrollIntoView({ behavior: 'smooth' });
+                    });
+                    this.navDotsContainer.appendChild(dot);
+                });
+                this.navDots = document.querySelectorAll('.nav-dot');
+            }
+
+            setupObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const index = Array.from(this.slides).indexOf(entry.target);
+                            this.currentSlide = index;
+                            this.updateNavDots(index);
+                            this.updateProgress();
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            setupKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        const next = Math.min(this.currentSlide + 1, this.slides.length - 1);
+                        this.slides[next].scrollIntoView({ behavior: 'smooth' });
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        const prev = Math.max(this.currentSlide - 1, 0);
+                        this.slides[prev].scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
+
+            updateNavDots(index) {
+                this.navDots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+
+            updateProgress() {
+                const pct = ((this.currentSlide + 1) / this.slides.length) * 100;
+                this.progressBar.style.width = pct + '%';
+            }
+        }
+
+        new SlidePresentation();
+    </script>
+</body>
+</html>
