@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AdherePod — Ben Franklin Technology Partners Q&A Preparation</title>
+<style>
+  @page {
+    size: letter;
+    margin: 0.75in 0.85in;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #1a1a1a;
+  }
+  .cover {
+    text-align: center;
+    padding: 2.5in 0 1in 0;
+    page-break-after: always;
+  }
+  .cover h1 {
+    font-size: 28pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+  .cover .subtitle {
+    font-size: 14pt;
+    color: #475569;
+    margin-bottom: 40px;
+  }
+  .cover .meta {
+    font-size: 10pt;
+    color: #64748b;
+    margin-top: 60px;
+  }
+  .cover .meta strong { color: #334155; }
+  h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 4px;
+    margin: 24px 0 12px 0;
+  }
+  h2:first-of-type { margin-top: 0; }
+  .question {
+    background: #f1f5f9;
+    border-left: 3px solid #2563eb;
+    padding: 8px 12px;
+    margin: 14px 0 6px 0;
+    font-weight: 600;
+    font-size: 10.5pt;
+    color: #0f172a;
+  }
+  .answer {
+    padding: 4px 0 4px 15px;
+    margin-bottom: 4px;
+  }
+  .answer p { margin-bottom: 6px; }
+  .status {
+    display: inline-block;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .ready { background: #dcfce7; color: #166534; }
+  .in-progress { background: #fef9c3; color: #854d0e; }
+  .needs-work { background: #fee2e2; color: #991b1b; }
+  ul { padding-left: 18px; margin: 4px 0 8px 0; }
+  li { margin-bottom: 3px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 9.5pt;
+  }
+  th {
+    background: #0f172a;
+    color: white;
+    text-align: left;
+    padding: 5px 8px;
+    font-weight: 600;
+  }
+  td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .section-intro {
+    font-style: italic;
+    color: #475569;
+    margin-bottom: 10px;
+    font-size: 10pt;
+  }
+  .page-break { page-break-before: always; }
+  .footer-note {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 9pt;
+    color: #94a3b8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>AdherePod</h1>
+  <div class="subtitle">Ben Franklin Technology Partners<br>Investment Application Q&amp;A Preparation</div>
+  <p style="font-size: 11pt; color: #475569; max-width: 480px; margin: 0 auto; line-height: 1.6;">
+    This document outlines the key questions Ben Franklin's Healthcare Investment Group typically evaluates, along with our draft responses showing where we stand today and our plan for each area.
+  </p>
+  <div class="meta">
+    <strong>Prepared for:</strong> AdherePod Leadership Team<br>
+    <strong>Date:</strong> March 2026<br>
+    <strong>Confidential</strong> — Internal Use Only
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<h2>Company Overview &amp; Product</h2>
+
+<div class="question">Q: What does AdherePod do, and what unmet medical need does it address?</div>
+<div class="answer">
+  <p>AdherePod is a voice native, AI powered medication adherence platform built for elderly and low literacy populations. The core product is a pre-configured, LTE connected tablet that sits in a patient's home. Patients simply speak to it: "AdherePod, what pills do I take this morning?" No apps to download, no screens to navigate, no digital literacy required.</p>
+  <p>The unmet need is massive: 50% of chronic disease patients don't take medications correctly. 1 in 4 ER visits is caused by medication errors. This costs the U.S. healthcare system $528 billion annually. Existing solutions (pill reminder apps, smart dispensers, care navigators) all fail to reach the most vulnerable patients because they require smartphone literacy, manual setup, or expensive human labor.</p>
+</div>
+
+<div class="question">Q: What features does the product have today?</div>
+<div class="answer">
+  <ul>
+    <li><strong>Voice AI agent:</strong> Real time conversational medication management powered by OpenAI (WebRTC, sub-second response)</li>
+    <li><strong>Camera intake:</strong> Hold up a prescription bottle or pharmacy label and the device reads it automatically (Google Gemini vision)</li>
+    <li><strong>Medication management:</strong> Add, edit, track all medications with dosing schedules, interaction checking, and reminders</li>
+    <li><strong>Provider dashboard:</strong> Clinicians see real time adherence data, conversation transcripts, and can add clinical notes</li>
+    <li><strong>Email reminders:</strong> Automated per-medication reminders and daily summaries</li>
+    <li><strong>Multi-role system:</strong> Patient, provider, and admin roles with proper authorization</li>
+  </ul>
+  <p>The product is live at adherepod.com with 30 automated end-to-end tests and continuous deployment. <span class="status ready">READY</span></p>
+</div>
+
+<div class="question">Q: How is AdherePod different from competitors?</div>
+<div class="answer">
+  <table>
+    <tr><th>Competitor Type</th><th>Their Approach</th><th>Why AdherePod Wins</th></tr>
+    <tr><td>Pill reminder apps</td><td>Smartphone notifications</td><td>Our users can't navigate apps. Voice first means zero digital literacy needed.</td></tr>
+    <tr><td>Smart dispensers (Hero, MedaCube)</td><td>Hardware only, timers and buzzers</td><td>No intelligence. Can't answer questions, detect interactions, or adapt to the patient.</td></tr>
+    <tr><td>Care navigators</td><td>Human coordinators at $50+ PMPM</td><td>We deliver comparable service at $10 PMPM through AI automation.</td></tr>
+    <tr><td>PBM adherence programs</td><td>Carrier driven, only track PBM managed drugs</td><td>We track all medications including OTC, samples, and non-insured drugs.</td></tr>
+  </table>
+</div>
+
+<h2>Location &amp; Incorporation</h2>
+
+<div class="question">Q: Does AdherePod have a significant presence in Bucks, Chester, Delaware, Montgomery, or Philadelphia County?</div>
+<div class="answer">
+  <p>Yes. AdherePod is based in Havertown, Pennsylvania, which is in Delaware County, one of Ben Franklin's five qualifying counties. Our operations, engineering, and strategy work all happen here. As we grow, we plan to hire additional team members in the Southeastern PA region.</p>
+  <p>All three co-founders are Pennsylvania based, and 100% of our operations are in the state. <span class="status ready">READY</span></p>
+</div>
+
+<div class="question">Q: Is the company incorporated in the United States?</div>
+<div class="answer">
+  <p>Yes. We are establishing AdherePod as a U.S. corporate entity through Stripe Atlas, with Pennsylvania as our principal place of business. Co-founder agreements with IP assignment and equity documentation are being finalized alongside the incorporation. <span class="status in-progress">IN PROGRESS</span></p>
+</div>
+
+<div class="question">Q: What is your plan for job creation in the region?</div>
+<div class="answer">
+  <p>Based in Havertown (Delaware County), our 12 month hiring plan includes a clinical operations lead and a second software engineer, both in the Southeastern PA region. As we scale beyond initial pilots, we plan to build a device fulfillment and configuration operation locally. We project 5 to 8 new full-time positions in Southeastern PA within 18 months of funding.</p>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page-break"></div>
+<h2>Capital &amp; Match Requirements</h2>
+
+<div class="question">Q: Do you have $1:$1 matching capital committed?</div>
+<div class="answer">
+  <p>We are actively raising matching capital through multiple channels:</p>
+  <ul>
+    <li><strong>Angel investors:</strong> Currently talking to multiple investors to determine if we can raise our initial funding round. Conversations include healthcare industry investors and former pharma executives in our network.</li>
+    <li><strong>Grants:</strong> Evaluating SBIR/STTR (NIH, NSF) for digital health innovation and Pennsylvania DCED programs</li>
+    <li><strong>Pilot revenue:</strong> Targeting $5,000 per 90-day pilot engagements with independent TPAs and self-funded employers; revenue can supplement match</li>
+  </ul>
+  <p>Our investor deck is finalized and we are actively presenting to potential investors. All investment will be documented with proper legal instruments. <span class="status in-progress">IN PROGRESS</span></p>
+</div>
+
+<div class="question">Q: How much capital do you need, and what will it fund?</div>
+<div class="answer">
+  <p>We are targeting a $300,000 total round ($150,000 from Ben Franklin + $150,000 in matching funds). This capital covers 12 months of milestones:</p>
+  <table>
+    <tr><th>Milestone</th><th>Timeline</th><th>Budget</th></tr>
+    <tr><td>Close 3 paid pilot partnerships</td><td>Months 1 to 3</td><td>$75,000</td></tr>
+    <tr><td>HIPAA certification &amp; SOC 2 Type 1</td><td>Months 2 to 4</td><td>$50,000</td></tr>
+    <tr><td>Hardware pilot (25 tablets deployed)</td><td>Months 3 to 5</td><td>$25,000</td></tr>
+    <tr><td>Hire clinical operations lead</td><td>Months 3 to 4</td><td>$50,000</td></tr>
+    <tr><td>Pilot outcomes &amp; ROI analysis</td><td>Months 4 to 8</td><td>$25,000</td></tr>
+    <tr><td>Product enhancements (dispenser integration, LTE)</td><td>Months 5 to 9</td><td>$50,000</td></tr>
+    <tr><td>Scale to 100 active users</td><td>Months 8 to 12</td><td>$25,000</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>12 Months</strong></td><td><strong>$300,000</strong></td></tr>
+  </table>
+</div>
+
+<h2>Commercialization &amp; Traction</h2>
+
+<div class="question">Q: Do you have paid pilots or market traction?</div>
+<div class="answer">
+  <p>We are in active pilot discussions with Bill Kaufman at AKM (Alliance of Healthcare Consultants), targeting $5,000 per 90-day pilot engagements with independent TPAs and self-funded employers. Our go-to-market strategy focuses on organizations that directly measure cost savings and have flexibility to adopt new solutions (not large carrier plans where PBMs block innovation).</p>
+  <p>Our product is live and demo ready. We have a fully functional MVP that can be demonstrated end to end in a 45-minute session. <span class="status in-progress">IN PROGRESS</span></p>
+</div>
+
+<div class="question">Q: What is your business model?</div>
+<div class="answer">
+  <ul>
+    <li><strong>Primary revenue:</strong> Per-member-per-month (PMPM) subscription at $10 PMPM for enterprise partners (Medicare Advantage plans, self-funded employers)</li>
+    <li><strong>Pilot entry point:</strong> $5,000 per 90-day pilot to validate outcomes before full deployment</li>
+    <li><strong>Hardware margin:</strong> Pre-configured tablets (approximately $125 cost) bundled with platform</li>
+    <li><strong>Future:</strong> Aggregated, de-identified adherence analytics for population health and pharma research</li>
+  </ul>
+</div>
+
+<div class="question">Q: Who are your target customers?</div>
+<div class="answer">
+  <ul>
+    <li><strong>Phase 1 (now):</strong> Self-funded employers using independent TPAs, independent PBM consultants, innovative brokers</li>
+    <li><strong>Phase 2:</strong> Medicare Advantage plans (adherence impacts Star ratings, direct cost savings)</li>
+    <li><strong>Phase 3:</strong> Provider networks, integrated delivery systems, rural health programs (Federal Rural Health Transformation Program: $50B from 2026 to 2030)</li>
+  </ul>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page-break"></div>
+<h2>Team</h2>
+
+<div class="question">Q: Who is on the management team, and what relevant experience do they have?</div>
+<div class="answer">
+  <table>
+    <tr><th>Name</th><th>Role</th><th>Background</th></tr>
+    <tr><td><strong>Gage Clifton</strong></td><td>Head of Product</td><td>Deep experience with the nation's largest health insurance companies. Healthcare policy and strategy expertise. Product vision and industry relationships.</td></tr>
+    <tr><td><strong>Andrew Furman</strong></td><td>Head of Engineering</td><td>AI/LLM engineer. Former PwC consultant who built software for UnitedHealthcare, Aetna, and Blue Cross Blue Shield plans. Built the entire AdherePod platform.</td></tr>
+    <tr><td><strong>Tyler Kaufman</strong></td><td>Head of Partnerships</td><td>Performance marketing and revenue growth in healthcare and tech. Strategic partnership development. Leading pilot outreach and sales.</td></tr>
+  </table>
+  <p><strong>Planned additions:</strong> Formalizing advisory board with healthcare industry veterans (clinical advisor, former pharma executive). First hire will be a clinical operations lead in the Philadelphia metro area. <span class="status ready">READY</span></p>
+</div>
+
+<h2>Intellectual Property</h2>
+
+<div class="question">Q: What is your IP strategy? Do you have patents filed?</div>
+<div class="answer">
+  <p>Our IP position rests on three pillars:</p>
+  <ul>
+    <li><strong>Proprietary technology:</strong> Voice native medication management system with real-time AI agent, camera-based prescription reading pipeline, and combined voice/vision/device adherence platform</li>
+    <li><strong>Hardware moat:</strong> A pre-configured device in the patient's home creates significant switching costs and ongoing data advantage</li>
+    <li><strong>Data moat:</strong> Comprehensive, real-time medication adherence data across all of a patient's medications (not just insured prescriptions)</li>
+  </ul>
+  <p>We are actively pursuing formal IP protection: we are filing a provisional patent application covering our core system architecture (voice/vision medication adherence platform) and registering the AdherePod trademark. All co-founders will execute IP assignment agreements to the corporate entity as part of our Stripe Atlas incorporation. <span class="status in-progress">IN PROGRESS</span></p>
+</div>
+
+<h2>Corporate &amp; Legal Readiness</h2>
+
+<div class="question">Q: Do you have proper corporate documentation, founder agreements, and accounting?</div>
+<div class="answer">
+  <p>We are formalizing all corporate infrastructure through Stripe Atlas:</p>
+  <ul>
+    <li><strong>Incorporation:</strong> Establishing corporate entity via Stripe Atlas, with Pennsylvania as principal place of business</li>
+    <li><strong>Founder agreements:</strong> Co-founder agreement with equity split, IP assignment, vesting schedules, and roles being finalized alongside incorporation</li>
+    <li><strong>Accounting:</strong> Setting up formal bookkeeping with a CPA. Business bank account opened through Stripe Atlas.</li>
+    <li><strong>Board:</strong> Establishing formal governance structure; welcome Ben Franklin's board observation seat</li>
+  </ul>
+  <p>All prior and future capital will be documented with proper legal instruments (no handshake deals). <span class="status in-progress">IN PROGRESS</span></p>
+</div>
+
+<div class="question">Q: Are there any outstanding debts, liens, or legal issues?</div>
+<div class="answer">
+  <p>No. AdherePod has no outstanding debt, no liens on assets or IP, no pending litigation, and no accounts payable issues. We are starting with a clean balance sheet. <span class="status ready">READY</span></p>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page-break"></div>
+<h2>Deal Terms &amp; Reporting</h2>
+
+<div class="question">Q: Are you comfortable with Ben Franklin's typical deal structure (convertible note, 8% interest, warrant, board observation, negative pledge)?</div>
+<div class="answer">
+  <p>Yes. Ben Franklin's terms are founder friendly and well aligned with our stage. Key points we appreciate:</p>
+  <ul>
+    <li>No personal guarantees from founders</li>
+    <li>Cash-conserving interest structure (lesser of 3% of revenue or interest due)</li>
+    <li>Long maturity (5 years) with prepayment flexibility</li>
+    <li>Cancellable warrant structure (no double dip with conversion discount)</li>
+  </ul>
+  <p>We understand the negative pledge requirement (IP stays in the company) and the board observation seat, and we welcome both. We will ensure any co-investor notes can be subordinated to Ben Franklin's senior position. <span class="status ready">READY</span></p>
+</div>
+
+<div class="question">Q: Can you meet ongoing reporting requirements (quarterly financials, updates, board materials, annual Economic Impact Survey)?</div>
+<div class="answer">
+  <p>Yes. We plan to establish quarterly reporting cadence from day one. Our platform already tracks product metrics (users, conversations, medications managed, reminder deliveries). We will engage a CPA to produce quarterly unaudited financial statements within the required 30 to 45 day window. We are committed to transparency and regular communication with all investors. <span class="status ready">READY</span></p>
+</div>
+
+<h2>Readiness Summary</h2>
+
+<table>
+  <tr><th>Ben Franklin Criteria</th><th>Our Status</th><th>Readiness</th></tr>
+  <tr><td>Digital health serving unmet medical need</td><td>Voice AI medication adherence for elderly/low-literacy patients</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>Beyond idea stage</td><td>Fully functional MVP live at adherepod.com</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>Paid pilots / market traction</td><td>Active pilot discussions, demo ready</td><td style="color:#854d0e;font-weight:600">In Progress</td></tr>
+  <tr><td>SE Pennsylvania presence</td><td>Based in Havertown, PA (Delaware County)</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>U.S. incorporation</td><td>Establishing via Stripe Atlas</td><td style="color:#854d0e;font-weight:600">In Progress</td></tr>
+  <tr><td>$1:$1 matching capital</td><td>Active fundraising, multiple channels</td><td style="color:#854d0e;font-weight:600">In Progress</td></tr>
+  <tr><td>Management team</td><td>3 co-founders with healthcare + engineering + partnerships</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>Intellectual property</td><td>Filing provisional patent, registering trademark</td><td style="color:#854d0e;font-weight:600">In Progress</td></tr>
+  <tr><td>Corporate documentation</td><td>Stripe Atlas incorporation, founder agreements in progress</td><td style="color:#854d0e;font-weight:600">In Progress</td></tr>
+  <tr><td>Technical feasibility</td><td>Production APIs, proven infrastructure, 30 e2e tests</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>Competition differentiation</td><td>Voice first, AI native, zero friction, full med picture</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+  <tr><td>Deal terms comfort</td><td>Founder friendly terms, fully aligned</td><td style="color:#166534;font-weight:600">Strong</td></tr>
+</table>
+
+<div class="footer-note">
+  AdherePod — Confidential — Prepared March 2026
+</div>
+
+</body>
+</html>
