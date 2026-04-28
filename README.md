@@ -60,7 +60,6 @@ The phone form factor is too confusing for elders and low-literacy populations. 
 ## Domain
 
 - **adherepod.com** — available
-- See [docs-and-planning/DOMAINS.md](docs-and-planning/DOMAINS.md) for additional options explored
 
 ## Tech Stack
 
