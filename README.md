@@ -1,66 +1,52 @@
 # AdherePod
 
-A voice-native, plug-and-play medical adherence device and data platform. Designed for elderly and low-literacy users who need frictionless health management — no apps, no menus, no confusion.
+A voice-native medication adherence platform for elderly and low-literacy users. Available today as a web app at [adherepod.com](https://adherepod.com) — works in any modern browser on desktop or mobile.
 
-## Vision
+> **Hardware device coming soon.** We're building a dedicated, LTE-enabled AdherePod device that ships ready to use — no WiFi setup, no app downloads, no menus. Plug it in and start talking. The web app is the first surface; the device is next.
 
-AdherePod is a dedicated hardware device (not a phone app) that sits in a patient's home and becomes their personal health hub. It connects to pill dispensers, blood pressure monitors, glucose meters, wearables, and other medical devices — then turns that data into a unified platform for providers and payers.
+## What's available today (web + mobile browser)
 
-The phone form factor is too confusing for elders and low-literacy populations. AdherePod is **frictionless, plug-and-play, and voice-native**.
+### For patients
+- **Voice-native medication management.** Talk naturally — "AdherePod, add lisinopril 10mg once a day in the morning" — and the assistant handles it. No forms to fill out unless you want to.
+- **Camera support.** Hold up a prescription label or pill bottle and the assistant reads it for you. Works for skin conditions and other visual questions too.
+- **Medication list.** Add, edit, and remove meds with dosage, frequency, timing notes, and start/end dates. Manual UI is there if you prefer it over voice.
+- **Email reminders.** Per-medication reminders at the times you choose, in your timezone. Toggle on/off per medication.
+- **Daily summary email.** Optional once-a-day digest at the time of your choice.
+- **History timeline.** Every voice conversation and email reminder in one chronological view, with transcripts, images, and delivery status.
+- **Settings.** Timezone auto-detection, reminder preferences, password management.
 
-## Core Features
+### For providers (nurses, doctors, care team members)
+- **Patient dashboard.** Search for and assign patients you're caring for.
+- **Manage their meds.** Add, edit, and remove medications on behalf of assigned patients.
+- **Clinical notes.** Attach provider-authored notes to specific medications.
+- **Voice conversation history.** Review every conversation an assigned patient has had with the assistant.
 
-### 1. Voice-Native Interface
-- All interactions happen through natural voice conversation
-- No screens to navigate, no apps to download, no buttons to press
-- "AdherePod, what pills do I take this morning?"
-- "AdherePod, my blood pressure reading is ready"
-- Supports multiple languages and dialects
+### For admins
+- **User management.** Manage every account, change roles (patient / provider / admin), set provider sub-type (nurse / doctor / care team member / family member).
+- **Password tools.** Send reset links or set passwords directly.
+- **View As.** Impersonate any user in read-only mode to audit their experience and data.
 
-### 2. Medical Device Integration
-- Connects to blood pressure monitors, glucose meters, pulse oximeters, scales
-- Syncs with wearables (Apple Watch, Fitbit, etc.)
-- Integrates with smart pill dispensers
-- Automatic data capture — no manual entry
+## Coming soon: the AdherePod device
 
-### 3. Medication Management
-- Voice-guided pill identification and scheduling
-- Automated reminders through the device speaker
-- Cross-references all medications for dangerous interactions
-- Flags advisories to discuss with your doctor
+The phone form factor is too confusing for the people who need adherence support most. The dedicated device fixes that:
 
-### 4. Adherence Tracking
-- Logs medication doses, vitals, and device readings automatically
-- Builds a comprehensive health adherence score
-- Tracks trends over time (blood pressure patterns, medication consistency, etc.)
+- **LTE-enabled out of the box** — no WiFi setup, no router config, no IT visit
+- **Plug and play** — turn it on and start talking
+- **Always listening for "AdherePod"** — no buttons, no menus, no screens to navigate
+- **Pairs with medical devices** — blood pressure monitors, glucose meters, pulse oximeters, smart pill dispensers, wearables
+- **Built for the home** — sits on a counter or nightstand and becomes the patient's personal health hub
 
-### 5. Data Platform for Providers & Payers
-- Real-time dashboard for physicians to monitor patient adherence and vitals
-- Shares anonymized adherence data with insurance providers
-- Surfaces cheaper medication alternatives covered by the patient's plan
-- Identifies discounts and savings programs through insurance
-- Enables value-based care models with verified adherence data
+Until the device ships, every patient feature works through the web app at adherepod.com on phones, tablets, and computers.
 
-## How It Works
+## Tech stack
 
-1. **Plug In** - Place AdherePod in the home, connect to WiFi
-2. **Pair** - Automatically discovers nearby medical devices and wearables
-3. **Talk** - Voice-guided setup of medications and schedule
-4. **Live** - Daily voice reminders, automatic vitals capture, hands-free logging
-5. **Share** - Providers and payers get a real-time view of patient health data
+Next.js 16 (App Router) with React 19, TypeScript, NextAuth v5, PostgreSQL via Neon + Drizzle ORM, OpenAI Agents SDK with `gpt-4o-mini-realtime-preview` over WebRTC, SendGrid for email, Vercel Cron for reminders, Tailwind CSS 4 + Radix UI, Playwright for end-to-end testing. Hosted on Vercel.
 
-## Target Users
+See [CLAUDE.md](CLAUDE.md) for project structure and developer setup.
 
-- **Elderly patients** managing multiple chronic conditions
-- **Low-literacy populations** who struggle with app-based solutions
-- **Caregivers** managing medications for family members
-- **Healthcare providers** who need reliable adherence and vitals data
-- **Insurance companies / payers** looking to reduce costs through better adherence
+## Target users
 
-## Domain
-
-- **adherepod.com** — available
-
-## Tech Stack
-
-*To be determined*
+- Elderly patients managing multiple chronic conditions
+- Low-literacy populations who struggle with app-based solutions
+- Caregivers managing medications for family members
+- Healthcare providers who need reliable adherence and conversation data
