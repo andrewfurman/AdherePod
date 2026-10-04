@@ -1,170 +1,419 @@
 # AdherePod Demo Script
 
-## Scenario
-
-**Patient:** Robert ("Bob") Johnson, 65-year-old male
-**Conditions:** Type 2 Diabetes, Hypertension
-**Situation:** Bob just returned from a doctor's appointment. His doctor increased one medication and prescribed a new one. He has the printed prescription in hand.
-
-## Pre-Demo Setup
-
-Before the demo, make sure the logged-in user has exactly **two medications** in their list:
-
-| Medication | Times/Day | Timing | Notes |
-|---|---|---|---|
-| Metformin 500mg | 2 | With breakfast and dinner | Type 2 Diabetes |
-| Lisinopril 10mg | 1 | Every morning | Blood pressure |
-
-Also prepare a **printed prescription** (real or mock) on paper that says something like:
-
-```
-Dr. Sarah Chen, MD — Internal Medicine
-Patient: Robert Johnson    DOB: 03/15/1961
-
-Rx: Atorvastatin 20mg
-    Take one tablet by mouth once daily at bedtime
-    Qty: 30    Refills: 5
-
-Rx: Metformin — increase to 1000mg twice daily
-    (Continue with meals)
-
-Date: [today's date]
-Signature: Dr. S. Chen
-```
-
-Print this out or write it clearly on a piece of paper. The camera will read it.
+A structured walkthrough of every major feature in AdherePod, organized as a demo script. Use this to plan video recordings, live demos, or investor walkthroughs.
 
 ---
 
-## Demo Flow
+## Demo Overview
 
-### Part 1 — Sign In & Show Dashboard (30 seconds)
+**Core pitch (30 seconds):**
+"AdherePod is a voice-native medication adherence app built for elderly and low-literacy users. At its core, patients maintain a medication list and talk to an AI voice assistant to manage it -- no typing, no confusing menus. Behind the scenes, there's a provider backend where care team members monitor their patients, and an automated email reminder system that keeps patients on track."
 
-**Presenter says:**
-> "This is AdherePod, a voice-first medication management app designed for elderly and low-literacy users. Let me sign in as our demo patient, Bob."
-
-- Sign in at the login page
-- Dashboard loads showing the medication list on the left and the voice assistant on the right
-- Point out the two existing medications: Metformin 500mg and Lisinopril 10mg
-
-**Presenter says:**
-> "Bob has two medications he's been taking — Metformin for his diabetes and Lisinopril for his blood pressure. He just got back from a doctor visit where his doctor made some changes. Let's see how he'd use AdherePod to update his list."
+**Three pillars to showcase:**
+1. Patient experience (voice-first medication management)
+2. Provider backend (care team visibility and clinical notes)
+3. Automated engagement (email reminders and delivery tracking)
 
 ---
 
-### Part 2 — Start a Voice Conversation (15 seconds)
+## Act 1: The Patient Experience
 
-- Click **"Talk to AdherePod"** button
-- Camera activates automatically (shows live feed on the right)
-- Bot animates to listening state
-- AdherePod greets the user
+### Scene 1.1: Homepage and Sign-Up
 
-**Wait for the greeting.** AdherePod will say something like:
-> "Hi there! I'm AdherePod, your medication assistant. I can see you through your camera — feel free to hold up any pill bottles or prescriptions and I'll read them for you. How can I help you today?"
+**What to show:**
+- Landing page with sticky nav, hero section, embedded Loom video
+- Voice-first callout section with example commands
+- Features grid (6 cards): Voice-Native Interface, Device Integration, Medication Management, Interaction Alerts, Adherence Tracking, Provider Platform
+- "How It Works" 3-step flow: Talk -> Discuss -> Get Notified
+- "Who It's For" cards: Elderly Patients, Caregivers, Providers, Payers, Low-Literacy Users, Chronic Care Programs
+- Team section
+- Click "Sign Up" -> show the clean sign-up form (name, email, password)
 
----
+**Key talking points:**
+- Designed for accessibility: large text, simple flows, voice-first
+- No app store download needed -- runs in any browser
+- Works on phones, tablets, and desktop
 
-### Part 3 — Review Existing Medications (30 seconds)
-
-**Say to AdherePod:**
-> "Hi, can you tell me what medications I'm currently taking?"
-
-AdherePod will call the `list_medications` tool and read back:
-> "You're currently taking two medications. First, Metformin 500mg, twice a day with breakfast and dinner for Type 2 Diabetes. Second, Lisinopril 10mg, once a day every morning for blood pressure."
-
-**Presenter aside to audience:**
-> "Notice how the bot reads back each medication clearly with the dosage and schedule. The transcript on screen also shows everything being said, so Bob can follow along visually too."
+**Route:** `/` (homepage) -> `/auth/sign-up`
 
 ---
 
-### Part 4 — Update an Existing Medication (45 seconds)
+### Scene 1.2: Patient Dashboard -- Medications Tab
 
-**Say to AdherePod:**
-> "I just saw my doctor today and she said I need to increase my Metformin from 500 milligrams to 1000 milligrams. Can you update that for me?"
+**What to show:**
+- Two-column layout: medication list on left, voice chat on right
+- Add a medication manually using the form:
+  - Name: "Lisinopril 10mg"
+  - Times per day: 2
+  - Timing: "morning and evening with food"
+  - Start date, optional end date, notes
+- Show the medication card after creation:
+  - Name, frequency badge, timing with clock icon, start date with calendar icon
+  - Edit and delete buttons
+- Enable email reminders:
+  - Toggle the bell icon on the medication card
+  - Show reminder times auto-populated (2x/day -> 08:00 and 20:00)
+  - Customize a time to demonstrate flexibility
 
-AdherePod will confirm and call `edit_medication`:
-> "Got it — so your doctor wants to increase your Metformin from 500mg to 1000mg, still twice a day with meals. Let me update that for you... Done! Your Metformin is now updated to 1000mg twice daily. Is there anything else?"
+**Key talking points:**
+- Simple card-based UI -- each medication is one card with clear information
+- Reminders are per-medication and fully customizable
+- Auto-populated times based on frequency reduce setup friction
 
-**Point out to audience:**
-- The medication list on the left side of the dashboard refreshes automatically
-- Metformin now shows 1000mg instead of 500mg
-- The transcript shows the full exchange
-
----
-
-### Part 5 — Camera Capture: Hold Up a Prescription (60 seconds)
-
-**Say to AdherePod:**
-> "Yes, my doctor also gave me a new prescription. Let me show it to you."
-
-**Hold the printed prescription up to the camera.** Hold it steady for about 10 seconds.
-
-**What happens automatically:**
-1. The camera captures a frame every 5 seconds
-2. Gemini 3 Flash describes the image — detects it contains medication info
-3. The description with all readable text is injected into the agent's context
-4. A yellow "Image Detected" card appears in the transcript with the extracted info
-5. AdherePod sees the extraction and responds verbally
-
-AdherePod will say something like:
-> "I can see a prescription from Dr. Chen. It looks like it says Atorvastatin 20mg, take one tablet at bedtime. It also mentions increasing your Metformin to 1000mg, which we already took care of. Would you like me to add the Atorvastatin to your medication list?"
-
-**Say:**
-> "Yes, please add that."
-
-AdherePod calls `add_medication`:
-> "Done! I've added Atorvastatin 20mg, once daily at bedtime. Your medication list now has three medications."
-
-**Point out to audience:**
-- The medication list updates again — now shows three medications
-- The camera read the prescription automatically without any buttons or manual steps
-- The bot confirmed what it read before making changes
+**Route:** `/my-medications` (Medications tab)
 
 ---
 
-### Part 6 — Ask About Drug Interactions (45 seconds)
+### Scene 1.3: Voice Chat -- The Core Feature
 
-**Say to AdherePod:**
-> "Now that I'm taking three medications, is there anything I should be aware of? Do any of these drugs interact with each other?"
+**What to show:**
+- Click the phone icon to start a voice conversation
+- Demonstrate these voice commands live:
+  1. **"What medications am I taking?"** -- AI lists current meds
+  2. **"Add Metformin 500mg, twice a day, with breakfast and dinner"** -- AI adds med, card appears in real-time on left
+  3. **"Set a reminder for Metformin at 7:30 AM and 6:30 PM"** -- AI toggles reminder and sets times
+  4. **"Change Lisinopril to once a day"** -- AI edits existing med
+  5. **"Delete Lisinopril"** -- AI removes med after confirmation
+- Show the real-time transcript appearing as you speak
+- Show medication list auto-refreshing after each voice tool action
+- Optionally demonstrate camera: point at a pill bottle, AI reads the label
 
-AdherePod will provide guidance (powered by GPT-4o-mini's medical knowledge):
-> "Good question, Bob. Here's what you should know about your three medications together. Metformin and Lisinopril are commonly prescribed together and generally work well as a combination. Lisinopril can actually help protect your kidneys, which is beneficial since diabetes can affect kidney function. With Atorvastatin, the main thing to be aware of is to take it at bedtime since it works best overnight. Also, let your doctor know if you experience any muscle pain or weakness, as that can occasionally happen with statins. There are no major interactions between these three medications, but always take them as directed. Is there anything else you'd like to know?"
+**Key talking points:**
+- No typing required -- everything done by voice
+- Real-time: medication list updates instantly as voice commands execute
+- 7 built-in voice tools: list, add, edit, delete, toggle reminder, set times, check camera
+- WebRTC connection via OpenAI's Realtime API for low-latency conversation
+- Designed for users who struggle with small buttons and text input
 
-**Presenter aside to audience:**
-> "AdherePod gives practical, easy-to-understand advice. It doesn't replace a doctor, but it helps patients understand their medications and know what to watch out for."
-
----
-
-### Part 7 — Wrap Up (15 seconds)
-
-**Say to AdherePod:**
-> "No, that's all. Thank you!"
-
-AdherePod will respond warmly and sign off.
-
-Click **"End Call"** to disconnect.
-
-**Presenter says:**
-> "In under three minutes, Bob reviewed his medications, updated a dosage change from his doctor, added a brand new prescription just by holding it up to the camera, and got advice about how his medications work together — all through a natural voice conversation."
+**Route:** `/my-medications` (Medications tab, voice chat panel)
 
 ---
 
-## Key Points to Emphasize
+### Scene 1.4: History Tab
 
-1. **Voice-first** — No typing required. The entire interaction was spoken.
-2. **Camera reads prescriptions** — Hold up a pill bottle or prescription and it's automatically recognized. No buttons to press, no photos to take manually.
-3. **Confirms before acting** — The bot always reads back what it understood and asks for confirmation before making changes.
-4. **Real-time updates** — The medication list on the dashboard updates live as changes are made.
-5. **Conversation history** — Everything is transcribed and saved. Bob or his caregiver can review the conversation later in the History tab.
-6. **Drug interaction advice** — Patients can ask questions about their medications and get clear, simple explanations.
+**What to show:**
+- Switch to the "History" tab (Message Circle icon)
+- Show the unified timeline mixing:
+  - Voice conversations (with auto-generated titles, duration, timestamps)
+  - Sent emails (reminders and daily summaries)
+- Expand a voice conversation:
+  - Full transcript showing user and assistant messages
+  - Tool calls visible (e.g., "addMedication called with {...}")
+  - Any captured images from camera usage
+- Expand an email:
+  - Full HTML email body rendered inline
+  - Delivery event timeline: sent -> delivered -> opened
+  - SendGrid tracking data (timestamps, IP addresses)
+- Delete an old conversation or email
 
-## Timing
+**Key talking points:**
+- Complete audit trail of every interaction
+- Patients can review what they discussed with the AI
+- Email delivery status visible -- know if a reminder was actually delivered and opened
+- Providers can also view this history for their assigned patients
 
-The core demo (Parts 2-7) runs about 3-4 minutes. With the intro and audience commentary, budget about 5 minutes total.
+**Route:** `/my-medications` (History tab)
 
-## Troubleshooting
+---
 
-- **Camera not showing?** Make sure the browser has camera permissions. Chrome will prompt on first use.
-- **Bot not responding?** Check that the microphone is allowed in the browser. The bot needs to hear you.
-- **Prescription not detected?** Hold the paper steady, well-lit, and fill the camera frame. The system captures every 5 seconds, so hold it for at least 5-10 seconds.
-- **Medications list not updating?** The list refreshes after each tool call. Give it a second after AdherePod confirms the action.
+### Scene 1.5: Settings Tab
+
+**What to show:**
+- Switch to the "Settings" tab
+- Reminder settings card:
+  - Timezone dropdown (ET, CT, MT, PT, AKT, HT)
+  - Daily summary email toggle
+  - Summary time picker (appears when toggle is on)
+- Password change card:
+  - Current password, new password, confirm
+- Demonstrate changing timezone and summary time
+
+**Key talking points:**
+- Timezone-aware: reminders arrive at the right local time
+- Daily summary gives a single morning email listing all meds for the day
+- Cron jobs run every 15 minutes and respect user timezone settings
+
+**Route:** `/my-medications` (Settings tab)
+
+---
+
+## Act 2: The Provider Backend
+
+### Scene 2.1: Provider Dashboard -- Patient List
+
+**What to show:**
+- Log in as a provider (nurse, doctor, or care team member)
+- Show the three-panel layout:
+  - Left sidebar: patient list with search and "Add Patient" button
+  - Main area: patient detail view
+  - Mobile: patient list becomes horizontal scrollable chips
+- Search for a patient by name or email
+- Click "Add Patient" to open the assignment dialog:
+  - Search for patients
+  - Show "Add" button for unassigned patients
+  - Show "Already added" badge for assigned patients
+- Select a patient from the list to load their details
+
+**Key talking points:**
+- Providers only see patients assigned to them (enforced by authorization)
+- Many-to-many: one provider can have many patients, one patient can have multiple providers
+- Assignments tracked with audit trail (who assigned, when)
+- Both admins and providers can establish provider-patient links
+
+**Route:** `/provider-dashboard`
+
+---
+
+### Scene 2.2: Viewing a Patient's Medications
+
+**What to show:**
+- With a patient selected, show their medications tab:
+  - Full medication list with same card UI as patient view
+  - Providers can add, edit, and delete medications for their patients
+- Clinical Notes feature:
+  - Expand a medication to see clinical notes section
+  - Show existing notes (author name, date, content)
+  - Add a new clinical note (e.g., "Monitor blood pressure weekly, patient reports dizziness")
+  - Delete a note
+
+**Key talking points:**
+- Providers have full medication management for assigned patients
+- Clinical notes are per-medication, not per-patient -- granular annotation
+- Notes visible to the patient and all assigned providers
+- Audit trail: every note shows who wrote it and when
+
+**Route:** `/provider-dashboard` (Medications tab for selected patient)
+
+---
+
+### Scene 2.3: Viewing a Patient's Conversations
+
+**What to show:**
+- Switch to the "Conversations" tab for the selected patient
+- Show list of patient's voice conversations
+- Expand a conversation to see:
+  - Full transcript
+  - What voice tools the patient used
+  - Captured images (if camera was used)
+  - Duration and timestamps
+
+**Key talking points:**
+- Providers can review what patients discussed with the AI assistant
+- See exactly what medication changes were made via voice
+- Helps providers understand patient behavior and adherence patterns
+- Read-only: providers observe but can't modify conversation records
+
+**Route:** `/provider-dashboard` (Conversations tab for selected patient)
+
+---
+
+## Act 3: Email Reminders and Automation
+
+### Scene 3.1: Per-Medication Reminders
+
+**What to show:**
+- Return to patient view or show from provider's perspective
+- Show a medication with reminders enabled:
+  - Bell icon toggled on (orange/active state)
+  - Reminder times displayed (e.g., "08:00, 14:00, 20:00" for 3x daily)
+- Explain the cron system:
+  - Vercel Cron runs every 15 minutes
+  - Checks each medication's reminder times against current time in user's timezone
+  - Sends email if within the 15-minute window and not already sent
+- Show a received reminder email (from email inbox or History tab):
+  - Clean plaintext-style email
+  - "Hi [name], it's time to take [medication]"
+  - Includes medication details and timing
+
+**Key talking points:**
+- Reminders are per-medication, not per-user -- different meds can have different times
+- Timezone-aware: a patient in Pacific time gets reminders at their local 8am, not Eastern
+- Deduplication: won't send the same reminder twice (tracks `lastReminderSentAt`)
+- Controllable by voice: "Hey, remind me to take Metformin at 8am"
+
+**Route:** `/my-medications` (Medications tab, bell icon on any med card)
+
+---
+
+### Scene 3.2: Daily Summary Email
+
+**What to show:**
+- Go to Settings tab and show daily summary preferences:
+  - Toggle enabled
+  - Time set to 08:00
+  - Timezone set correctly
+- Show a received daily summary email:
+  - Lists all active medications for the day
+  - Includes times per day and timing descriptions
+  - Sent once per day at the configured time
+
+**Key talking points:**
+- One email each morning summarizing all meds -- simple reference card
+- Configurable time and timezone
+- Can be disabled if patient only wants per-medication reminders
+- Separate cron job from per-medication reminders
+
+**Route:** `/my-medications` (Settings tab)
+
+---
+
+### Scene 3.3: Email Delivery Tracking
+
+**What to show:**
+- Go to History tab
+- Click on a sent email to expand it
+- Show the delivery event timeline:
+  - "sent" event with timestamp
+  - "delivered" event (email reached mailbox)
+  - "open" event (patient opened the email)
+  - Optionally "click" event if email contained links
+- Show that bounced or failed emails are also tracked
+
+**Key talking points:**
+- Full delivery lifecycle tracked via SendGrid webhooks
+- Know definitively whether a reminder was delivered and read
+- Valuable for providers monitoring whether patients are engaged
+- All events stored in `emailEvents` table with deduplication
+
+**Route:** `/my-medications` (History tab, expanded email)
+
+---
+
+## Act 4: Admin Capabilities
+
+### Scene 4.1: User Management
+
+**What to show:**
+- Log in as admin
+- Go to the "Users" tab on the patient dashboard
+- Show the users table:
+  - All users listed with name, email, role, provider type, created date, last login
+  - Inline editing of name and email
+  - Role dropdown (patient/provider/admin)
+  - Provider type dropdown (appears when role=provider)
+- Demonstrate changing a user's role from patient to provider
+- Show the "Set Password" modal (Key icon):
+  - Admin can directly set a user's password
+- Show the "Send Reset Email" action (Mail icon)
+
+**Key talking points:**
+- Centralized user management for the admin
+- Can onboard providers by changing role and setting provider type
+- Can set passwords directly for initial setup or support scenarios
+- All role changes take effect immediately
+
+**Route:** `/my-medications` (Users tab, admin only)
+
+---
+
+### Scene 4.2: Admin Impersonation ("View As")
+
+**What to show:**
+- From the Users tab, click the Eye icon on a patient
+- Show the amber impersonation banner: "Viewing as: [patient name] (read-only)"
+- Navigate through the patient's view:
+  - See their medications exactly as they see them
+  - See their history tab
+  - See their settings
+- Note the read-only state -- no edits possible while impersonating
+- Click "Exit" on the banner to return to admin view
+
+**Key talking points:**
+- Admins can see exactly what any user sees
+- Useful for debugging issues, support tickets, onboarding help
+- Read-only to prevent accidental changes while impersonating
+- URL-based (`?viewAs=userId`) for easy sharing/bookmarking
+
+**Route:** `/my-medications?viewAs=[userId]`
+
+---
+
+## Suggested Demo Flow (5-7 minute version)
+
+| Time | Section | What to Cover |
+|------|---------|---------------|
+| 0:00 | Opening | "This is AdherePod. Voice-native medication adherence for elderly and low-literacy users." |
+| 0:15 | Homepage | Quick scroll through landing page, point out key sections |
+| 0:45 | Sign up | Quick sign-up flow |
+| 1:00 | Add medication | Add one medication manually to show the form |
+| 1:30 | Voice chat | The hero moment: add a medication by voice, set a reminder by voice, list meds by voice |
+| 3:00 | Reminders | Show bell icon toggle, reminder times, explain cron system |
+| 3:30 | History | Show conversation + email timeline, expand one of each |
+| 4:00 | Provider login | Switch to provider account, show patient list |
+| 4:30 | Patient view | View patient's meds, add a clinical note |
+| 5:00 | Conversations | Show patient's voice history from provider view |
+| 5:30 | Admin | Quick tour of user management and impersonation |
+| 6:00 | Email tracking | Show delivery events for a sent reminder |
+| 6:30 | Close | "Medication management through conversation, not complexity." |
+
+---
+
+## Suggested Demo Flow (2-3 minute version)
+
+| Time | Section | What to Cover |
+|------|---------|---------------|
+| 0:00 | Opening | "AdherePod: medication adherence through voice, not screens." |
+| 0:10 | Homepage | 5-second scroll of landing page |
+| 0:15 | Dashboard | Show medication list with a few meds already populated |
+| 0:30 | Voice chat | Live voice demo: add a med, set a reminder (the hero moment) |
+| 1:30 | Reminders | Show reminder configuration, mention email system |
+| 1:45 | History | Quick look at conversation + email timeline |
+| 2:00 | Provider | Switch to provider view, show patient's meds + clinical note |
+| 2:30 | Close | "Voice-first. Provider-connected. Reminder-driven." |
+
+---
+
+## Screen Inventory
+
+Every screen and tab referenced in this demo:
+
+| Screen | Route | Roles | Description |
+|--------|-------|-------|-------------|
+| Homepage | `/` | Public | Landing page with features, how it works, team |
+| Sign In | `/auth/sign-in` | Public | Email/password login |
+| Sign Up | `/auth/sign-up` | Public | Account creation |
+| Forgot Password | `/auth/forgot-password` | Public | Request password reset email |
+| Reset Password | `/auth/reset-password` | Public | Set new password via token |
+| My Medications | `/my-medications` | Patient, Admin | Meds list + voice chat (Medications tab) |
+| History | `/my-medications` | Patient, Admin | Conversation + email timeline (History tab) |
+| Settings | `/my-medications` | Patient, Admin | Timezone, daily summary, password (Settings tab) |
+| Users | `/my-medications` | Admin only | All users table with management (Users tab) |
+| Impersonation | `/my-medications?viewAs=X` | Admin only | View as another user (read-only) |
+| Provider Dashboard | `/provider-dashboard` | Provider, Admin | Patient list + detail view |
+| Patient Medications | `/provider-dashboard` | Provider, Admin | Selected patient's meds + clinical notes |
+| Patient Conversations | `/provider-dashboard` | Provider, Admin | Selected patient's voice history |
+
+---
+
+## Feature Checklist for Demo
+
+Use this to verify you've covered each feature:
+
+- [ ] Homepage walkthrough
+- [ ] User sign-up flow
+- [ ] Manual medication creation (form)
+- [ ] Voice-based medication creation
+- [ ] Voice-based medication editing
+- [ ] Voice-based medication deletion
+- [ ] Voice-based reminder setup
+- [ ] Medication list with card UI
+- [ ] Bell icon reminder toggle
+- [ ] Customizable reminder times
+- [ ] Daily summary email settings
+- [ ] Timezone configuration
+- [ ] History tab -- conversation timeline
+- [ ] History tab -- email timeline
+- [ ] Expand conversation to see transcript
+- [ ] Expand email to see HTML + delivery events
+- [ ] Provider dashboard patient list
+- [ ] Provider search and add patient
+- [ ] Provider view patient medications
+- [ ] Provider add clinical note
+- [ ] Provider view patient conversations
+- [ ] Admin user management table
+- [ ] Admin role/provider type changes
+- [ ] Admin set password / send reset
+- [ ] Admin impersonation (View As)
+- [ ] Camera integration (optional)
+- [ ] Password change flow
+- [ ] Forgot/reset password flow
